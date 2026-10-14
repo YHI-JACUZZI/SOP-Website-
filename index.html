@@ -255,7 +255,7 @@ const PROCESSES = [
     steps: [
       { id: "start", type: "terminal", label: "Job Start Steps", role: "pc", col: 0, sop: "SOP-PRD-000", doc: "sops/SOP-PRD-000.html", docTitle: "New Job Set Up / First Customer Call", docStatus: "Rev 00 · 10-13-26" },
       { id: "p1", label: "PreSite", role: "fm", col: 0, sop: "SOP-PRD-001", doc: "sops/SOP-PRD-001.html", docTitle: "Pre-Site", docStatus: "Rev 00" },
-      { id: "p2", label: "Material Ordering / PO", role: "pc", col: 1, sop: "SOP-PRD-002" },
+      { id: "p2", label: "Material Ordering / PO", role: "pc", col: 1, sop: "SOP-PRD-002", doc: "sops/SOP-PRD-002.html", docTitle: "Material Ordering", docStatus: "Rev 00" },
       { id: "p3", label: "Customer Touch Call 1", role: "pc", col: 2, sop: "SOP-PRD-003" },
       { id: "p4", label: "Customer Touch Call 2", role: "pc", col: 3, sop: "SOP-PRD-004" },
       { id: "p5", label: "Materials Received", role: "wh", col: 2, sop: "SOP-PRD-005" },
@@ -587,7 +587,7 @@ function rebuildRoleMenu() {
 async function openDoc(url, label) {
   const dlg = $("docview"); $("doctitle").textContent = label + " · SOP"; $("docframe").srcdoc = "<p style='font:15px system-ui;padding:20px'>Loading…</p>";
   dlg.hidden = false; $("docclose").focus();
-  try { const res = await fetch(url); if (!res.ok) throw new Error(res.status); $("docframe").srcdoc = await res.text(); }
+  try { const res = await fetch(url); if (!res.ok) throw new Error(res.status); $("docframe").srcdoc = (await res.text()).replace(/<head>/i, '<head><base target="_blank">'); }
   catch (e) { $("docframe").srcdoc = "<p style='font:15px system-ui;padding:20px'>This SOP couldn't load. Try again in a moment.</p>"; }
 }
 function closeDoc() { $("docview").hidden = true; }
