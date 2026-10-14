@@ -73,6 +73,9 @@ select:focus-visible, button:focus-visible, .node:focus-visible { outline: 2px s
 
 .tree { display: grid; gap: 14px; min-width: 0; }
 .tree h2, .panel h2 { font-family: var(--f-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 0; font-weight: 500; }
+.regionpick { display: grid; gap: 4px; }
+.regionpick span { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+.regionpick select { width: 100%; font-weight: 600; }
 .tree ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .tree .lvl { font-size: 0.82rem; color: var(--muted); padding: 4px 0; }
 .crumb { all: unset; cursor: pointer; color: var(--accent); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
@@ -321,21 +324,21 @@ const visible = p => state.role === "all" || p.steps.some(s => s.role === state.
 function drawTree() {
   const groups = {};
   PROCESSES.filter(p => !p.parent && visible(p)).forEach(p => { (groups[p.region] ??= {}); (groups[p.region][p.department] ??= []).push(p); });
-  let h = "";
-  for (const reg in groups) {
-    h += `<div class="lvl">Region · <b>${reg}</b></div>`;
-    for (const dep in groups[reg]) {
-      h += `<div class="lvl">Department · <b>${dep}</b></div><ul>`;
-      groups[reg][dep].forEach(p => {
-        h += `<li><button data-p="${p.id}" aria-current="${p.id === state.proc}">${p.name}</button></li>`;
-        PROCESSES.filter(c => c.parent === p.id && visible(c)).forEach(c => { h += `<li class="child"><button data-p="${c.id}" aria-current="${c.id === state.proc}">↳ ${c.name}</button></li>`; });
-      });
-      h += `</ul>`;
-    }
+  const curP = PROCESSES.find(x => x.id === state.proc), regions = Object.keys(groups);
+  let reg = curP && groups[curP.region] ? curP.region : regions[0];
+  let h = `<label class="regionpick"><span>Region</span><select id="region">${regions.map(r => `<option value="${esc(r)}" ${r === reg ? "selected" : ""}>${esc(r)}</option>`).join("")}</select></label>`;
+  for (const dep in (groups[reg] || {})) {
+    h += `<div class="lvl">Department · <b>${dep}</b></div><ul>`;
+    groups[reg][dep].forEach(p => {
+      h += `<li><button data-p="${p.id}" aria-current="${p.id === state.proc}">${p.name}</button></li>`;
+      PROCESSES.filter(c => c.parent === p.id && visible(c)).forEach(c => { h += `<li class="child"><button data-p="${c.id}" aria-current="${c.id === state.proc}">↳ ${c.name}</button></li>`; });
+    });
+    h += `</ul>`;
   }
   h += `<div class="soon">More major processes will be added here.</div>`;
   $("tree").innerHTML = h;
   $("tree").querySelectorAll("button[data-p]").forEach(b => b.onclick = () => { state.proc = b.dataset.p; state.sel = null; render(); });
+  $("region").onchange = e => { const first = PROCESSES.find(p => !p.parent && p.region === e.target.value && visible(p)); if (first) { state.proc = first.id; state.sel = null; render(); } };
 }
 
 function wrap(text, max) {
