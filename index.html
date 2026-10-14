@@ -166,7 +166,7 @@ const PROCESSES = [
     name: "Overarching General Process",
     summary: "From signed sale to installed and closed job.",
     // lanes top to bottom; rows > 1 gives a lane room for a parallel branch
-    lanes: [ { role: "sales" }, { role: "sm", rows: 2 }, { role: "pm" }, { role: "admin" }, { role: "prod" } ],
+    lanes: [ { role: "sales" }, { role: "sm", rows: 2 }, { role: "admin" }, { role: "prod" } ],
     steps: [
       { id: "start", type: "terminal", label: "Start", role: "sales", col: 0 },
       { id: "s1", label: "Price & sign in FlexX", role: "sales", col: 1, sop: "SOP-JAC-001", confirm: "Confirm the name of the pricing tool (FlexX)." },
@@ -174,7 +174,7 @@ const PROCESSES = [
       { id: "d1", type: "decision", label: "Special quote?", role: "sm", col: 3, sop: "SOP-JAC-003", confirm: "Owner assumed to be the Sales Manager." },
       { id: "s3", label: "Send to PM for costing", role: "sm", col: 4, sop: "SOP-JAC-004" },
       { id: "s5", label: "Send to Admin", role: "sm", col: 4, row: 1, sop: "SOP-JAC-005", confirm: "Owner assumed to be the Sales Manager." },
-      { id: "s4", label: "PM fills & sends back", role: "pm", col: 5, sop: "SOP-JAC-006" },
+      { id: "s4", label: "PM fills & sends back", role: "prod", col: 5, sop: "SOP-JAC-006" },
       { id: "s6", label: "Admin review + upload to QB, JT, Keap, LP", role: "admin", col: 6, sop: "SOP-JAC-007", confirm: "Confirm what QB, JT and LP stand for." },
       { id: "s7", label: "Contract lands in JT", role: "admin", col: 7, sop: "SOP-JAC-008", confirm: "Owner assumed to be Admin." },
       { id: "s8", label: "Production process / install", role: "prod", col: 8, sop: "SOP-JAC-009", drill: "jacuzzi-production", confirm: "Owner assumed to be a Production team." },
@@ -183,7 +183,7 @@ const PROCESSES = [
     edges: [
       ["start","s1"], ["s1","s2"], ["s2","d1"],
       ["d1","s3",{label:"Yes"}], ["d1","s5",{label:"No", exit:"bottom"}],
-      ["s3","s4"], ["s4","s6",{label:"SM delivers to Admin"}], ["s5","s6"],
+      ["s3","s4",{route:"rv"}], ["s4","s6",{label:"SM delivers to Admin"}], ["s5","s6"],
       ["s6","s7"], ["s7","s8"], ["s8","end"]
     ]
   },
@@ -302,7 +302,7 @@ function drawMap(p) {
       const sy = A.y + ha.h, my = B.y - hb.h - 22; d = `M${A.x},${sy} V${my} H${B.x} V${B.y - hb.h}`;
     } else if (A.s.col === B.s.col && Math.abs(A.y - B.y) > 1) {
       const down = B.y > A.y, vx = A.x + (A.s.type === "terminal" ? 0 : 26); d = `M${vx},${tb(A, ha, !down)} V${tb(B, hb, down)}`;
-    } else if (p.routing === "vertical" && Math.abs(A.y - B.y) > 1) {
+    } else if ((p.routing === "vertical" || o.route === "rv") && Math.abs(A.y - B.y) > 1) {
       const down = B.y > A.y; d = `M${A.x + ha.w},${A.y} H${B.x} V${tb(B, hb, down)}`;
     } else if (o.exit === "bottom") {
       const sy = A.y + ha.h; d = `M${A.x},${sy} V${B.y} H${B.x - hb.w}`; lx = A.x + 6; ly = (sy + B.y) / 2;
