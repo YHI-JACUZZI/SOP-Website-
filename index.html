@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}</style>
+</head>
+<body>
+<title>Jacuzzi SOP Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: app shell — top bar with "view as" role switch, left process tree, swimlane map center, step detail panel right */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --ink: #15212b;
+  --muted: #5b6b78;
+  --line: #d5dde3;
+  --accent: #0b7285;
+  --accent-soft: #e3f3f6;
+  --lane-a: #f8fafb;
+  --lane-b: #eef2f4;
+  --r-sales: #2f6fd6; --r-sm: #6a4fd1; --r-pm: #c47a0c; --r-admin: #198a4a; --r-prod: #c03a78; --r-pc: #0f8a7a; --r-fm: #a326c9; --r-wh: #d9700f; --r-inst: #3c9a3c;
+  --r-sales-bg: #e6eefb; --r-sm-bg: #ece8fb; --r-pm-bg: #fbf0dc; --r-admin-bg: #e1f4e8; --r-prod-bg: #fae6ef; --r-pc-bg: #daf3ef; --r-fm-bg: #f5e3fa; --r-wh-bg: #fdeedd; --r-inst-bg: #e3f4e1;
+  --warn: #9a5b00; --warn-bg: #fff3d6;
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f161b; --surface: #16212a; --ink: #e4ebf0; --muted: #93a4b1; --line: #2a3a46;
+  --accent: #4cc3d6; --accent-soft: #143440; --lane-a: #131d24; --lane-b: #18242d;
+  --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2; --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f;
+  --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c; --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317;
+  --warn: #f1c46b; --warn-bg: #3a2f14; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f161b; --surface: #16212a; --ink: #e4ebf0; --muted: #93a4b1; --line: #2a3a46;
+  --accent: #4cc3d6; --accent-soft: #143440; --lane-a: #131d24; --lane-b: #18242d;
+  --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2; --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f;
+  --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c; --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317;
+  --warn: #f1c46b; --warn-bg: #3a2f14; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.shell { padding-inline: 16px; padding-block: 16px 40px; max-width: 1500px; margin: 0 auto; display: grid; gap: 16px; }
+
+.topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand h1 { font-family: var(--f-display); font-weight: 800; font-size: 1.35rem; margin: 0; letter-spacing: -0.01em; }
+.tag { font-family: var(--f-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--warn); background: var(--warn-bg); padding: 2px 8px; border-radius: 4px; }
+.viewas { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.viewas label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+select { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+select:focus-visible, button:focus-visible, .node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.main { display: grid; grid-template-columns: 200px minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.tree { display: grid; gap: 14px; min-width: 0; }
+.tree h2, .panel h2 { font-family: var(--f-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 0; font-weight: 500; }
+.tree ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.tree .lvl { font-size: 0.82rem; color: var(--muted); padding: 4px 0; }
+.crumb { all: unset; cursor: pointer; color: var(--accent); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+.drillbtn { font: inherit; font-weight: 600; cursor: pointer; padding: 9px 12px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--surface); }
+.tree .lvl b { color: var(--ink); font-weight: 600; }
+.tree button { all: unset; cursor: pointer; display: block; padding: 7px 10px; border-radius: 6px; font-weight: 500; }
+.tree button[aria-current="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.tree .child button { padding-left: 22px; font-size: 0.9rem; }
+.tree .soon { padding: 7px 10px; color: var(--muted); font-size: 0.85rem; border: 1px dashed var(--line); border-radius: 6px; }
+
+.canvas { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0; display: grid; }
+.canvas-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: baseline; }
+.canvas-head h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; margin: 0; text-wrap: balance; }
+.canvas-head p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.scroll { overflow-x: auto; padding: 12px; }
+svg { display: block; width: 100%; min-width: 1050px; height: auto; }
+.lane-label { font-family: var(--f-mono); font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.node { cursor: pointer; transition: opacity .2s; }
+.node text { font-family: var(--f-body); font-size: 15px; pointer-events: none; }
+.node.dim { opacity: 0.22; }
+.node.sel .shape { stroke-width: 3; }
+.edge { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.edge-label { font-family: var(--f-mono); font-size: 12.5px; fill: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .node { transition: none; } }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 18px 14px; font-size: 0.8rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel h3 { font-family: var(--f-display); font-size: 1.1rem; margin: 0; text-wrap: balance; }
+.chip { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 0.88rem; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; }
+.sop { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 6px; font-size: 0.88rem; }
+.sop .id { font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); }
+.sop a { color: var(--accent); font-weight: 600; }
+.note { font-size: 0.82rem; color: var(--warn); background: var(--warn-bg); padding: 8px 10px; border-radius: 6px; }
+.hint { color: var(--muted); font-size: 0.88rem; margin: 0; }
+.nextlist { margin: 0; padding-left: 18px; font-size: 0.88rem; }
+.nextlist button { all: unset; cursor: pointer; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.docview { position: fixed; inset: 0; background: var(--bg); z-index: 10; display: grid; grid-template-rows: auto 1fr; padding-top: env(safe-area-inset-top, 0px); }
+.docview[hidden] { display: none; }
+.docbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.docbar h2 { font-family: var(--f-display); font-size: 1.05rem; margin: 0; }
+.docview iframe { width: 100%; height: 100%; border: 0; background: var(--surface); }
+</style>
+
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Company SOP Map</h1>
+      <span class="tag">Test environment</span>
+    </div>
+    <div class="viewas">
+      <label for="role">Viewing as</label>
+      <select id="role"></select>
+    </div>
+  </header>
+
+  <div class="main">
+    <nav class="tree" aria-label="Processes">
+      <h2>Processes</h2>
+      <div id="tree"></div>
+    </nav>
+
+    <section class="canvas" aria-labelledby="ptitle">
+      <div class="canvas-head">
+        <h2 id="ptitle"></h2>
+        <p id="psub"></p>
+      </div>
+      <div class="scroll"><svg id="map" role="img" aria-label="Process flowchart"></svg></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+</div>
+
+<div id="docview" class="docview" hidden role="dialog" aria-modal="true" aria-labelledby="doctitle">
+  <div class="docbar"><h2 id="doctitle"></h2><button id="docclose" class="drillbtn" type="button">Close</button></div>
+  <iframe id="docframe" title="SOP document"></iframe>
+</div>
+
+<script>
+// ---- Data: add new processes to PROCESSES; the page draws them automatically ----
+const ROLES = {
+  sales: { name: "Sales Team", c: "--r-sales" },
+  sm:    { name: "Sales Manager", c: "--r-sm" },
+  pm:    { name: "Project Manager", c: "--r-pm" },
+  admin: { name: "Admin", c: "--r-admin" },
+  prod:  { name: "Production", c: "--r-prod" },
+  pc:    { name: "Project Coordinator", c: "--r-pc" },
+  fm:    { name: "Field Manager", c: "--r-fm" },
+  wh:    { name: "Warehouse", c: "--r-wh" },
+  inst:  { name: "Installer", c: "--r-inst" }
+};
+
+const PROCESSES = [
+  {
+    id: "jacuzzi-general",
+    region: "Jacuzzi",
+    department: "Company-wide",
+    name: "Overarching General Process",
+    summary: "From signed sale to installed and closed job.",
+    // lanes top to bottom; rows > 1 gives a lane room for a parallel branch
+    lanes: [ { role: "sales" }, { role: "sm", rows: 2 }, { role: "pm" }, { role: "admin" }, { role: "prod" } ],
+    steps: [
+      { id: "start", type: "terminal", label: "Start", role: "sales", col: 0 },
+      { id: "s1", label: "Price & sign in FlexX", role: "sales", col: 1, sop: "SOP-JAC-001", confirm: "Confirm the name of the pricing tool (FlexX)." },
+      { id: "s2", label: "Contract delivers to Sales Manager for review", role: "sm", col: 2, sop: "SOP-JAC-002" },
+      { id: "d1", type: "decision", label: "Special quote?", role: "sm", col: 3, sop: "SOP-JAC-003", confirm: "Owner assumed to be the Sales Manager." },
+      { id: "s3", label: "Send to PM for costing", role: "sm", col: 4, sop: "SOP-JAC-004" },
+      { id: "s5", label: "Send to Admin", role: "sm", col: 4, row: 1, sop: "SOP-JAC-005", confirm: "Owner assumed to be the Sales Manager." },
+      { id: "s4", label: "PM fills & sends back", role: "pm", col: 5, sop: "SOP-JAC-006" },
+      { id: "s6", label: "Admin review + upload to QB, JT, Keap, LP", role: "admin", col: 6, sop: "SOP-JAC-007", confirm: "Confirm what QB, JT and LP stand for." },
+      { id: "s7", label: "Contract lands in JT", role: "admin", col: 7, sop: "SOP-JAC-008", confirm: "Owner assumed to be Admin." },
+      { id: "s8", label: "Production process / install", role: "prod", col: 8, sop: "SOP-JAC-009", drill: "jacuzzi-production", confirm: "Owner assumed to be a Production team." },
+      { id: "end", type: "terminal", label: "Close", role: "prod", col: 9 }
+    ],
+    edges: [
+      ["start","s1"], ["s1","s2"], ["s2","d1"],
+      ["d1","s3",{label:"Yes"}], ["d1","s5",{label:"No", exit:"bottom"}],
+      ["s3","s4"], ["s4","s6",{label:"SM delivers to Admin"}], ["s5","s6"],
+      ["s6","s7"], ["s7","s8"], ["s8","end"]
+    ]
+  },
+  {
+    id: "jacuzzi-production",
+    parent: "jacuzzi-general", parentStep: "s8",
+    region: "Jacuzzi",
+    department: "Production",
+    name: "Production Process / Install",
+    summary: "From job start through install, closing and AR.",
+    routing: "vertical",
+    lanes: [ { role: "pc" }, { role: "fm" }, { role: "wh" }, { role: "inst" } ],
+    steps: [
+      { id: "start", type: "terminal", label: "Job Start Steps", role: "pc", col: 0, sop: "SOP-PRD-000", doc: "sops/SOP-PRD-000.html", docTitle: "New Job Set Up / First Customer Call", docStatus: "Rev 00 · 10-13-26" },
+      { id: "p1", label: "PreSite", role: "fm", col: 0, sop: "SOP-PRD-001", doc: "sops/SOP-PRD-001.html", docTitle: "Pre-Site", docStatus: "Rev 00" },
+      { id: "p2", label: "Material Ordering / PO", role: "pc", col: 1, sop: "SOP-PRD-002" },
+      { id: "p3", label: "Customer Touch Call 1", role: "pc", col: 2, sop: "SOP-PRD-003" },
+      { id: "p4", label: "Customer Touch Call 2", role: "pc", col: 3, sop: "SOP-PRD-004" },
+      { id: "p5", label: "Materials Received", role: "wh", col: 2, sop: "SOP-PRD-005" },
+      { id: "p6", label: "Materials RTG", role: "wh", col: 3, sop: "SOP-PRD-006", confirm: "Confirm RTG means Ready to Go." },
+      { id: "p7", label: "Confirmation Calls with Customer and Installer", role: "pc", col: 4, sop: "SOP-PRD-007" },
+      { id: "p8", label: "Installer PO", role: "pc", col: 5, sop: "SOP-PRD-008" },
+      { id: "p9", label: "Material Pickup", role: "wh", col: 5, sop: "SOP-PRD-009" },
+      { id: "p10", label: "Office Job Start", role: "fm", col: 6, sop: "SOP-PRD-010" },
+      { id: "p11", label: "Install", role: "inst", col: 6, sop: "SOP-PRD-011" },
+      { id: "p12", label: "Closing Steps", role: "pc", col: 7, sop: "SOP-PRD-012" },
+      { id: "p13", label: "AR Steps", role: "pc", col: 8, sop: "SOP-PRD-013" }
+    ],
+    edges: [
+      ["start","p1"], ["p1","p2"], ["p2","p3"], ["p3","p4"], ["p4","p5",{route:"down-over"}],
+      ["p5","p6"], ["p6","p7"], ["p7","p8"], ["p8","p9"], ["p9","p10"], ["p10","p11"],
+      ["p11","p12"], ["p12","p13"]
+    ]
+  }
+];
+
+// ---- Rendering ----
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const $ = id => document.getElementById(id);
+
+let state = { proc: "jacuzzi-general", role: "all", sel: null };
+try { const r = localStorage.getItem("sop-role"); if (r) state.role = r; } catch (e) {}
+
+const roleSel = $("role");
+roleSel.innerHTML = `<option value="all">Admin (all roles)</option>` + Object.entries(ROLES).filter(([k]) => k !== "admin").map(([k, r]) => `<option value="${k}">${r.name}</option>`).join("");
+roleSel.value = state.role;
+roleSel.onchange = () => { state.role = roleSel.value; try { localStorage.setItem("sop-role", state.role); } catch (e) {} render(); };
+
+const visible = p => state.role === "all" || p.steps.some(s => s.role === state.role);
+
+function drawTree() {
+  const groups = {};
+  PROCESSES.filter(p => !p.parent && visible(p)).forEach(p => { (groups[p.region] ??= {}); (groups[p.region][p.department] ??= []).push(p); });
+  let h = "";
+  for (const reg in groups) {
+    h += `<div class="lvl">Region · <b>${reg}</b></div>`;
+    for (const dep in groups[reg]) {
+      h += `<div class="lvl">Department · <b>${dep}</b></div><ul>`;
+      groups[reg][dep].forEach(p => {
+        h += `<li><button data-p="${p.id}" aria-current="${p.id === state.proc}">${p.name}</button></li>`;
+        PROCESSES.filter(c => c.parent === p.id && visible(c)).forEach(c => { h += `<li class="child"><button data-p="${c.id}" aria-current="${c.id === state.proc}">↳ ${c.name}</button></li>`; });
+      });
+      h += `</ul>`;
+    }
+  }
+  h += `<div class="soon">More major processes will be added here.</div>`;
+  $("tree").innerHTML = h;
+  $("tree").querySelectorAll("button[data-p]").forEach(b => b.onclick = () => { state.proc = b.dataset.p; state.sel = null; render(); });
+}
+
+function wrap(text, max) {
+  const words = text.split(" "), lines = []; let cur = "";
+  words.forEach(w => { if ((cur + " " + w).trim().length > max) { lines.push(cur); cur = w; } else cur = (cur + " " + w).trim(); });
+  if (cur) lines.push(cur); return lines;
+}
+
+function drawMap(p) {
+  const svg = $("map"); svg.innerHTML = "";
+  const HEAD = 16, COLW = 144, ROWH = 112, NW = 130, NH = 74;
+  const cols = Math.max(...p.steps.map(s => s.col)) + 1;
+  const W = HEAD + cols * COLW + 4;
+  // lane geometry
+  let y = 0; const laneY = {};
+  p.lanes.forEach((l, i) => { const rows = l.rows || 1; laneY[l.role] = { y, rows }; y += rows * ROWH; });
+  const H = y;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); 
+
+  const defs = el("defs", {}, svg);
+  const mk = el("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
+  el("path", { d: "M0,0 L10,5 L0,10 z", fill: css("--muted") }, mk);
+
+  p.lanes.forEach((l, i) => {
+    const ly = laneY[l.role], r = ROLES[l.role];
+    el("rect", { x: 0, y: ly.y, width: W, height: ly.rows * ROWH, fill: css(i % 2 ? "--lane-b" : "--lane-a") }, svg);
+    el("line", { x1: 0, y1: ly.y, x2: W, y2: ly.y, stroke: css("--line") }, svg);
+    el("rect", { x: 0, y: ly.y + 8, width: 4, height: ly.rows * ROWH - 16, fill: css(r.c), rx: 2 }, svg);
+    const t = el("text", { x: 14, y: ly.y + 22, class: "lane-label", fill: css(r.c) }, svg);
+    t.textContent = r.name;
+  });
+
+  const pos = {};
+  p.steps.forEach(s => {
+    const ly = laneY[s.role];
+    pos[s.id] = { x: HEAD + s.col * COLW + COLW / 2, y: ly.y + (s.row || 0) * ROWH + ROWH / 2 + 12, s };
+  });
+  const half = s => s.type === "decision" ? { w: 60, h: 42 } : s.type === "terminal" ? { w: Math.min(COLW / 2 - 10, Math.max(36, s.label.length * 4.6 + 14)), h: 18 } : { w: NW / 2, h: NH / 2 };
+
+  // edges
+  p.edges.forEach(([a, b, o = {}]) => {
+    const A = pos[a], B = pos[b], ha = half(A.s), hb = half(B.s);
+    let d, lx, ly;
+    const tb = (P, h, down) => down ? P.y - h.h : P.y + h.h;
+    if (o.route === "down-over") {
+      const sy = A.y + ha.h, my = B.y - hb.h - 22; d = `M${A.x},${sy} V${my} H${B.x} V${B.y - hb.h}`;
+    } else if (A.s.col === B.s.col && Math.abs(A.y - B.y) > 1) {
+      const down = B.y > A.y, vx = A.x + (A.s.type === "terminal" ? 0 : 26); d = `M${vx},${tb(A, ha, !down)} V${tb(B, hb, down)}`;
+    } else if (p.routing === "vertical" && Math.abs(A.y - B.y) > 1) {
+      const down = B.y > A.y; d = `M${A.x + ha.w},${A.y} H${B.x} V${tb(B, hb, down)}`;
+    } else if (o.exit === "bottom") {
+      const sy = A.y + ha.h; d = `M${A.x},${sy} V${B.y} H${B.x - hb.w}`; lx = A.x + 6; ly = (sy + B.y) / 2;
+    } else {
+      const sx = A.x + ha.w, ex = B.x - hb.w;
+      if (Math.abs(A.y - B.y) < 1) { d = `M${sx},${A.y} H${ex}`; lx = (sx + ex) / 2 - 10; ly = A.y - 8; }
+      else { const mx = ex - 18; d = `M${sx},${A.y} H${mx} V${B.y} H${ex}`; lx = sx + 6; ly = A.y - 8; }
+    }
+    el("path", { d, class: "edge", "marker-end": "url(#arr)" }, svg);
+    if (o.label) { const t = el("text", { x: lx, y: ly, class: "edge-label" }, svg); t.textContent = o.label; }
+  });
+
+  // nodes
+  p.steps.forEach(s => {
+    const P = pos[s.id], r = ROLES[s.role];
+    const dim = state.role !== "all" && s.role !== state.role && s.type !== "terminal";
+    const g = el("g", { class: "node" + (dim ? " dim" : "") + (state.sel === s.id ? " sel" : ""), tabindex: 0, role: "button", "aria-label": `${s.label}, ${r.name}` }, svg);
+    let shape;
+    if (s.type === "decision") shape = el("polygon", { points: `${P.x},${P.y - 42} ${P.x + 60},${P.y} ${P.x},${P.y + 42} ${P.x - 60},${P.y}` }, g);
+    else if (s.type === "terminal") { const tw = half(s).w; shape = el("rect", { x: P.x - tw, y: P.y - 18, width: tw * 2, height: 36, rx: 18 }, g); }
+    else {
+      if (s.drill) el("rect", { x: P.x - NW / 2 + 5, y: P.y - NH / 2 + 5, width: NW, height: NH, rx: 6, fill: css(r.c + "-bg"), stroke: css(r.c), "stroke-width": 1.5 }, g);
+      shape = el("rect", { x: P.x - NW / 2, y: P.y - NH / 2, width: NW, height: NH, rx: 6 }, g);
+      if (s.type === "placeholder") shape.setAttribute("stroke-dasharray", "5 4");
+    }
+    shape.setAttribute("class", "shape");
+    shape.setAttribute("fill", s.type === "terminal" ? css("--surface") : css(r.c + "-bg"));
+    shape.setAttribute("stroke", s.type === "terminal" ? css("--muted") : css(r.c));
+    shape.setAttribute("stroke-width", 1.5);
+    const lines = wrap(s.label, s.type === "decision" ? 10 : 15);
+    lines.forEach((ln, i) => { const t = el("text", { x: P.x, y: P.y + (i - (lines.length - 1) / 2) * 17 + 5, "text-anchor": "middle", fill: css("--ink") }, g); t.textContent = ln; });
+    if (s.confirm) { el("circle", { cx: P.x + (s.type === "decision" ? 40 : NW / 2 - 8), cy: P.y - (s.type === "decision" ? 26 : NH / 2 - 8), r: 4, fill: css("--warn") }, g); }
+    if (s.type !== "terminal" || s.sop) {
+      const go = () => { state.sel = s.id; render(); };
+      g.addEventListener("click", go);
+      if (s.drill) g.addEventListener("dblclick", () => openProc(s.drill));
+      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    }
+  });
+
+  $("legend").innerHTML = p.lanes.map(l => `<span><i style="background:var(${ROLES[l.role].c})"></i>${ROLES[l.role].name}</span>`).join("") +
+    `<span><i style="background:var(--warn);border-radius:50%"></i>Needs confirming</span><span><i style="border:1.5px solid var(--muted);box-shadow:3px 3px 0 var(--muted)"></i>Has a detailed flowchart</span>`;
+}
+
+function drawPanel(p) {
+  const s = p.steps.find(x => x.id === state.sel);
+  if (!s) {
+    const mine = state.role === "all" ? p.steps.filter(x => x.sop).length : p.steps.filter(x => x.role === state.role && x.sop).length;
+    $("panel").innerHTML = `<h2>Step details</h2><p class="hint">Click any step on the map to see who owns it and open its SOP.</p>
+      <dl class="kv"><dt>Steps ${state.role === "all" ? "in process" : "for this role"}</dt><dd>${mine}</dd><dt>SOPs written</dt><dd>0 of ${mine}</dd></dl>
+      <p class="hint">Switch <b>Viewing as</b> to preview what each role would see after logging in.</p>`;
+    return;
+  }
+  const r = ROLES[s.role];
+  const next = p.edges.filter(e => e[0] === s.id).map(e => p.steps.find(x => x.id === e[1]));
+  $("panel").innerHTML = `<h2>Step details</h2>
+    <h3>${s.label}</h3>
+    <div><span class="chip" style="color:var(${r.c});background:var(${r.c}-bg)">${r.name}</span></div>
+    <div class="sop"><span class="id">${s.sop}</span>${s.doc ? `<span>${s.docTitle || ""}</span><button class="drillbtn" data-doc="${s.doc}">Open SOP</button><span class="hint">${s.docStatus || ""}</span>` : `<span>${s.type === "placeholder" ? "Steps not mapped yet." : "SOP document not written yet."}</span>`}${s.doc ? "" : `<span class="hint">Next: request a screen recording from the ${r.name.toLowerCase()} lead.</span>`}</div>
+    ${s.drill ? `<button class="drillbtn" data-drill="${s.drill}">Open detailed flowchart</button>` : ""}
+    ${s.confirm ? `<div class="note">${s.confirm}</div>` : ""}
+    ${next.length ? `<div><h2>Next step</h2><ul class="nextlist">${next.map(n => n.type === "terminal" ? `<li>${n.label}</li>` : `<li><button data-s="${n.id}">${n.label}</button></li>`).join("")}</ul></div>` : ""}`;
+  $("panel").querySelectorAll("button[data-s]").forEach(b => b.onclick = () => { state.sel = b.dataset.s; render(); });
+  $("panel").querySelectorAll("button[data-doc]").forEach(b => b.onclick = () => openDoc(b.dataset.doc, s.label));
+  $("panel").querySelectorAll("button[data-drill]").forEach(b => b.onclick = () => openProc(b.dataset.drill));
+}
+
+async function openDoc(url, label) {
+  const dlg = $("docview"); $("doctitle").textContent = label + " · SOP"; $("docframe").srcdoc = "<p style='font:15px system-ui;padding:20px'>Loading…</p>";
+  dlg.hidden = false; $("docclose").focus();
+  try { const res = await fetch(url); if (!res.ok) throw new Error(res.status); $("docframe").srcdoc = await res.text(); }
+  catch (e) { $("docframe").srcdoc = "<p style='font:15px system-ui;padding:20px'>This SOP couldn't load. Try again in a moment.</p>"; }
+}
+function closeDoc() { $("docview").hidden = true; }
+function openProc(id) { state.proc = id; state.sel = null; render(); }
+function render() {
+  let p = PROCESSES.find(x => x.id === state.proc);
+  if (!visible(p)) p = PROCESSES.find(visible) || p;
+  const par = p.parent && PROCESSES.find(x => x.id === p.parent);
+  $("ptitle").innerHTML = par ? `<button class="crumb" data-up="${par.id}">${par.region} · ${par.name}</button> › ${p.name}` : `${p.region} · ${p.name}`;
+  const up = $("ptitle").querySelector("[data-up]"); if (up) up.onclick = () => { state.proc = par.id; state.sel = p.parentStep; render(); };
+  $("psub").textContent = p.summary;
+  drawTree(); drawMap(p); drawPanel(p);
+}
+$("docclose").onclick = closeDoc;
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("docview").hidden) closeDoc(); });
+render();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
+
+</body>
+</html>
