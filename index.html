@@ -169,6 +169,37 @@ svg#map { display: block; height: auto; margin: 0 auto; }
 .lanes li { display: flex; gap: 6px; align-items: center; font-size: 0.88rem; }
 .lanes li span { flex: 1; }
 .copybox { width: 100%; min-height: 120px; font-family: var(--f-mono); font-size: 0.72rem; }
+/* Import page (#import): Scribe Word export -> formatted SOP */
+.importbtn { font: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--brand-rule); background: transparent; color: var(--bar-ink); text-decoration: none; white-space: nowrap; }
+.importbtn:hover { background: var(--brand-rule); color: #111; }
+.importbtn[hidden], .importview[hidden], .main[hidden] { display: none; }
+.importview { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .importview { grid-template-columns: minmax(0, 1fr); } }
+.importview .head { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; border-bottom: 2px solid var(--brand-rule); padding-bottom: 10px; }
+.importview .head h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.2rem; margin: 0; }
+.importform { display: grid; gap: 14px; min-width: 0; }
+.importform[hidden], .preview .empty[hidden], .preview iframe[hidden] { display: none; }
+.istep { min-width: 0; }
+.istep select { width: 100%; max-width: 100%; }
+.istep { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--brand-rule); border-radius: 10px; padding: 16px; display: grid; gap: 10px; }
+.istep h3 { font-family: var(--f-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin: 0; font-weight: 500; }
+.istep.off { opacity: .5; pointer-events: none; }
+.drop { border: 2px dashed var(--line); border-radius: 8px; padding: 18px; text-align: center; color: var(--muted); font-size: 0.9rem; cursor: pointer; }
+.drop.over, .drop:hover { border-color: var(--brand-rule); background: var(--accent-soft); color: var(--ink); }
+.drop input { display: none; }
+.drop b { color: var(--accent); }
+.istat { font-size: 0.85rem; margin: 0; }
+.istat.err { color: #c0392b; }
+.istat.ok { color: var(--ink); }
+.ifields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.ifields .wide { grid-column: 1 / -1; }
+.preview { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-height: 70vh; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+.preview .bar { padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.preview iframe { width: 100%; height: 100%; min-height: 70vh; border: 0; background: #fff; }
+.preview .empty { display: grid; place-items: center; color: var(--muted); padding: 40px; text-align: center; }
+.implist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 0.85rem; }
+.implist li { display: flex; justify-content: space-between; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; }
+.localtag { font-family: var(--f-mono); font-size: 0.64rem; text-transform: uppercase; letter-spacing: .06em; color: var(--warn); }
 /* Archive: admin-only folder button, lower right */
 .archbtn { position: fixed; right: 20px; bottom: 20px; z-index: 8; display: inline-flex; align-items: center; gap: 8px; font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; padding: 10px 16px; border-radius: 999px; border: 0; background: var(--bar); color: var(--bar-ink); box-shadow: 0 6px 18px rgba(0,0,0,.25); border: 2px solid var(--brand-rule); }
 .archbtn svg { width: 18px; height: 18px; }
@@ -195,6 +226,7 @@ svg#map { display: block; height: auto; margin: 0 auto; }
       <input id="q" type="search" placeholder="Search steps and SOPs…" autocomplete="off" aria-controls="results">
       <div id="results" class="results" hidden></div>
     </div>
+    <a id="importbtn" class="importbtn" href="#import" hidden>Import Scribe SOP</a>
     <div class="viewas">
       <label for="role">Viewing as</label>
       <select id="role"></select>
@@ -202,7 +234,45 @@ svg#map { display: block; height: auto; margin: 0 auto; }
   </header></div>
 <div class="shell">
 
-  <div class="main">
+  <section id="importview" class="importview" hidden aria-labelledby="imptitle">
+    <div class="head"><h2 id="imptitle">Import a Scribe SOP</h2><a class="crumb" href="#">← Back to the SOP map</a></div>
+    <div class="importform">
+      <div class="istep">
+        <h3>1 · Upload the Scribe Word export</h3>
+        <label class="drop" id="drop"><input type="file" id="impfile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"><span>Drop the <b>.docx</b> here or <b>click to choose</b> it.<br>In Scribe: Download → Word.</span></label>
+        <p class="istat" id="impstat"></p>
+      </div>
+      <div class="istep off" id="istep2">
+        <h3>2 · Which SOP is this updating?</h3>
+        <select id="imptarget"></select>
+        <p class="hint" id="imptargetnote"></p>
+      </div>
+      <div class="istep off" id="istep3">
+        <h3>3 · Check the details</h3>
+        <div class="form ifields">
+          <label class="wide">SOP title<input id="i-title"></label>
+          <label>Revision<input id="i-rev"></label>
+          <label>Effective date<input id="i-date"></label>
+          <label>Updated by<input id="i-by" placeholder="Name or initials"></label>
+          <label>Document status<select id="i-status"><option>Approved</option><option>In Review</option><option>Draft</option></select></label>
+          <label class="wide">Summary of change<input id="i-why"></label>
+        </div>
+        <div class="row2"><button class="drillbtn" type="button" id="imppublish">Publish &amp; archive old version</button><button class="editbtn" type="button" id="impdownload">Download SOP file</button></div>
+        <p class="hint">On this test site, publishing saves in this browser only. To publish for the whole team, download the SOP file and send it to Claude.</p>
+      </div>
+      <div class="istep" id="implocal" hidden>
+        <h3>Imported in this browser</h3>
+        <ul class="implist" id="implist"></ul>
+      </div>
+    </div>
+    <div class="preview">
+      <div class="bar"><span id="prevlabel">Preview</span><span id="prevcount"></span></div>
+      <div class="empty" id="prevempty">Upload a Scribe export to see it in the Yancey SOP format.</div>
+      <iframe id="prevframe" title="Formatted SOP preview" hidden></iframe>
+    </div>
+  </section>
+
+  <div class="main" id="mainview">
     <nav class="tree" aria-label="Processes">
       <h2>Processes</h2>
       <div id="tree"></div>
@@ -369,8 +439,19 @@ try { const r = localStorage.getItem("sop-role"); if (r) state.role = r; } catch
 const roleSel = $("role");
 roleSel.innerHTML = `<option value="all">Admin (all roles)</option>` + Object.entries(ROLES).filter(([k]) => k !== "admin").map(([k, r]) => `<option value="${k}">${r.name}</option>`).join("");
 roleSel.value = state.role;
-roleSel.onchange = () => { state.role = roleSel.value; try { localStorage.setItem("sop-role", state.role); } catch (e) {} render(); };
+roleSel.onchange = () => { state.role = roleSel.value; try { localStorage.setItem("sop-role", state.role); } catch (e) {} location.hash === "#import" ? route() : render(); };
 
+// SOPs imported on this browser (from the Import page) take the place of the published file
+let IMPORTS = {}, LOCAL_ARCHIVE = [];
+const impKey = (p, s) => p.id + "/" + s.id;
+function sopOf(s, p = cur()) {
+  const im = IMPORTS[impKey(p, s)];
+  return im ? { doc: "local:" + impKey(p, s), docTitle: im.title, docStatus: im.status, local: true } : { doc: s.doc, docTitle: s.docTitle, docStatus: s.docStatus };
+}
+async function getDocHtml(url) {
+  if (url.startsWith("local:")) { const im = IMPORTS[url.slice(6)]; if (!im) throw new Error("missing"); return im.html; }
+  const res = await fetch(url); if (!res.ok) throw new Error(res.status); return res.text();
+}
 const visible = p => state.role === "all" || p.steps.some(s => s.role === state.role);
 
 function drawTree() {
@@ -522,18 +603,18 @@ function drawPanel(p) {
   if (state.edit) return drawEditPanel(p);
   const s = p.steps.find(x => x.id === state.sel);
   if (!s) {
-    const steps = p.steps.filter(x => x.sop && x.sop !== "—" && (state.role === "all" || x.role === state.role)), mine = steps.length, done = steps.filter(x => x.doc).length;
+    const steps = p.steps.filter(x => x.sop && x.sop !== "—" && (state.role === "all" || x.role === state.role)), mine = steps.length, done = steps.filter(x => sopOf(x, p).doc).length;
     $("panel").innerHTML = `<h2>Step details</h2><p class="hint">Click any step on the map to see who owns it. Double-click a step to open its SOP.</p>
       <dl class="kv"><dt>Steps ${state.role === "all" ? "in process" : "for this role"}</dt><dd>${mine}</dd><dt>SOPs written</dt><dd>${done} of ${mine}</dd></dl>
       <p class="hint">Switch <b>Viewing as</b> to preview what each role would see after logging in.</p>`;
     return;
   }
   const r = ROLES[s.role];
-  const next = p.edges.filter(e => e[0] === s.id).map(e => p.steps.find(x => x.id === e[1]));
+  const next = p.edges.filter(e => e[0] === s.id).map(e => p.steps.find(x => x.id === e[1])), d = sopOf(s, p);
   $("panel").innerHTML = `<h2>Step details</h2>
     <h3>${s.label}</h3>
     <div><span class="chip" style="color:var(${r.c});background:var(${r.c}-bg)">${r.name}</span></div>
-    <div class="sop"><span class="id">${s.sop}</span>${s.doc ? `<span>${s.docTitle || ""}</span><button class="drillbtn" data-doc="${s.doc}">Open SOP</button><span class="hint">${s.docStatus || ""}</span>` : `<span>${s.type === "placeholder" ? "Steps not mapped yet." : "SOP document not written yet."}</span>`}${s.doc ? "" : `<span class="hint">Next: request a screen recording from the ${r.name.toLowerCase()} lead.</span>`}</div>
+    <div class="sop"><span class="id">${s.sop}</span>${d.doc ? `<span>${d.docTitle || ""}</span><button class="drillbtn" data-doc="${d.doc}">Open SOP</button><span class="hint">${d.docStatus || ""}${d.local ? ' <span class="localtag">Imported in this browser</span>' : ""}</span>` : `<span>${s.type === "placeholder" ? "Steps not mapped yet." : "SOP document not written yet."}</span>`}${d.doc ? "" : `<span class="hint">Next: request a screen recording from the ${r.name.toLowerCase()} lead.</span>`}</div>
     ${s.drill ? `<button class="drillbtn" data-drill="${s.drill}">Open detailed flowchart</button>` : ""}
     ${s.confirm ? `<div class="note">${s.confirm}</div>` : ""}
     ${next.length ? `<div><h2>Next step</h2><ul class="nextlist">${next.map(n => n.type === "terminal" ? `<li>${n.label}</li>` : `<li><button data-s="${n.id}">${n.label}</button></li>`).join("")}</ul></div>` : ""}`;
@@ -668,7 +749,7 @@ function rebuildRoleMenu() {
 async function openDoc(url, label) {
   const dlg = $("docview"); $("doctitle").textContent = label + " · SOP"; $("docframe").srcdoc = "<p style='font:15px system-ui;padding:20px'>Loading…</p>";
   dlg.hidden = false; $("docclose").focus();
-  try { const res = await fetch(url); if (!res.ok) throw new Error(res.status); $("docframe").srcdoc = (await res.text()).replace(/<head>/i, '<head><base target="_blank">'); }
+  try { $("docframe").srcdoc = (await getDocHtml(url)).replace(/<head>/i, '<head><base target="_blank">'); }
   catch (e) { $("docframe").srcdoc = "<p style='font:15px system-ui;padding:20px'>This SOP couldn't load. Try again in a moment.</p>"; }
 }
 function closeDoc() { $("docview").hidden = true; }
@@ -677,8 +758,8 @@ const docText = {};
 let docsLoading = null;
 function loadDocs() {
   if (docsLoading) return docsLoading;
-  const urls = [...new Set(PROCESSES.flatMap(p => p.steps.filter(x => x.doc).map(x => x.doc)))];
-  docsLoading = Promise.all(urls.map(u => fetch(u).then(r => r.ok ? r.text() : "").then(h => {
+  const urls = [...new Set(PROCESSES.flatMap(p => p.steps.map(x => sopOf(x, p).doc).filter(Boolean)))];
+  docsLoading = Promise.all(urls.map(u => getDocHtml(u).then(h => {
     const d = new DOMParser().parseFromString(h, "text/html");
     d.querySelectorAll("style,script,img").forEach(n => n.remove());
     docText[u] = (d.body ? d.body.textContent : "").replace(/\s+/g, " ").trim();
@@ -694,8 +775,8 @@ function runSearch() {
   PROCESSES.filter(visible).forEach(p => p.steps.forEach(st => {
     if (st.type === "terminal" && !st.sop) return;
     if (state.role !== "all" && st.role !== state.role) return;
-    const meta = [st.label, ROLES[st.role].name, st.sop || "", st.docTitle || "", p.name, p.region].join(" ").toLowerCase();
-    const body = st.doc ? (docText[st.doc] || "") : "", lb = body.toLowerCase();
+    const sd = sopOf(st, p), meta = [st.label, ROLES[st.role].name, st.sop || "", sd.docTitle || "", p.name, p.region].join(" ").toLowerCase();
+    const body = sd.doc ? (docText[sd.doc] || "") : "", lb = body.toLowerCase();
     if (words.every(w => meta.includes(w))) hits.push({ p, st, score: 2 });
     else if (body && words.every(w => meta.includes(w) || lb.includes(w))) {
       const w = words.find(w => lb.includes(w)), i = lb.indexOf(w), a = Math.max(0, i - 50);
@@ -706,7 +787,7 @@ function runSearch() {
   box.innerHTML = hits.length ? hits.slice(0, 12).map((h, i) => `<button class="res" data-i="${i}">
       <b>${hl(h.st.label, words)}</b>
       <span class="meta">${h.p.region} · ${h.p.name} · ${ROLES[h.st.role].name}${h.st.sop && h.st.sop !== "—" ? " · " + h.st.sop : ""}</span>
-      ${h.st.doc ? `<span class="doc">SOP available</span>` : ""}
+      ${sopOf(h.st, h.p).doc ? `<span class="doc">SOP available</span>` : ""}
       ${h.snip ? `<span class="snip">${hl(h.snip, words)}</span>` : ""}</button>`).join("")
     : `<div class="noresult">No steps or SOPs match “${esc(q)}”.${Object.keys(docText).length ? "" : " Still loading SOP text…"}</div>`;
   box.hidden = false;
@@ -778,7 +859,8 @@ function stepClicked(s) {
   lastClick = dbl ? { sid: null, t: 0 } : { sid: s.id, t: now };
   if (!dbl) return false;
   window.getSelection()?.removeAllRanges();
-  if (s.doc) openDoc(s.doc, s.label); else if (s.drill) openProc(s.drill); else return false;
+  const d = sopOf(s);
+  if (d.doc) openDoc(d.doc, s.label); else if (s.drill) openProc(s.drill); else return false;
   return true;
 }
 // ---- Archive (admins only): replaced or retired SOP versions ----
@@ -788,12 +870,218 @@ const ARCHIVE = [
 function drawArchive() {
   const admin = state.role === "all";
   $("archbtn").hidden = !admin; if (!admin) $("archpanel").hidden = true;
-  $("archn").textContent = ARCHIVE.length;
-  $("archlist").innerHTML = ARCHIVE.length ? ARCHIVE.map((a, i) => `<li><button type="button" data-arch="${i}"><span class="id">${a.sop} · ${a.rev}</span><span class="t">${a.title}</span><span class="m">Archived ${a.archived} · ${a.why}</span></button></li>`).join("") : `<li class="hint">Nothing archived yet.</li>`;
-  $("archlist").querySelectorAll("[data-arch]").forEach(b => b.onclick = () => { const a = ARCHIVE[+b.dataset.arch]; openDoc(a.doc, a.title + " (archived)"); });
+  $("importbtn").hidden = !admin;
+  const all = [...LOCAL_ARCHIVE.map(a => ({ ...a, local: true })), ...ARCHIVE];
+  $("archn").textContent = all.length;
+  $("archlist").innerHTML = all.length ? all.map((a, i) => `<li><button type="button" data-arch="${i}"><span class="id">${esc(a.sop)} · ${esc(a.rev)}</span><span class="t">${esc(a.title)}</span><span class="m">Archived ${a.archived} · ${esc(a.why)}${a.local ? ' · <span class="localtag">This browser</span>' : ""}</span></button></li>`).join("") : `<li class="hint">Nothing archived yet.</li>`;
+  $("archlist").querySelectorAll("[data-arch]").forEach(b => b.onclick = () => { const a = all[+b.dataset.arch], label = a.title + " (archived)";
+    if (a.html) { $("doctitle").textContent = label + " · SOP"; $("docframe").srcdoc = a.html.replace(/<head>/i, '<head><base target="_blank">'); $("docview").hidden = false; $("docclose").focus(); }
+    else openDoc(a.doc, label); });
 }
 $("archbtn").onclick = () => { const open = $("archpanel").hidden; $("archpanel").hidden = !open; $("archbtn").setAttribute("aria-expanded", open); };
 document.addEventListener("click", e => { if (!e.target.closest("#archpanel, #archbtn, #docview")) { $("archpanel").hidden = true; $("archbtn").setAttribute("aria-expanded", false); } });
+// ---- Import page (#import): read a Scribe Word export, format it in the Yancey SOP template, publish over a step's SOP ----
+// Saved in this browser's IndexedDB (imports + archived copies) until the full build adds shared storage.
+const idb = (() => {
+  let dbp = null;
+  const open = () => dbp ??= new Promise((res, rej) => { const r = indexedDB.open("sop-site", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  const tx = (mode, fn) => open().then(db => new Promise((res, rej) => { const t = db.transaction("kv", mode), q = fn(t.objectStore("kv")); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); }));
+  return { get: k => tx("readonly", s => s.get(k)), set: (k, v) => tx("readwrite", s => s.put(v, k)) };
+})();
+async function loadLocal() {
+  try { IMPORTS = (await idb.get("imports")) || {}; LOCAL_ARCHIVE = (await idb.get("archive")) || []; } catch (e) { IMPORTS = {}; LOCAL_ARCHIVE = []; }
+}
+async function saveLocal() { await idb.set("imports", IMPORTS); await idb.set("archive", LOCAL_ARCHIVE); docsLoading = null; }
+
+const today = () => { const d = new Date(), z = n => String(n).padStart(2, "0"); return `${z(d.getMonth() + 1)}-${z(d.getDate())}-${String(d.getFullYear()).slice(2)}`; };
+const nextRev = st => { const m = /Rev\s*(\d+)/i.exec(st || ""); return m ? String(+m[1] + 1).padStart(2, "0") : "00"; };
+let IMP = null; // { title, desc, steps:[{html, img}] }
+
+function loadMammoth() {
+  if (window.mammoth) return Promise.resolve();
+  return new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "lib/mammoth.browser.min.js"; sc.onload = res; sc.onerror = () => rej(new Error("reader")); document.head.appendChild(sc); });
+}
+// Shrink screenshots so a 30-step SOP stays a few MB
+function shrink(src) {
+  return new Promise(res => { const im = new Image(); im.onload = () => {
+    const k = Math.min(1, 1400 / im.naturalWidth), c = document.createElement("canvas");
+    c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+    const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+    res(c.toDataURL("image/jpeg", 0.82)); }; im.onerror = () => res(src); im.src = src; });
+}
+// Scribe layout: heading 1 = title, heading 2 = description, then numbered steps, each followed by its screenshot
+async function parseScribe(buf) {
+  await loadMammoth();
+  const out = await mammoth.convertToHtml({ arrayBuffer: buf });
+  const d = new DOMParser().parseFromString(out.value, "text/html");
+  const junk = t => /scribehow\.com|made with scribe|never miss a step/i.test(t);
+  let title = "", desc = "", steps = [];
+  for (const n of d.body.children) {
+    const txt = n.textContent.trim();
+    if (/^H[1-6]$/.test(n.tagName) && !title) { title = txt; continue; }
+    if (/^H[1-6]$/.test(n.tagName) && !desc && !steps.length) { desc = txt; continue; }
+    if (n.tagName === "OL" || n.tagName === "UL") {
+      for (const li of n.querySelectorAll(":scope > li")) {
+        const imgs = [...li.querySelectorAll("img")].map(i => i.src); li.querySelectorAll("img").forEach(i => i.remove());
+        steps.push({ html: li.innerHTML.trim(), imgs });
+      }
+      continue;
+    }
+    const imgs = [...n.querySelectorAll("img")].map(i => i.src);
+    if (imgs.length) { if (steps.length) steps[steps.length - 1].imgs.push(...imgs); continue; }
+    if (!txt || junk(txt)) continue;
+    if (!steps.length && !desc) { desc = txt; continue; }
+    if (steps.length) steps[steps.length - 1].html += "<br>" + n.innerHTML; else desc += " " + txt;
+  }
+  for (const st of steps) st.imgs = await Promise.all(st.imgs.map(shrink));
+  return { title, desc, steps };
+}
+
+// Put the Scribe content into the Yancey SOP layout: the step's current SOP if it has one, otherwise the blank template
+async function buildSop(target, f) {
+  const base = target.doc ? await getDocHtml(target.doc) : await getDocHtml("sops/_template.html");
+  const d = new DOMParser().parseFromString(base, "text/html");
+  const H = re => [...d.querySelectorAll("h1")].find(h => re.test(h.textContent));
+  const setBody = (h, nodes, keepFirst) => {
+    let n = h.nextElementSibling; if (keepFirst && n && n.tagName === "P") n = n.nextElementSibling;
+    while (n && n.tagName !== "H1" && !n.classList.contains("runfoot")) { const nx = n.nextElementSibling; n.remove(); n = nx; }
+    const anchor = n; nodes.forEach(x => h.parentNode.insertBefore(x, anchor));
+  };
+  const mk = html => { const t = d.createElement("template"); t.innerHTML = html.trim(); return [...t.content.childNodes].filter(x => x.nodeType === 1); };
+  d.title = f.title;
+  const ht = d.querySelector("h1.title"); if (ht) ht.textContent = f.title;
+  const tt = d.querySelector('[data-custom-style="Title"]'); if (tt) tt.innerHTML = `<p>${esc(f.title)}</p>`;
+  const meta = [...d.querySelectorAll("p")].find(p => /SOP ID:/.test(p.textContent));
+  if (meta) meta.textContent = `Department: ${f.dept} • SOP ID: ${f.sop} • Revision: ${f.rev}`;
+  const row = (re, v) => { const tr = [...d.querySelectorAll("tr")].find(r => r.cells.length > 1 && re.test(r.cells[0].textContent)); if (tr && v) tr.cells[1].textContent = v; return tr; };
+  const owner = row(/Document owner/i); if (owner && /^\[/.test(owner.cells[1].textContent.trim()) && f.by) owner.cells[1].textContent = f.by;
+  const po = row(/Process owner/i); if (po && /^\[/.test(po.cells[1].textContent.trim())) po.cells[1].textContent = f.dept;
+  row(/Effective date/i, f.date); row(/Document status/i, f.status); row(/Supersedes/i, f.supersedes);
+  const hp = H(/Purpose/); if (hp && f.desc) setBody(hp, mk(`<p>${esc(f.desc)}</p>`), false);
+  const hproc = H(/Procedure/);
+  if (hproc) setBody(hproc, f.steps.flatMap((st, i) => mk(`<div data-custom-style="List Paragraph"><p><strong>${i + 1}.</strong> ${st.html}</p></div>` +
+    st.imgs.map(src => `<blockquote><p><img src="${src}" style="width:5.6in" alt="Step ${i + 1} screenshot"></p></blockquote>`).join(""))), true);
+  const hr = H(/Revision History/), tb = hr && hr.nextElementSibling && [...d.querySelectorAll("table")].find(t => hr.compareDocumentPosition(t) & 4)?.tBodies[0];
+  if (tb) {
+    let r = [...tb.rows].find(x => /^\[|^$/.test(x.cells[1]?.textContent.trim() || ""));
+    if (!r) { r = tb.rows[tb.rows.length - 1].cloneNode(true); tb.appendChild(r); }
+    [f.rev, f.date, f.why, f.by, ""].forEach((v, i) => { if (r.cells[i]) r.cells[i].textContent = v; });
+  }
+  return "<!doctype html>\n" + d.documentElement.outerHTML;
+}
+
+const allTargets = () => PROCESSES.flatMap(p => p.steps.filter(s => s.type !== "terminal" || s.sop || s.doc).filter(s => s.type !== "placeholder").map(s => ({ p, s })));
+function fillTargets() {
+  const sel = $("imptarget"), groups = {};
+  allTargets().forEach(t => (groups[`${t.p.region} · ${t.p.name}`] ??= []).push(t));
+  sel.innerHTML = `<option value="">Choose the step this SOP belongs to…</option>` + Object.entries(groups).map(([g, ts]) => `<optgroup label="${esc(g)}">` +
+    ts.map(t => { const d = sopOf(t.s, t.p); return `<option value="${impKey(t.p, t.s)}">${esc(t.s.label)}${t.s.sop && t.s.sop !== "—" ? " · " + t.s.sop : ""}${d.doc ? " (has SOP)" : ""}</option>`; }).join("") + `</optgroup>`).join("");
+}
+function curTarget() {
+  const k = $("imptarget").value; if (!k) return null;
+  const t = allTargets().find(t => impKey(t.p, t.s) === k); if (!t) return null;
+  return { ...t, key: k, ...sopOf(t.s, t.p) };
+}
+function formVals(t) {
+  const sop = t.s.sop && t.s.sop !== "—" ? t.s.sop : "[SOP-XXX]";
+  return { title: $("i-title").value.trim() || IMP.title, rev: $("i-rev").value.trim() || "00", date: $("i-date").value.trim() || today(), by: $("i-by").value.trim(),
+    status: $("i-status").value, why: $("i-why").value.trim() || "Updated from Scribe export", desc: IMP.desc, steps: IMP.steps, sop,
+    dept: `${t.p.region} · ${ROLES[t.s.role]?.name || ""}`, supersedes: t.doc ? `${sop} ${(t.docStatus || "").split("·")[0].trim() || "previous revision"}` : "N/A" };
+}
+let prevTimer = null, lastBuilt = null;
+function schedulePreview() { clearTimeout(prevTimer); prevTimer = setTimeout(preview, 250); }
+async function preview() {
+  const t = curTarget(); lastBuilt = null;
+  $("istep3").classList.toggle("off", !t);
+  if (!IMP || !t) return;
+  try {
+    const html = await buildSop(t, formVals(t)); lastBuilt = { html, t };
+    $("prevempty").hidden = true; $("prevframe").hidden = false;
+    $("prevframe").srcdoc = html.replace(/<head>/i, '<head><base target="_blank">');
+    $("prevlabel").textContent = `Preview · ${t.s.label}`;
+  } catch (e) { $("impstat").className = "istat err"; $("impstat").textContent = "Couldn't build the SOP for that step. Try another step or reload the page."; }
+}
+async function handleFile(file) {
+  const st = $("impstat");
+  if (!file) return;
+  if (!/\.docx$/i.test(file.name)) { st.className = "istat err"; st.textContent = "That isn't a Word .docx file. In Scribe, choose Download → Word."; return; }
+  st.className = "istat"; st.textContent = "Reading " + file.name + "…";
+  try {
+    IMP = await parseScribe(await file.arrayBuffer());
+    if (!IMP.steps.length) throw new Error("no steps");
+    const shots = IMP.steps.reduce((n, x) => n + x.imgs.length, 0);
+    st.className = "istat ok"; st.innerHTML = `<b>${esc(IMP.title || file.name)}</b><br>${IMP.steps.length} steps · ${shots} screenshots`;
+    $("prevcount").textContent = `${IMP.steps.length} steps`;
+    $("i-title").value = IMP.title; $("istep2").classList.remove("off"); fillTargets(); schedulePreview();
+  } catch (e) { IMP = null; st.className = "istat err"; st.textContent = e.message === "reader" ? "The Word reader didn't load. Check your connection and try again." : "Couldn't find Scribe steps in that file. Make sure it's a Scribe Word export."; }
+}
+function onTarget() {
+  const t = curTarget(), note = $("imptargetnote");
+  if (!t) { note.textContent = ""; schedulePreview(); return; }
+  note.innerHTML = t.doc ? `This replaces <b>${esc(t.docTitle || t.s.label)}</b> (${esc(t.docStatus || "current version")}). The current version moves to the Archive.` : "This step doesn't have an SOP yet, so a new one will be created from the Yancey template.";
+  $("i-rev").value = t.doc ? nextRev(t.docStatus) : "00"; $("i-date").value = today();
+  $("i-why").value = t.doc ? "Updated from Scribe export" : "Initial release";
+  schedulePreview();
+}
+async function publishImport() {
+  if (!lastBuilt) await preview(); if (!lastBuilt) return;
+  const { html, t } = lastBuilt, f = formVals(t), btn = $("imppublish");
+  btn.disabled = true;
+  try {
+    if (t.doc) {
+      const old = t.local ? { html: IMPORTS[t.key].html } : { doc: t.doc };
+      LOCAL_ARCHIVE.unshift({ sop: f.sop, title: t.docTitle || t.s.label, rev: t.docStatus || "", archived: today(), why: "Replaced by Scribe import", key: t.key, ...old });
+    }
+    IMPORTS[t.key] = { html, title: f.title, status: `Rev ${f.rev} · ${f.date}`, sop: f.sop, file: $("impfile").files[0]?.name || "" };
+    await saveLocal();
+    state.proc = t.p.id; state.sel = t.s.id; location.hash = "";
+  } catch (e) { alert("Couldn't save in this browser (storage may be full or blocked). Use Download SOP file instead."); }
+  btn.disabled = false;
+}
+// Inside claude.ai the viewer saves through the downloads capability; on the plain website a normal download link works
+const dlCap = window.claude && typeof window.claude.use === "function" ? window.claude.use("downloads").catch(() => null) : Promise.resolve(null);
+async function downloadImport() {
+  if (!lastBuilt) return;
+  const f = formVals(lastBuilt.t), name = `${f.sop.replace(/[\[\]]/g, "")} ${f.title}`.replace(/[\\/:*?"<>|]+/g, "").trim() + ".html";
+  const dl = await dlCap;
+  if (dl) { try { await dl.save({ filename: name, data: new Blob([lastBuilt.html], { type: "text/html" }) }); } catch (e) {} return; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lastBuilt.html], { type: "text/html" })); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function drawImportList() {
+  const keys = Object.keys(IMPORTS);
+  $("implocal").hidden = !keys.length;
+  $("implist").innerHTML = keys.map(k => { const [pid, sid] = k.split("/"), p = PROCESSES.find(x => x.id === pid), s = p?.steps.find(x => x.id === sid);
+    return `<li><span>${esc(s ? s.label : k)} · ${esc(IMPORTS[k].status)}</span><button class="editbtn danger" type="button" data-undo="${k}">Undo</button></li>`; }).join("");
+  $("implist").querySelectorAll("[data-undo]").forEach(b => b.onclick = async () => {
+    const k = b.dataset.undo; delete IMPORTS[k];
+    const i = LOCAL_ARCHIVE.findIndex(a => a.key === k); if (i >= 0) LOCAL_ARCHIVE.splice(i, 1);
+    await saveLocal(); drawImportList(); fillTargets(); onTarget();
+  });
+}
+function route() {
+  const imp = location.hash === "#import";
+  $("importview").hidden = !imp; $("mainview").hidden = imp;
+  if (imp) {
+    if (state.role !== "all") { $("imptitle").textContent = "Import a Scribe SOP · Admins only"; $("importview").querySelector(".importform").hidden = true; }
+    else { $("imptitle").textContent = "Import a Scribe SOP"; $("importview").querySelector(".importform").hidden = false; }
+    drawImportList(); if (IMP) fillTargets(); loadMammoth().catch(() => {});
+  } else render();
+  scrollTo(0, 0);
+}
+addEventListener("hashchange", route);
+$("impfile").onchange = e => handleFile(e.target.files[0]);
+const drop = $("drop");
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove("over")));
+drop.addEventListener("drop", e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) { try { const dt = new DataTransfer(); dt.items.add(f); $("impfile").files = dt.files; } catch (x) {} handleFile(f); } });
+$("imptarget").onchange = onTarget;
+["i-title", "i-rev", "i-date", "i-by", "i-why"].forEach(id => $(id).addEventListener("input", schedulePreview));
+$("i-status").onchange = schedulePreview;
+$("imppublish").onclick = publishImport;
+$("impdownload").onclick = downloadImport;
+
 $("docclose").onclick = closeDoc;
 $("editbtn").onclick = () => { state.edit = !state.edit; state.sel = null; render(); };
 $("donebtn").onclick = () => { state.edit = false; state.sel = null; render(); };
@@ -808,7 +1096,7 @@ $("q").addEventListener("keydown", e => {
 });
 document.addEventListener("click", e => { if (!e.target.closest(".search")) $("results").hidden = true; });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("docview").hidden) closeDoc(); });
-render();
+loadLocal().then(route);
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
 new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 </script>
