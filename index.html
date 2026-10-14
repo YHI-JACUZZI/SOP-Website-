@@ -169,6 +169,20 @@ svg#map { display: block; height: auto; margin: 0 auto; }
 .lanes li { display: flex; gap: 6px; align-items: center; font-size: 0.88rem; }
 .lanes li span { flex: 1; }
 .copybox { width: 100%; min-height: 120px; font-family: var(--f-mono); font-size: 0.72rem; }
+/* Archive: admin-only folder button, lower right */
+.archbtn { position: fixed; right: 20px; bottom: 20px; z-index: 8; display: inline-flex; align-items: center; gap: 8px; font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; padding: 10px 16px; border-radius: 999px; border: 0; background: var(--bar); color: var(--bar-ink); box-shadow: 0 6px 18px rgba(0,0,0,.25); border: 2px solid var(--brand-rule); }
+.archbtn svg { width: 18px; height: 18px; }
+.archbtn .n { background: var(--brand-rule); color: #111; border-radius: 999px; padding: 0 7px; font-size: 0.75rem; }
+.archbtn[hidden], .archpanel[hidden] { display: none; }
+.archpanel { position: fixed; right: 20px; bottom: 76px; z-index: 9; width: min(380px, calc(100vw - 32px)); max-height: min(70vh, 560px); overflow: auto; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--brand-rule); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.22); padding: 16px; display: grid; gap: 12px; }
+.archpanel h2 { font-family: var(--f-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin: 0; }
+.archpanel ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.archpanel li button { all: unset; box-sizing: border-box; cursor: pointer; display: grid; gap: 2px; width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
+.archpanel li button:hover, .archpanel li button:focus-visible { background: var(--accent-soft); border-color: var(--brand-rule); }
+.archpanel .t { font-weight: 600; }
+.archpanel .m { font-size: 0.78rem; color: var(--muted); }
+.archpanel .id { font-family: var(--f-mono); font-size: 0.68rem; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+@media (max-width: 600px) { .archbtn { right: 16px; bottom: 16px; } .archpanel { right: 16px; bottom: 70px; } }
 </style>
 
 <div class="topwrap"><header class="topbar">
@@ -215,6 +229,12 @@ svg#map { display: block; height: auto; margin: 0 auto; }
   </div>
 </div>
 
+<button id="archbtn" class="archbtn" type="button" aria-expanded="false" aria-controls="archpanel" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Archive <span class="n" id="archn"></span></button>
+<div id="archpanel" class="archpanel" hidden role="dialog" aria-labelledby="archtitle">
+  <h2 id="archtitle">Archived SOPs · Admin only</h2>
+  <p class="hint">Older or replaced versions, kept for reference. These aren't linked from the map.</p>
+  <ul id="archlist"></ul>
+</div>
 <div id="docview" class="docview" hidden role="dialog" aria-modal="true" aria-labelledby="doctitle">
   <div class="docbar"><h2 id="doctitle"></h2><button id="docclose" class="drillbtn" type="button">Close</button></div>
   <iframe id="docframe" title="SOP document"></iframe>
@@ -694,7 +714,7 @@ function render() {
   $("toolbar").hidden = !state.edit;
   $("editedtag").hidden = !EDITS.processes[p.id];
   if (state.zoomFor !== p.id) { state.zoom = null; state.zoomFor = p.id; }
-  drawTree(); drawMap(p); drawPanel(p); applyZoom();
+  drawTree(); drawMap(p); drawPanel(p); applyZoom(); drawArchive();
 }
 // Zoom: null = fit the whole chart in the view; otherwise a scale factor on the chart's natural size
 function fitScale() {
@@ -747,6 +767,19 @@ function stepClicked(s) {
   if (s.doc) openDoc(s.doc, s.label); else if (s.drill) openProc(s.drill); else return false;
   return true;
 }
+// ---- Archive (admins only): replaced or retired SOP versions ----
+const ARCHIVE = [
+  { sop: "SOP-PRD-000", title: "Job Start Steps: New Job Set Up / First Customer Call", rev: "Rev 00 · 10-13-26", archived: "10-14-26", why: "Replaced by the Scribe version", doc: "sops/archive/SOP-PRD-000-original.html" },
+];
+function drawArchive() {
+  const admin = state.role === "all";
+  $("archbtn").hidden = !admin; if (!admin) $("archpanel").hidden = true;
+  $("archn").textContent = ARCHIVE.length;
+  $("archlist").innerHTML = ARCHIVE.length ? ARCHIVE.map((a, i) => `<li><button type="button" data-arch="${i}"><span class="id">${a.sop} · ${a.rev}</span><span class="t">${a.title}</span><span class="m">Archived ${a.archived} · ${a.why}</span></button></li>`).join("") : `<li class="hint">Nothing archived yet.</li>`;
+  $("archlist").querySelectorAll("[data-arch]").forEach(b => b.onclick = () => { const a = ARCHIVE[+b.dataset.arch]; openDoc(a.doc, a.title + " (archived)"); });
+}
+$("archbtn").onclick = () => { const open = $("archpanel").hidden; $("archpanel").hidden = !open; $("archbtn").setAttribute("aria-expanded", open); };
+document.addEventListener("click", e => { if (!e.target.closest("#archpanel, #archbtn, #docview")) { $("archpanel").hidden = true; $("archbtn").setAttribute("aria-expanded", false); } });
 $("docclose").onclick = closeDoc;
 $("editbtn").onclick = () => { state.edit = !state.edit; state.sel = null; render(); };
 $("donebtn").onclick = () => { state.edit = false; state.sel = null; render(); };
