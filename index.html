@@ -104,6 +104,8 @@ select:focus-visible, button:focus-visible, .node:focus-visible { outline: 2px s
 .canvas-head p { margin: 0; color: var(--muted); font-size: 0.85rem; }
 .scroll { overflow: auto; padding: 12px 0; max-height: calc(100vh - 150px); }
 svg#map { display: block; height: auto; margin: 0 auto; }
+.scroll { overscroll-behavior: contain; cursor: grab; }
+.editing .scroll, .scroll .node { cursor: pointer; }
 .zoom { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
 .zoom button { font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: 0; background: transparent; color: var(--ink); padding: 5px 10px; min-width: 32px; }
 .zoom button:hover { background: var(--accent-soft); color: var(--accent); }
@@ -686,7 +688,27 @@ function zoomBy(f) {
 $("zin").onclick = () => zoomBy(1.25);
 $("zout").onclick = () => zoomBy(0.8);
 $("zfit").onclick = () => { state.zoom = null; applyZoom(); };
-$("scroll").addEventListener("wheel", e => { if (!e.ctrlKey) return; e.preventDefault(); zoomBy(e.deltaY < 0 ? 1.1 : 0.9); }, { passive: false });
+// Mouse wheel over the chart zooms toward the cursor; drag empty space to pan when zoomed in
+$("scroll").addEventListener("wheel", e => {
+  if (e.shiftKey) return;
+  e.preventDefault();
+  const sc = $("scroll"), svg = $("map"), r = svg.getBoundingClientRect();
+  const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+  const ox = e.clientX - sc.getBoundingClientRect().left, oy = e.clientY - sc.getBoundingClientRect().top;
+  zoomBy(Math.exp(-e.deltaY * (e.deltaMode ? 0.05 : 0.0015)));
+  const r2 = svg.getBoundingClientRect(), s2 = sc.getBoundingClientRect();
+  sc.scrollLeft += (r2.left - s2.left + fx * r2.width) - ox;
+  sc.scrollTop += (r2.top - s2.top + fy * r2.height) - oy;
+}, { passive: false });
+{
+  let pan = null;
+  $("scroll").addEventListener("pointerdown", e => {
+    if (state.edit || e.button !== 0 || e.target.closest(".node")) return;
+    const sc = $("scroll"); pan = { x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop };
+  });
+  addEventListener("pointermove", e => { if (!pan) return; const sc = $("scroll"); sc.scrollLeft = pan.l - (e.clientX - pan.x); sc.scrollTop = pan.t - (e.clientY - pan.y); });
+  addEventListener("pointerup", () => { pan = null; });
+}
 addEventListener("resize", () => { if (state.zoom == null) applyZoom(); });
 $("docclose").onclick = closeDoc;
 $("editbtn").onclick = () => { state.edit = !state.edit; state.sel = null; render(); };
