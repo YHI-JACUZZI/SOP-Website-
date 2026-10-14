@@ -223,8 +223,8 @@ svg#map { display: block; height: auto; margin: 0 auto; }
 <script>
 // ---- Data: add new processes to PROCESSES; the page draws them automatically ----
 const ROLES = {
-  sales: { name: "Sales Team", c: "--r-sales" },
-  sm:    { name: "Sales Manager", c: "--r-sm" },
+  sales: { name: "Marketing", c: "--r-sales" },
+  sm:    { name: "Sales", c: "--r-sm" },
   pm:    { name: "Project Manager", c: "--r-pm" },
   admin: { name: "Admin", c: "--r-admin" },
   prod:  { name: "Production", c: "--r-prod" },
@@ -248,9 +248,9 @@ const PROCESSES = [
       { id: "start", type: "terminal", label: "Start", role: "sales", col: 0 },
       { id: "s1", label: "Price & sign in FlexX", role: "sales", col: 1, sop: "SOP-JAC-001", confirm: "Confirm the name of the pricing tool (FlexX)." },
       { id: "s2", label: "Contract delivers to Sales Manager for review", role: "sm", col: 2, sop: "SOP-JAC-002" },
-      { id: "d1", type: "decision", label: "Special quote?", role: "sm", col: 3, sop: "SOP-JAC-003", confirm: "Owner assumed to be the Sales Manager." },
+      { id: "d1", type: "decision", label: "Special quote?", role: "sm", col: 3, sop: "SOP-JAC-003", confirm: "Owner assumed to be Sales." },
       { id: "s3", label: "Send to PM for costing", role: "sm", col: 4, sop: "SOP-JAC-004" },
-      { id: "s5", label: "Send to Admin", role: "sm", col: 4, row: 1, sop: "SOP-JAC-005", confirm: "Owner assumed to be the Sales Manager." },
+      { id: "s5", label: "Send to Admin", role: "sm", col: 4, row: 1, sop: "SOP-JAC-005", confirm: "Owner assumed to be Sales." },
       { id: "s4", label: "PM fills & sends back", role: "prod", col: 5, sop: "SOP-JAC-006" },
       { id: "s6", label: "Admin review + upload to QB, JT, Keap, LP", role: "admin", col: 6, sop: "SOP-JAC-007", confirm: "Confirm what QB, JT and LP stand for." },
       { id: "s7", label: "Contract lands in JT", role: "admin", col: 7, sop: "SOP-JAC-008", confirm: "Owner assumed to be Admin." },
