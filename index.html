@@ -200,6 +200,8 @@ svg#map { display: block; height: auto; margin: 0 auto; }
 .implist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 0.85rem; }
 .implist li { display: flex; justify-content: space-between; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; }
 .localtag { font-family: var(--f-mono); font-size: 0.64rem; text-transform: uppercase; letter-spacing: .06em; color: var(--warn); }
+.notice { display: flex; justify-content: space-between; gap: 12px; align-items: center; background: var(--accent-soft); border: 1px solid var(--brand-rule); border-left: 4px solid var(--brand-rule); border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; }
+.notice[hidden] { display: none; }
 /* Archive: admin-only folder button, lower right */
 .archbtn { position: fixed; right: 20px; bottom: 20px; z-index: 8; display: inline-flex; align-items: center; gap: 8px; font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; padding: 10px 16px; border-radius: 999px; border: 0; background: var(--bar); color: var(--bar-ink); box-shadow: 0 6px 18px rgba(0,0,0,.25); border: 2px solid var(--brand-rule); }
 .archbtn svg { width: 18px; height: 18px; }
@@ -233,6 +235,7 @@ svg#map { display: block; height: auto; margin: 0 auto; }
     </div>
   </header></div>
 <div class="shell">
+  <div id="notice" class="notice" role="status" hidden><span id="noticetext"></span><button class="x" type="button" id="noticex" aria-label="Dismiss">×</button></div>
 
   <section id="importview" class="importview" hidden aria-labelledby="imptitle">
     <div class="head"><h2 id="imptitle">Import a Scribe SOP</h2><a class="crumb" href="#">← Back to the SOP map</a></div>
@@ -258,6 +261,7 @@ svg#map { display: block; height: auto; margin: 0 auto; }
           <label class="wide">Summary of change<input id="i-why"></label>
         </div>
         <div class="row2"><button class="drillbtn" type="button" id="imppublish">Publish &amp; archive old version</button><button class="editbtn" type="button" id="impdownload">Download SOP file</button></div>
+        <p class="istat" id="impmsg" role="status"></p>
         <p class="hint">On this test site, publishing saves in this browser only. To publish for the whole team, download the SOP file and send it to Claude.</p>
       </div>
       <div class="istep" id="implocal" hidden>
@@ -889,9 +893,15 @@ const idb = (() => {
   return { get: k => tx("readonly", s => s.get(k)), set: (k, v) => tx("readwrite", s => s.put(v, k)) };
 })();
 async function loadLocal() {
-  try { IMPORTS = (await idb.get("imports")) || {}; LOCAL_ARCHIVE = (await idb.get("archive")) || []; } catch (e) { IMPORTS = {}; LOCAL_ARCHIVE = []; }
+  try { IMPORTS = (await idb.get("imports")) || {}; LOCAL_ARCHIVE = (await idb.get("archive")) || []; }
+  catch (e) { try { const j = JSON.parse(localStorage.getItem("sop-imports") || "{}"); IMPORTS = j.IMPORTS || {}; LOCAL_ARCHIVE = j.LOCAL_ARCHIVE || []; } catch (x) { IMPORTS = {}; LOCAL_ARCHIVE = []; } }
 }
-async function saveLocal() { await idb.set("imports", IMPORTS); await idb.set("archive", LOCAL_ARCHIVE); docsLoading = null; }
+// Returns where it saved: "browser" (kept after reload) or "session" (storage blocked, e.g. inside the claude.ai viewer; kept until the page reloads)
+async function saveLocal() {
+  docsLoading = null;
+  try { await idb.set("imports", IMPORTS); await idb.set("archive", LOCAL_ARCHIVE); return "browser"; }
+  catch (e) { try { localStorage.setItem("sop-imports", JSON.stringify({ IMPORTS, LOCAL_ARCHIVE })); return "browser"; } catch (x) { return "session"; } }
+}
 
 const today = () => { const d = new Date(), z = n => String(n).padStart(2, "0"); return `${z(d.getMonth() + 1)}-${z(d.getDate())}-${String(d.getFullYear()).slice(2)}`; };
 const nextRev = st => { const m = /Rev\s*(\d+)/i.exec(st || ""); return m ? String(+m[1] + 1).padStart(2, "0") : "00"; };
@@ -1025,17 +1035,20 @@ function onTarget() {
 }
 async function publishImport() {
   if (!lastBuilt) await preview(); if (!lastBuilt) return;
-  const { html, t } = lastBuilt, f = formVals(t), btn = $("imppublish");
-  btn.disabled = true;
+  const { html, t } = lastBuilt, f = formVals(t), btn = $("imppublish"), msg = $("impmsg");
+  btn.disabled = true; msg.className = "istat"; msg.textContent = "Publishing…";
   try {
     if (t.doc) {
       const old = t.local ? { html: IMPORTS[t.key].html } : { doc: t.doc };
       LOCAL_ARCHIVE.unshift({ sop: f.sop, title: t.docTitle || t.s.label, rev: t.docStatus || "", archived: today(), why: "Replaced by Scribe import", key: t.key, ...old });
     }
     IMPORTS[t.key] = { html, title: f.title, status: `Rev ${f.rev} · ${f.date}`, sop: f.sop, file: $("impfile").files[0]?.name || "" };
-    await saveLocal();
+    const where = await saveLocal();
+    msg.textContent = "";
+    notice(where === "browser" ? `Published “${f.title}” on ${t.s.label}. The old version is in the Archive.` :
+      `Published “${f.title}” on ${t.s.label} for now. This view can't keep it after a reload, so download the SOP file and send it to Claude to make it permanent.`);
     state.proc = t.p.id; state.sel = t.s.id; location.hash = "";
-  } catch (e) { alert("Couldn't save in this browser (storage may be full or blocked). Use Download SOP file instead."); }
+  } catch (e) { msg.className = "istat err"; msg.textContent = "Couldn't publish here. Use Download SOP file and send it to Claude."; }
   btn.disabled = false;
 }
 // Inside claude.ai the viewer saves through the downloads capability; on the plain website a normal download link works
@@ -1049,6 +1062,8 @@ async function downloadImport() {
   a.href = URL.createObjectURL(new Blob([lastBuilt.html], { type: "text/html" })); a.download = name;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
+function notice(t) { $("noticetext").textContent = t; $("notice").hidden = false; }
+$("noticex").onclick = () => { $("notice").hidden = true; };
 function drawImportList() {
   const keys = Object.keys(IMPORTS);
   $("implocal").hidden = !keys.length;
