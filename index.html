@@ -471,11 +471,11 @@ function drawMap(p) {
     const lines = wrap(s.label, s.type === "decision" ? 10 : 15);
     lines.forEach((ln, i) => { const t = el("text", { x: P.x, y: P.y + (i - (lines.length - 1) / 2) * 17 + 5, "text-anchor": "middle", fill: css("--ink") }, g); t.textContent = ln; });
     if (s.confirm) { el("circle", { cx: P.x + (s.type === "decision" ? 40 : NW / 2 - 8), cy: P.y - (s.type === "decision" ? 26 : NH / 2 - 8), r: 4, fill: css("--warn") }, g); }
+    g.dataset.sid = s.id;
     if (state.edit) { makeDraggable(g, s, p, svg); return; }
     if (s.type !== "terminal" || s.sop) {
       const go = () => { state.sel = s.id; render(); };
-      g.addEventListener("click", go);
-      if (s.drill) g.addEventListener("dblclick", () => openProc(s.drill));
+      g.addEventListener("click", () => { if (!stepClicked(s)) go(); });
       g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
     }
   });
@@ -489,7 +489,7 @@ function drawPanel(p) {
   const s = p.steps.find(x => x.id === state.sel);
   if (!s) {
     const steps = p.steps.filter(x => x.sop && x.sop !== "—" && (state.role === "all" || x.role === state.role)), mine = steps.length, done = steps.filter(x => x.doc).length;
-    $("panel").innerHTML = `<h2>Step details</h2><p class="hint">Click any step on the map to see who owns it and open its SOP.</p>
+    $("panel").innerHTML = `<h2>Step details</h2><p class="hint">Click any step on the map to see who owns it. Double-click a step to open its SOP.</p>
       <dl class="kv"><dt>Steps ${state.role === "all" ? "in process" : "for this role"}</dt><dd>${mine}</dd><dt>SOPs written</dt><dd>${done} of ${mine}</dd></dl>
       <p class="hint">Switch <b>Viewing as</b> to preview what each role would see after logging in.</p>`;
     return;
@@ -736,6 +736,17 @@ $("scroll").addEventListener("wheel", e => {
   addEventListener("pointerup", () => { pan = null; });
 }
 addEventListener("resize", () => { if (state.zoom == null) applyZoom(); });
+// Double-click a step: open its SOP if it has one, otherwise its detailed flowchart.
+// Detected from two clicks on the same step, because a single click re-renders the map.
+let lastClick = { sid: null, t: 0 };
+function stepClicked(s) {
+  const now = Date.now(), dbl = lastClick.sid === s.id && now - lastClick.t < 450;
+  lastClick = dbl ? { sid: null, t: 0 } : { sid: s.id, t: now };
+  if (!dbl) return false;
+  window.getSelection()?.removeAllRanges();
+  if (s.doc) openDoc(s.doc, s.label); else if (s.drill) openProc(s.drill); else return false;
+  return true;
+}
 $("docclose").onclick = closeDoc;
 $("editbtn").onclick = () => { state.edit = !state.edit; state.sel = null; render(); };
 $("donebtn").onclick = () => { state.edit = false; state.sel = null; render(); };
