@@ -328,6 +328,20 @@ const PROCESSES = [
       { id: "end", type: "terminal", label: "Close", role: "roof", col: 2 }
     ],
     edges: [ ["start","r1"], ["r1","end"] ]
+  },
+  {
+    id: "admin-general",
+    region: "Admin",
+    department: "Company-wide",
+    name: "Overarching General Process",
+    summary: "Placeholder: the admin workflow hasn't been mapped yet.",
+    lanes: [ { role: "admin" } ],
+    steps: [
+      { id: "start", type: "terminal", label: "Start", role: "admin", col: 0 },
+      { id: "a1", type: "placeholder", label: "Admin workflow to be mapped", role: "admin", col: 1, sop: "—", confirm: "Placeholder for the Admin region. Steps get added once the admin flow is drawn." },
+      { id: "end", type: "terminal", label: "Close", role: "admin", col: 2 }
+    ],
+    edges: [ ["start","a1"], ["a1","end"] ]
   }
 ];
 
