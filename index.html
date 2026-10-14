@@ -120,6 +120,34 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
 .docbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
 .docbar h2 { font-family: var(--f-display); font-size: 1.05rem; margin: 0; }
 .docview iframe { width: 100%; height: 100%; border: 0; background: var(--surface); }
+.editbtn { font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: transparent; color: var(--accent); }
+.editbtn.on, .editbtn.primary { background: var(--accent); color: var(--surface); }
+.editbtn.danger { border-color: #c0392b; color: #c0392b; }
+.editbtn.danger.armed { background: #c0392b; color: #fff; }
+.editbtn:disabled { opacity: .4; cursor: not-allowed; }
+.headright { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.edited { font-family: var(--f-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--warn); background: var(--warn-bg); padding: 2px 7px; border-radius: 4px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--accent-soft); }
+.toolbar .hint { flex-basis: 100%; margin: 0; font-size: 0.82rem; }
+.toolbar[hidden] { display: none; }
+.editing .node { cursor: grab; }
+.editing .node.dragging { cursor: grabbing; opacity: .85; }
+.form { display: grid; gap: 10px; }
+.form label { display: grid; gap: 4px; font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+.form input, .form textarea, .form select { font: inherit; font-size: 0.9rem; font-weight: 400; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; width: 100%; }
+.form textarea { resize: vertical; min-height: 54px; }
+.row2 { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.arrows { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.arrows li { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; font-size: 0.85rem; }
+.arrows li input { grid-column: 1 / -1; }
+.x { all: unset; cursor: pointer; color: var(--muted); padding: 0 6px; font-size: 1rem; }
+.x:hover { color: #c0392b; }
+.x:disabled { opacity: .3; cursor: not-allowed; }
+.form [hidden] { display: none; }
+.lanes { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.lanes li { display: flex; gap: 6px; align-items: center; font-size: 0.88rem; }
+.lanes li span { flex: 1; }
+.copybox { width: 100%; min-height: 120px; font-family: var(--f-mono); font-size: 0.72rem; }
 </style>
 
 <div class="shell">
@@ -148,7 +176,15 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
     <section class="canvas" aria-labelledby="ptitle">
       <div class="canvas-head">
         <h2 id="ptitle"></h2>
-        <p id="psub"></p>
+        <div class="headright"><p id="psub"></p><span id="editedtag" class="edited" hidden>Edited in this browser</span><button id="editbtn" class="editbtn" type="button">Edit chart</button></div>
+      </div>
+      <div id="toolbar" class="toolbar" hidden>
+        <button class="editbtn" type="button" data-add="process">+ Step</button>
+        <button class="editbtn" type="button" data-add="decision">+ Decision</button>
+        <button class="editbtn" type="button" id="copybtn">Copy changes</button>
+        <button class="editbtn danger" type="button" id="resetbtn">Reset this chart</button>
+        <button class="editbtn primary" type="button" id="donebtn">Done editing</button>
+        <p class="hint">Drag steps to move them between lanes and columns. Click a step to rename it, change its owner, or edit its arrows. Edits save in this browser; use <b>Copy changes</b> and send them to Claude to publish them for everyone.</p>
       </div>
       <div class="scroll"><svg id="map" role="img" aria-label="Process flowchart"></svg></div>
       <div class="legend" id="legend"></div>
@@ -254,13 +290,25 @@ const PROCESSES = [
   }
 ];
 
+// ---- Admin edits: saved per browser, applied over the published charts ----
+const ORIGINAL = JSON.parse(JSON.stringify(PROCESSES));
+const ROLE_COLORS = ["--r-sales", "--r-sm", "--r-pm", "--r-admin", "--r-prod", "--r-pc", "--r-fm", "--r-wh", "--r-inst", "--r-roof"];
+let EDITS = { roles: {}, processes: {} };
+try { const raw = localStorage.getItem("sop-edits"); if (raw) EDITS = Object.assign(EDITS, JSON.parse(raw)); } catch (e) {}
+Object.assign(ROLES, EDITS.roles || {});
+for (const id in EDITS.processes) { const i = PROCESSES.findIndex(p => p.id === id); if (i >= 0) PROCESSES[i] = EDITS.processes[id]; }
+function saveEdits(p) {
+  EDITS.processes[p.id] = p;
+  try { localStorage.setItem("sop-edits", JSON.stringify(EDITS)); } catch (e) {}
+}
+
 // ---- Rendering ----
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const NS = "http://www.w3.org/2000/svg";
 const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
 const $ = id => document.getElementById(id);
 
-let state = { proc: "jacuzzi-general", role: "all", sel: null };
+let state = { proc: "jacuzzi-general", role: "all", sel: null, edit: false };
 try { const r = localStorage.getItem("sop-role"); if (r) state.role = r; } catch (e) {}
 
 const roleSel = $("role");
@@ -298,8 +346,10 @@ function wrap(text, max) {
 
 function drawMap(p) {
   const svg = $("map"); svg.innerHTML = "";
+  svg.classList.toggle("editing", state.edit);
   const HEAD = 16, COLW = 144, ROWH = 112, NW = 130, NH = 74;
-  const cols = Math.max(...p.steps.map(s => s.col)) + 1;
+  geo = { HEAD, COLW, ROWH, lanes: p.lanes };
+  const cols = Math.max(0, ...p.steps.map(s => s.col)) + 1 + (state.edit ? 1 : 0);
   const W = HEAD + cols * COLW + 4;
   // lane geometry
   let y = 0; const laneY = {};
@@ -323,6 +373,7 @@ function drawMap(p) {
 
   const pos = {};
   p.steps.forEach(s => {
+    if (!laneY[s.role]) { s.role = p.lanes[0].role; }
     const ly = laneY[s.role];
     pos[s.id] = { x: HEAD + s.col * COLW + COLW / 2, y: ly.y + (s.row || 0) * ROWH + ROWH / 2 + 12, s };
   });
@@ -330,7 +381,8 @@ function drawMap(p) {
 
   // edges
   p.edges.forEach(([a, b, o = {}]) => {
-    const A = pos[a], B = pos[b], ha = half(A.s), hb = half(B.s);
+    const A = pos[a], B = pos[b]; if (!A || !B) return;
+    const ha = half(A.s), hb = half(B.s);
     let d, lx, ly;
     const tb = (P, h, down) => down ? P.y - h.h : P.y + h.h;
     if (o.route === "lv") {
@@ -372,6 +424,7 @@ function drawMap(p) {
     const lines = wrap(s.label, s.type === "decision" ? 10 : 15);
     lines.forEach((ln, i) => { const t = el("text", { x: P.x, y: P.y + (i - (lines.length - 1) / 2) * 17 + 5, "text-anchor": "middle", fill: css("--ink") }, g); t.textContent = ln; });
     if (s.confirm) { el("circle", { cx: P.x + (s.type === "decision" ? 40 : NW / 2 - 8), cy: P.y - (s.type === "decision" ? 26 : NH / 2 - 8), r: 4, fill: css("--warn") }, g); }
+    if (state.edit) { makeDraggable(g, s, p, svg); return; }
     if (s.type !== "terminal" || s.sop) {
       const go = () => { state.sel = s.id; render(); };
       g.addEventListener("click", go);
@@ -385,6 +438,7 @@ function drawMap(p) {
 }
 
 function drawPanel(p) {
+  if (state.edit) return drawEditPanel(p);
   const s = p.steps.find(x => x.id === state.sel);
   if (!s) {
     const steps = p.steps.filter(x => x.sop && x.sop !== "—" && (state.role === "all" || x.role === state.role)), mine = steps.length, done = steps.filter(x => x.doc).length;
@@ -405,6 +459,129 @@ function drawPanel(p) {
   $("panel").querySelectorAll("button[data-s]").forEach(b => b.onclick = () => { state.sel = b.dataset.s; render(); });
   $("panel").querySelectorAll("button[data-doc]").forEach(b => b.onclick = () => openDoc(b.dataset.doc, s.label));
   $("panel").querySelectorAll("button[data-drill]").forEach(b => b.onclick = () => openProc(b.dataset.drill));
+}
+
+let geo = null;
+function makeDraggable(g, s, p, svg) {
+  g.addEventListener("pointerdown", e => {
+    if (e.button !== 0) return;
+    const pt = svg.createSVGPoint(), toSvg = ev => { pt.x = ev.clientX; pt.y = ev.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); };
+    const start = toSvg(e); let moved = false;
+    g.setPointerCapture(e.pointerId);
+    const move = ev => { const q = toSvg(ev), dx = q.x - start.x, dy = q.y - start.y;
+      if (!moved && Math.hypot(dx, dy) < 5) return; moved = true; g.classList.add("dragging"); g.setAttribute("transform", `translate(${dx},${dy})`); };
+    const up = ev => {
+      g.removeEventListener("pointermove", move); g.removeEventListener("pointerup", up);
+      if (!moved) { state.sel = s.id; render(); return; }
+      const q = toSvg(ev), col = Math.max(0, Math.floor((q.x - geo.HEAD) / geo.COLW));
+      let y = 0, lane = geo.lanes[geo.lanes.length - 1], row = 0;
+      for (const l of geo.lanes) { const h = (l.rows || 1) * geo.ROWH; if (q.y < y + h) { lane = l; row = Math.max(0, Math.min((l.rows || 1) - 1, Math.floor((q.y - y) / geo.ROWH))); break; } y += h; }
+      const other = p.steps.find(x => x !== s && x.col === col && x.role === lane.role && (x.row || 0) === row);
+      if (other) { other.col = s.col; other.role = s.role; other.row = s.row || 0; }
+      s.col = col; s.role = lane.role; s.row = row; state.sel = s.id;
+      saveEdits(p); render();
+    };
+    g.addEventListener("pointermove", move); g.addEventListener("pointerup", up);
+  });
+  g.addEventListener("keydown", e => { if (e.key === "Enter") { state.sel = s.id; render(); } });
+}
+
+const SHAPES = { process: "Process step", decision: "Decision (yes/no)", terminal: "Start / end", placeholder: "Placeholder" };
+function drawEditPanel(p) {
+  const s = p.steps.find(x => x.id === state.sel), P = $("panel");
+  if (!s) {
+    const unused = Object.entries(ROLES).filter(([k]) => !p.lanes.some(l => l.role === k));
+    P.innerHTML = `<h2>Editing chart</h2><p class="hint">Select a step to edit it, or add one with <b>+ Step</b>.</p>
+      <h2>Lanes</h2>
+      <ul class="lanes">${p.lanes.map((l, i) => { const used = p.steps.some(x => x.role === l.role);
+        return `<li><span>${ROLES[l.role].name}</span>
+          <button class="x" data-lup="${i}" title="Move up" ${i ? "" : "disabled"}>↑</button>
+          <button class="x" data-ldown="${i}" title="Move down" ${i < p.lanes.length - 1 ? "" : "disabled"}>↓</button>
+          <button class="x" data-lrows="${i}" title="Toggle an extra row">${(l.rows || 1) > 1 ? "−row" : "+row"}</button>
+          <button class="x" data-ldel="${i}" title="${used ? "Move its steps out first" : "Remove lane"}" ${used ? "disabled" : ""}>×</button></li>`; }).join("")}</ul>
+      <div class="form">
+        <label>Add a lane<select id="addlane"><option value="">Choose a role…</option>${unused.map(([k, r]) => `<option value="${k}">${r.name}</option>`).join("")}<option value="__new">New role…</option></select></label>
+        <label id="newrolewrap" hidden>New role name<input id="newrole" placeholder="e.g. Estimator"></label>
+      </div>`;
+    P.querySelectorAll("[data-lup]").forEach(b => b.onclick = () => { const i = +b.dataset.lup; [p.lanes[i - 1], p.lanes[i]] = [p.lanes[i], p.lanes[i - 1]]; saveEdits(p); render(); });
+    P.querySelectorAll("[data-ldown]").forEach(b => b.onclick = () => { const i = +b.dataset.ldown; [p.lanes[i + 1], p.lanes[i]] = [p.lanes[i], p.lanes[i + 1]]; saveEdits(p); render(); });
+    P.querySelectorAll("[data-lrows]").forEach(b => b.onclick = () => { const l = p.lanes[+b.dataset.lrows];
+      if ((l.rows || 1) > 1) { l.rows = 1; p.steps.forEach(x => { if (x.role === l.role) x.row = 0; }); } else l.rows = 2; saveEdits(p); render(); });
+    P.querySelectorAll("[data-ldel]").forEach(b => b.onclick = () => { p.lanes.splice(+b.dataset.ldel, 1); saveEdits(p); render(); });
+    $("addlane").onchange = e => { const v = e.target.value;
+      if (v === "__new") { $("newrolewrap").hidden = false; $("newrole").focus(); return; }
+      if (v) { p.lanes.push({ role: v }); saveEdits(p); render(); } };
+    $("newrole").onkeydown = e => { if (e.key !== "Enter") return; const name = e.target.value.trim(); if (!name) return;
+      const key = "r_" + name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+      ROLES[key] = EDITS.roles[key] = { name, c: ROLE_COLORS[Object.keys(ROLES).length % ROLE_COLORS.length] };
+      p.lanes.push({ role: key }); saveEdits(p); rebuildRoleMenu(); render(); };
+    return;
+  }
+  const outs = p.edges.map((e, i) => ({ e, i })).filter(x => x.e[0] === s.id);
+  const targets = p.steps.filter(x => x !== s && !outs.some(o => o.e[1] === x.id));
+  const laneRows = (p.lanes.find(l => l.role === s.role) || {}).rows || 1;
+  P.innerHTML = `<h2>Edit step</h2>
+    <div class="form">
+      <label>Step name<textarea id="ed-label">${esc(s.label)}</textarea></label>
+      <label>Owner (lane)<select id="ed-role">${p.lanes.map(l => `<option value="${l.role}" ${l.role === s.role ? "selected" : ""}>${ROLES[l.role].name}</option>`).join("")}</select></label>
+      <label>Shape<select id="ed-type">${Object.entries(SHAPES).map(([k, v]) => `<option value="${k}" ${(s.type || "process") === k ? "selected" : ""}>${v}</option>`).join("")}</select></label>
+      <label>SOP ID<input id="ed-sop" value="${esc(s.sop || "")}" placeholder="e.g. SOP-PRD-014"></label>
+      <div><h2>Position</h2><div class="row2">
+        <button class="editbtn" data-mv="-1">◀ Left</button><button class="editbtn" data-mv="1">Right ▶</button>
+        ${laneRows > 1 ? `<button class="editbtn" data-row="${(s.row || 0) ? 0 : 1}">${(s.row || 0) ? "Upper row" : "Lower row"}</button>` : ""}</div></div>
+      <div><h2>Arrows out</h2><ul class="arrows">${outs.length ? outs.map(o => { const t = p.steps.find(x => x.id === o.e[1]);
+        return `<li><span>→ ${esc(t ? t.label : "?")}</span><button class="x" data-rm="${o.i}" title="Remove arrow">×</button>
+          <input data-lbl="${o.i}" value="${esc((o.e[2] || {}).label || "")}" placeholder="Arrow label (optional, e.g. Yes)"></li>`; }).join("") : `<li class="hint">No arrows out of this step.</li>`}</ul></div>
+      <label>Add an arrow to<select id="ed-arrow"><option value="">Choose a step…</option>${targets.map(t => `<option value="${t.id}">${esc(t.label)}</option>`).join("")}</select></label>
+      <div class="row2"><button class="editbtn danger" id="ed-del">Delete step</button><button class="editbtn" id="ed-close">Done with step</button></div>
+    </div>`;
+  $("ed-label").oninput = e => { s.label = e.target.value || "Untitled step"; saveEdits(p); drawMap(p); };
+  $("ed-role").onchange = e => { s.role = e.target.value; s.row = 0; saveEdits(p); render(); };
+  $("ed-type").onchange = e => { const v = e.target.value; if (v === "process") delete s.type; else s.type = v; saveEdits(p); render(); };
+  $("ed-sop").oninput = e => { s.sop = e.target.value.trim(); saveEdits(p); };
+  P.querySelectorAll("[data-mv]").forEach(b => b.onclick = () => { s.col = Math.max(0, s.col + +b.dataset.mv); saveEdits(p); render(); });
+  P.querySelectorAll("[data-row]").forEach(b => b.onclick = () => { s.row = +b.dataset.row; saveEdits(p); render(); });
+  P.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { p.edges.splice(+b.dataset.rm, 1); saveEdits(p); render(); });
+  P.querySelectorAll("[data-lbl]").forEach(inp => inp.oninput = () => { const e = p.edges[+inp.dataset.lbl];
+    const o = Object.assign({}, e[2] || {}); if (inp.value.trim()) o.label = inp.value.trim(); else delete o.label; e[2] = o; saveEdits(p); drawMap(p); });
+  $("ed-arrow").onchange = e => { if (!e.target.value) return; p.edges.push([s.id, e.target.value]); saveEdits(p); render(); };
+  const del = $("ed-del");
+  del.onclick = () => { if (!del.classList.contains("armed")) { del.classList.add("armed"); del.textContent = "Click again to delete"; return; }
+    p.steps = p.steps.filter(x => x !== s); p.edges = p.edges.filter(e => e[0] !== s.id && e[1] !== s.id); state.sel = null; saveEdits(p); render(); };
+  $("ed-close").onclick = () => { state.sel = null; render(); };
+}
+
+function addStep(type) {
+  const p = cur(), from = p.steps.find(x => x.id === state.sel);
+  const role = from ? from.role : p.lanes[0].role, row = from ? (from.row || 0) : 0;
+  let col = from ? from.col + 1 : Math.max(-1, ...p.steps.map(x => x.col)) + 1;
+  while (p.steps.some(x => x.col === col && x.role === role && (x.row || 0) === row)) col++;
+  const s = { id: "n" + Date.now().toString(36), label: type === "decision" ? "New decision?" : "New step", role, col, row, sop: "" };
+  if (type === "decision") s.type = "decision";
+  p.steps.push(s); if (from) p.edges.push([from.id, s.id]);
+  state.sel = s.id; saveEdits(p); render();
+  const t = $("ed-label"); if (t) { t.focus(); t.select(); }
+}
+function cur() { let p = PROCESSES.find(x => x.id === state.proc); if (!visible(p)) p = PROCESSES.find(visible) || p; return p; }
+function copyChanges() {
+  const p = cur(), out = JSON.stringify({ roles: EDITS.roles, processes: EDITS.processes }, null, 1);
+  const done = () => { $("copybtn").textContent = "Copied — paste it to Claude"; setTimeout(() => { $("copybtn").textContent = "Copy changes"; }, 3000); };
+  const fallback = () => { $("panel").innerHTML = `<h2>Your changes</h2><p class="hint">Copy everything in this box and paste it to Claude.</p><textarea class="copybox" id="copybox" readonly></textarea>`;
+    $("copybox").value = out; $("copybox").focus(); $("copybox").select(); };
+  if (!Object.keys(EDITS.processes).length) { $("copybtn").textContent = "No changes yet"; setTimeout(() => { $("copybtn").textContent = "Copy changes"; }, 2000); return; }
+  try { navigator.clipboard.writeText(out).then(done, fallback); } catch (e) { fallback(); }
+}
+function resetChart() {
+  const b = $("resetbtn");
+  if (!b.classList.contains("armed")) { b.classList.add("armed"); b.textContent = "Click again to reset"; setTimeout(() => { b.classList.remove("armed"); b.textContent = "Reset this chart"; }, 4000); return; }
+  const p = cur(), orig = ORIGINAL.find(x => x.id === p.id); if (!orig) return;
+  const i = PROCESSES.findIndex(x => x.id === p.id); PROCESSES[i] = JSON.parse(JSON.stringify(orig));
+  delete EDITS.processes[p.id]; try { localStorage.setItem("sop-edits", JSON.stringify(EDITS)); } catch (e) {}
+  b.classList.remove("armed"); b.textContent = "Reset this chart"; state.sel = null; render();
+}
+function rebuildRoleMenu() {
+  roleSel.innerHTML = `<option value="all">Admin (all roles)</option>` + Object.entries(ROLES).filter(([k]) => k !== "admin").map(([k, r]) => `<option value="${k}">${r.name}</option>`).join("");
+  roleSel.value = state.role;
 }
 
 async function openDoc(url, label) {
@@ -464,9 +641,19 @@ function render() {
   $("ptitle").innerHTML = par ? `<button class="crumb" data-up="${par.id}">${par.region} · ${par.name}</button> › ${p.name}` : `${p.region} · ${p.name}`;
   const up = $("ptitle").querySelector("[data-up]"); if (up) up.onclick = () => { state.proc = par.id; state.sel = p.parentStep; render(); };
   $("psub").textContent = p.summary;
+  if (state.role !== "all") state.edit = false;
+  $("editbtn").hidden = state.role !== "all";
+  $("editbtn").classList.toggle("on", state.edit); $("editbtn").textContent = state.edit ? "Editing…" : "Edit chart";
+  $("toolbar").hidden = !state.edit;
+  $("editedtag").hidden = !EDITS.processes[p.id];
   drawTree(); drawMap(p); drawPanel(p);
 }
 $("docclose").onclick = closeDoc;
+$("editbtn").onclick = () => { state.edit = !state.edit; state.sel = null; render(); };
+$("donebtn").onclick = () => { state.edit = false; state.sel = null; render(); };
+document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => addStep(b.dataset.add));
+$("copybtn").onclick = copyChanges;
+$("resetbtn").onclick = resetChart;
 $("q").addEventListener("focus", loadDocs);
 $("q").addEventListener("input", () => { loadDocs(); runSearch(); });
 $("q").addEventListener("keydown", e => {
