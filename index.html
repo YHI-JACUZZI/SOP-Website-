@@ -21,8 +21,8 @@
   --accent-soft: #e3f3f6;
   --lane-a: #f8fafb;
   --lane-b: #eef2f4;
-  --r-sales: #2f6fd6; --r-sm: #6a4fd1; --r-pm: #c47a0c; --r-admin: #198a4a; --r-prod: #c03a78; --r-pc: #0f8a7a; --r-fm: #a326c9; --r-wh: #d9700f; --r-inst: #3c9a3c;
-  --r-sales-bg: #e6eefb; --r-sm-bg: #ece8fb; --r-pm-bg: #fbf0dc; --r-admin-bg: #e1f4e8; --r-prod-bg: #fae6ef; --r-pc-bg: #daf3ef; --r-fm-bg: #f5e3fa; --r-wh-bg: #fdeedd; --r-inst-bg: #e3f4e1;
+  --r-sales: #2f6fd6; --r-sm: #6a4fd1; --r-pm: #c47a0c; --r-admin: #198a4a; --r-prod: #c03a78; --r-pc: #0f8a7a; --r-fm: #a326c9; --r-wh: #d9700f; --r-inst: #3c9a3c; --r-roof: #4a5f8f;
+  --r-sales-bg: #e6eefb; --r-sm-bg: #ece8fb; --r-pm-bg: #fbf0dc; --r-admin-bg: #e1f4e8; --r-prod-bg: #fae6ef; --r-pc-bg: #daf3ef; --r-fm-bg: #f5e3fa; --r-wh-bg: #fdeedd; --r-inst-bg: #e3f4e1; --r-roof-bg: #e6eaf3;
   --warn: #9a5b00; --warn-bg: #fff3d6;
   --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -31,14 +31,14 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0f161b; --surface: #16212a; --ink: #e4ebf0; --muted: #93a4b1; --line: #2a3a46;
   --accent: #4cc3d6; --accent-soft: #143440; --lane-a: #131d24; --lane-b: #18242d;
-  --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2; --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f;
-  --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c; --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317;
+  --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2; --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f; --r-roof: #a3b4dc;
+  --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c; --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317; --r-roof-bg: #1f2638;
   --warn: #f1c46b; --warn-bg: #3a2f14; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #0f161b; --surface: #16212a; --ink: #e4ebf0; --muted: #93a4b1; --line: #2a3a46;
   --accent: #4cc3d6; --accent-soft: #143440; --lane-a: #131d24; --lane-b: #18242d;
-  --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2; --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f;
-  --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c; --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317;
+  --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2; --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f; --r-roof: #a3b4dc;
+  --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c; --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317; --r-roof-bg: #1f2638;
   --warn: #f1c46b; --warn-bg: #3a2f14; color-scheme: dark }
 
 * { box-sizing: border-box; }
@@ -49,6 +49,20 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); fon
 .brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .brand h1 { font-family: var(--f-display); font-weight: 800; font-size: 1.35rem; margin: 0; letter-spacing: -0.01em; }
 .tag { font-family: var(--f-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--warn); background: var(--warn-bg); padding: 2px 8px; border-radius: 4px; }
+.search { position: relative; flex: 1 1 260px; max-width: 460px; min-width: 0; }
+.search input { width: 100%; font: inherit; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.search input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.14); max-height: 60vh; overflow-y: auto; padding: 6px; }
+.results[hidden] { display: none; }
+.res { all: unset; box-sizing: border-box; display: grid; gap: 2px; width: 100%; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.res:hover, .res:focus-visible { background: var(--accent-soft); }
+.res b { font-weight: 600; }
+.res .meta { font-size: 0.78rem; color: var(--muted); }
+.res .snip { font-size: 0.82rem; color: var(--muted); }
+.res mark { background: var(--warn-bg); color: inherit; padding: 0 1px; border-radius: 2px; }
+.res .doc { font-family: var(--f-mono); font-size: 0.68rem; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+.noresult { padding: 10px; color: var(--muted); font-size: 0.88rem; }
 .viewas { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .viewas label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 select { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
@@ -114,6 +128,11 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
       <h1>Company SOP Map</h1>
       <span class="tag">Test environment</span>
     </div>
+    <div class="search" role="search">
+      <label for="q" class="sr">Search SOPs</label>
+      <input id="q" type="search" placeholder="Search steps and SOPs…" autocomplete="off" aria-controls="results">
+      <div id="results" class="results" hidden></div>
+    </div>
     <div class="viewas">
       <label for="role">Viewing as</label>
       <select id="role"></select>
@@ -155,7 +174,8 @@ const ROLES = {
   pc:    { name: "Project Coordinator", c: "--r-pc" },
   fm:    { name: "Field Manager", c: "--r-fm" },
   wh:    { name: "Warehouse", c: "--r-wh" },
-  inst:  { name: "Installer", c: "--r-inst" }
+  inst:  { name: "Installer", c: "--r-inst" },
+  roof:  { name: "Roofing Team", c: "--r-roof" }
 };
 
 const PROCESSES = [
@@ -217,6 +237,20 @@ const PROCESSES = [
       ["p5","p6"], ["p6","p7"], ["p7","p8"], ["p8","p9"], ["p9","p10"], ["p10","p11"],
       ["p11","p12"], ["p12","p13"]
     ]
+  },
+  {
+    id: "roofing-general",
+    region: "Roofing",
+    department: "Company-wide",
+    name: "Overarching General Process",
+    summary: "Placeholder: the roofing workflow hasn't been mapped yet.",
+    lanes: [ { role: "roof" } ],
+    steps: [
+      { id: "start", type: "terminal", label: "Start", role: "roof", col: 0 },
+      { id: "r1", type: "placeholder", label: "Roofing workflow to be mapped", role: "roof", col: 1, sop: "—", confirm: "Placeholder showing how a second region works. Steps get added once the roofing flow is drawn." },
+      { id: "end", type: "terminal", label: "Close", role: "roof", col: 2 }
+    ],
+    edges: [ ["start","r1"], ["r1","end"] ]
   }
 ];
 
@@ -271,7 +305,8 @@ function drawMap(p) {
   let y = 0; const laneY = {};
   p.lanes.forEach((l, i) => { const rows = l.rows || 1; laneY[l.role] = { y, rows }; y += rows * ROWH; });
   const H = y;
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); 
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.style.minWidth = Math.min(1050, W) + "px"; svg.style.maxWidth = Math.round(W * 1.15) + "px"; 
 
   const defs = el("defs", {}, svg);
   const mk = el("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
@@ -352,9 +387,9 @@ function drawMap(p) {
 function drawPanel(p) {
   const s = p.steps.find(x => x.id === state.sel);
   if (!s) {
-    const mine = state.role === "all" ? p.steps.filter(x => x.sop).length : p.steps.filter(x => x.role === state.role && x.sop).length;
+    const steps = p.steps.filter(x => x.sop && x.sop !== "—" && (state.role === "all" || x.role === state.role)), mine = steps.length, done = steps.filter(x => x.doc).length;
     $("panel").innerHTML = `<h2>Step details</h2><p class="hint">Click any step on the map to see who owns it and open its SOP.</p>
-      <dl class="kv"><dt>Steps ${state.role === "all" ? "in process" : "for this role"}</dt><dd>${mine}</dd><dt>SOPs written</dt><dd>0 of ${mine}</dd></dl>
+      <dl class="kv"><dt>Steps ${state.role === "all" ? "in process" : "for this role"}</dt><dd>${mine}</dd><dt>SOPs written</dt><dd>${done} of ${mine}</dd></dl>
       <p class="hint">Switch <b>Viewing as</b> to preview what each role would see after logging in.</p>`;
     return;
   }
@@ -379,6 +414,48 @@ async function openDoc(url, label) {
   catch (e) { $("docframe").srcdoc = "<p style='font:15px system-ui;padding:20px'>This SOP couldn't load. Try again in a moment.</p>"; }
 }
 function closeDoc() { $("docview").hidden = true; }
+// ---- Search: step names, roles, SOP IDs, and the text inside each SOP ----
+const docText = {};
+let docsLoading = null;
+function loadDocs() {
+  if (docsLoading) return docsLoading;
+  const urls = [...new Set(PROCESSES.flatMap(p => p.steps.filter(x => x.doc).map(x => x.doc)))];
+  docsLoading = Promise.all(urls.map(u => fetch(u).then(r => r.ok ? r.text() : "").then(h => {
+    const d = new DOMParser().parseFromString(h, "text/html");
+    d.querySelectorAll("style,script,img").forEach(n => n.remove());
+    docText[u] = (d.body ? d.body.textContent : "").replace(/\s+/g, " ").trim();
+  }).catch(() => {}))).then(() => { if ($("q").value.trim()) runSearch(); });
+  return docsLoading;
+}
+const esc = t => t.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const hl = (t, words) => { let h = esc(t); words.forEach(w => { h = h.replace(new RegExp("(" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "ig"), "<mark>$1</mark>"); }); return h; };
+function runSearch() {
+  const q = $("q").value.trim().toLowerCase(), box = $("results");
+  if (!q) { box.hidden = true; box.innerHTML = ""; return; }
+  const words = q.split(/\s+/).filter(Boolean), hits = [];
+  PROCESSES.filter(visible).forEach(p => p.steps.forEach(st => {
+    if (st.type === "terminal" && !st.sop) return;
+    if (state.role !== "all" && st.role !== state.role) return;
+    const meta = [st.label, ROLES[st.role].name, st.sop || "", st.docTitle || "", p.name, p.region].join(" ").toLowerCase();
+    const body = st.doc ? (docText[st.doc] || "") : "", lb = body.toLowerCase();
+    if (words.every(w => meta.includes(w))) hits.push({ p, st, score: 2 });
+    else if (body && words.every(w => meta.includes(w) || lb.includes(w))) {
+      const w = words.find(w => lb.includes(w)), i = lb.indexOf(w), a = Math.max(0, i - 50);
+      hits.push({ p, st, score: 1, snip: (a ? "…" : "") + body.slice(a, i + 90) + "…" });
+    }
+  }));
+  hits.sort((a, b) => b.score - a.score);
+  box.innerHTML = hits.length ? hits.slice(0, 12).map((h, i) => `<button class="res" data-i="${i}">
+      <b>${hl(h.st.label, words)}</b>
+      <span class="meta">${h.p.region} · ${h.p.name} · ${ROLES[h.st.role].name}${h.st.sop && h.st.sop !== "—" ? " · " + h.st.sop : ""}</span>
+      ${h.st.doc ? `<span class="doc">SOP available</span>` : ""}
+      ${h.snip ? `<span class="snip">${hl(h.snip, words)}</span>` : ""}</button>`).join("")
+    : `<div class="noresult">No steps or SOPs match “${esc(q)}”.${Object.keys(docText).length ? "" : " Still loading SOP text…"}</div>`;
+  box.hidden = false;
+  box.querySelectorAll(".res").forEach(b => b.onclick = () => {
+    const h = hits[+b.dataset.i]; state.proc = h.p.id; state.sel = h.st.id; box.hidden = true; render();
+  });
+}
 function openProc(id) { state.proc = id; state.sel = null; render(); }
 function render() {
   let p = PROCESSES.find(x => x.id === state.proc);
@@ -390,6 +467,13 @@ function render() {
   drawTree(); drawMap(p); drawPanel(p);
 }
 $("docclose").onclick = closeDoc;
+$("q").addEventListener("focus", loadDocs);
+$("q").addEventListener("input", () => { loadDocs(); runSearch(); });
+$("q").addEventListener("keydown", e => {
+  if (e.key === "Enter") { const b = $("results").querySelector(".res"); if (b) b.click(); }
+  if (e.key === "Escape") { $("q").value = ""; runSearch(); }
+});
+document.addEventListener("click", e => { if (!e.target.closest(".search")) $("results").hidden = true; });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("docview").hidden) closeDoc(); });
 render();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
