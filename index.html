@@ -12,15 +12,19 @@
 <style>
 /* Layout: app shell — top bar with "view as" role switch, left process tree, swimlane map center, step detail panel right */
 :root {
-  --bg: #f4f6f7;
+  --bg: #f6f5f3;
   --surface: #ffffff;
-  --ink: #15212b;
-  --muted: #5b6b78;
-  --line: #d5dde3;
-  --accent: #0b7285;
-  --accent-soft: #e3f3f6;
-  --lane-a: #f8fafb;
-  --lane-b: #eef2f4;
+  --ink: #141414;
+  --muted: #5e5a56;
+  --line: #e1dcd6;
+  --accent: #c25508;
+  --brand: #e36c0a;
+  --brand-rule: #f47c20;
+  --bar: #111111;
+  --bar-ink: #ffffff;
+  --accent-soft: #fdeee2;
+  --lane-a: #fbfaf9;
+  --lane-b: #f3f1ee;
   --r-sales: #2f6fd6; --r-sm: #6a4fd1; --r-pm: #c47a0c; --r-admin: #198a4a; --r-prod: #c03a78; --r-pc: #0f8a7a; --r-fm: #a326c9; --r-wh: #d9700f; --r-inst: #3c9a3c; --r-roof: #4a5f8f;
   --r-sales-bg: #e6eefb; --r-sm-bg: #ece8fb; --r-pm-bg: #fbf0dc; --r-admin-bg: #e1f4e8; --r-prod-bg: #fae6ef; --r-pc-bg: #daf3ef; --r-fm-bg: #f5e3fa; --r-wh-bg: #fdeedd; --r-inst-bg: #e3f4e1; --r-roof-bg: #e6eaf3;
   --warn: #9a5b00; --warn-bg: #fff3d6;
@@ -29,22 +33,30 @@
   --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0f161b; --surface: #16212a; --ink: #e4ebf0; --muted: #93a4b1; --line: #2a3a46;
-  --accent: #4cc3d6; --accent-soft: #143440; --lane-a: #131d24; --lane-b: #18242d;
+  --bg: #0d0d0d; --surface: #181818; --ink: #f1efed; --muted: #a8a29c; --line: #34302c;
+  --accent: #f68c3a; --brand: #f47c20; --brand-rule: #f47c20; --bar: #000000; --bar-ink: #ffffff;
+  --accent-soft: #3a2312; --lane-a: #141414; --lane-b: #1b1a19;
   --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2; --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f; --r-roof: #a3b4dc;
   --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c; --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317; --r-roof-bg: #1f2638;
   --warn: #f1c46b; --warn-bg: #3a2f14; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #0f161b; --surface: #16212a; --ink: #e4ebf0; --muted: #93a4b1; --line: #2a3a46;
-  --accent: #4cc3d6; --accent-soft: #143440; --lane-a: #131d24; --lane-b: #18242d;
+  --bg: #0d0d0d; --surface: #181818; --ink: #f1efed; --muted: #a8a29c; --line: #34302c;
+  --accent: #f68c3a; --brand: #f47c20; --brand-rule: #f47c20; --bar: #000000; --bar-ink: #ffffff;
+  --accent-soft: #3a2312; --lane-a: #141414; --lane-b: #1b1a19;
   --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2; --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f; --r-roof: #a3b4dc;
   --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c; --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317; --r-roof-bg: #1f2638;
   --warn: #f1c46b; --warn-bg: #3a2f14; color-scheme: dark }
 
 * { box-sizing: border-box; }
+body { margin: 0; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
 .shell { padding-inline: 16px; padding-block: 16px 40px; max-width: 1500px; margin: 0 auto; display: grid; gap: 16px; }
 
+.topwrap { background: var(--bar); color: var(--bar-ink); border-bottom: 4px solid var(--brand-rule); }
+.topwrap .topbar { max-width: 1500px; margin: 0 auto; padding: 12px 16px; }
+.topwrap .viewas label { color: #d6d2ce; }
+.kicker { margin: 0; font-family: var(--f-mono); font-size: 0.68rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-rule); }
+.topwrap .tag { color: #111; background: var(--brand-rule); }
 .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
 .brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .brand h1 { font-family: var(--f-display); font-weight: 800; font-size: 1.35rem; margin: 0; letter-spacing: -0.01em; }
@@ -72,7 +84,7 @@ select:focus-visible, button:focus-visible, .node:focus-visible { outline: 2px s
 @media (max-width: 1100px) { .main { grid-template-columns: minmax(0, 1fr); } }
 
 .tree { display: grid; gap: 14px; min-width: 0; }
-.tree h2, .panel h2 { font-family: var(--f-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 0; font-weight: 500; }
+.tree h2, .panel h2 { font-family: var(--f-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); border-bottom: 2px solid var(--brand-rule); padding-bottom: 4px; margin: 0; font-weight: 500; }
 .regionpick { display: grid; gap: 4px; }
 .regionpick span { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
 .regionpick select { width: 100%; font-weight: 600; }
@@ -86,12 +98,16 @@ select:focus-visible, button:focus-visible, .node:focus-visible { outline: 2px s
 .tree .child button { padding-left: 22px; font-size: 0.9rem; }
 .tree .soon { padding: 7px 10px; color: var(--muted); font-size: 0.85rem; border: 1px dashed var(--line); border-radius: 6px; }
 
-.canvas { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0; display: grid; }
-.canvas-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: baseline; }
+.canvas { min-width: 0; display: grid; }
+.canvas-head { padding: 2px 0 10px; border-bottom: 2px solid var(--brand-rule); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: baseline; }
 .canvas-head h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; margin: 0; text-wrap: balance; }
 .canvas-head p { margin: 0; color: var(--muted); font-size: 0.85rem; }
-.scroll { overflow-x: auto; padding: 12px; }
-svg { display: block; width: 100%; min-width: 1050px; height: auto; }
+.scroll { overflow: auto; padding: 12px 0; max-height: calc(100vh - 150px); }
+svg#map { display: block; height: auto; margin: 0 auto; }
+.zoom { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.zoom button { font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: 0; background: transparent; color: var(--ink); padding: 5px 10px; min-width: 32px; }
+.zoom button:hover { background: var(--accent-soft); color: var(--accent); }
+.zoom output { font-family: var(--f-mono); font-size: 0.72rem; color: var(--muted); min-width: 44px; text-align: center; border-inline: 1px solid var(--line); padding: 5px 4px; }
 .lane-label { font-family: var(--f-mono); font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 .node { cursor: pointer; transition: opacity .2s; }
 .node text { font-family: var(--f-body); font-size: 15px; pointer-events: none; }
@@ -101,11 +117,11 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
 .edge-label { font-family: var(--f-mono); font-size: 12.5px; fill: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .node { transition: none; } }
 
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 18px 14px; font-size: 0.8rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 0 14px; font-size: 0.8rem; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--brand-rule); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
 .panel h3 { font-family: var(--f-display); font-size: 1.1rem; margin: 0; text-wrap: balance; }
 .chip { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
 .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 0.88rem; margin: 0; }
@@ -120,7 +136,7 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
 .nextlist button { all: unset; cursor: pointer; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 .docview { position: fixed; inset: 0; background: var(--bg); z-index: 10; display: grid; grid-template-rows: auto 1fr; padding-top: env(safe-area-inset-top, 0px); }
 .docview[hidden] { display: none; }
-.docbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.docbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; background: var(--bar); color: var(--bar-ink); border-bottom: 4px solid var(--brand-rule); }
 .docbar h2 { font-family: var(--f-display); font-size: 1.05rem; margin: 0; }
 .docview iframe { width: 100%; height: 100%; border: 0; background: var(--surface); }
 .editbtn { font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: transparent; color: var(--accent); }
@@ -130,7 +146,7 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
 .editbtn:disabled { opacity: .4; cursor: not-allowed; }
 .headright { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .edited { font-family: var(--f-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--warn); background: var(--warn-bg); padding: 2px 7px; border-radius: 4px; }
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--accent-soft); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 0 0 8px 8px; background: var(--accent-soft); }
 .toolbar .hint { flex-basis: 100%; margin: 0; font-size: 0.82rem; }
 .toolbar[hidden] { display: none; }
 .editing .node { cursor: grab; }
@@ -153,10 +169,9 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
 .copybox { width: 100%; min-height: 120px; font-family: var(--f-mono); font-size: 0.72rem; }
 </style>
 
-<div class="shell">
-  <header class="topbar">
+<div class="topwrap"><header class="topbar">
     <div class="brand">
-      <h1>Company SOP Map</h1>
+      <div><p class="kicker">Yancey Home Improvements</p><h1>Company SOP Map</h1></div>
       <span class="tag">Test environment</span>
     </div>
     <div class="search" role="search">
@@ -168,7 +183,8 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
       <label for="role">Viewing as</label>
       <select id="role"></select>
     </div>
-  </header>
+  </header></div>
+<div class="shell">
 
   <div class="main">
     <nav class="tree" aria-label="Processes">
@@ -179,7 +195,7 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
     <section class="canvas" aria-labelledby="ptitle">
       <div class="canvas-head">
         <h2 id="ptitle"></h2>
-        <div class="headright"><p id="psub"></p><span id="editedtag" class="edited" hidden>Edited in this browser</span><button id="editbtn" class="editbtn" type="button">Edit chart</button></div>
+        <div class="headright"><p id="psub"></p><span id="editedtag" class="edited" hidden>Edited in this browser</span><span class="zoom" role="group" aria-label="Zoom"><button id="zout" type="button" aria-label="Zoom out">−</button><output id="zpct">100%</output><button id="zin" type="button" aria-label="Zoom in">+</button><button id="zfit" type="button">Fit</button></span><button id="editbtn" class="editbtn" type="button">Edit chart</button></div>
       </div>
       <div id="toolbar" class="toolbar" hidden>
         <button class="editbtn" type="button" data-add="process">+ Step</button>
@@ -189,7 +205,7 @@ svg { display: block; width: 100%; min-width: 1050px; height: auto; }
         <button class="editbtn primary" type="button" id="donebtn">Done editing</button>
         <p class="hint">Drag steps to move them between lanes and columns. Click a step to rename it, change its owner, or edit its arrows. Edits save in this browser; use <b>Copy changes</b> and send them to Claude to publish them for everyone.</p>
       </div>
-      <div class="scroll"><svg id="map" role="img" aria-label="Process flowchart"></svg></div>
+      <div class="scroll" id="scroll"><svg id="map" role="img" aria-label="Process flowchart"></svg></div>
       <div class="legend" id="legend"></div>
     </section>
 
@@ -311,7 +327,7 @@ const NS = "http://www.w3.org/2000/svg";
 const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
 const $ = id => document.getElementById(id);
 
-let state = { proc: "jacuzzi-general", role: "all", sel: null, edit: false };
+let state = { proc: "jacuzzi-general", role: "all", sel: null, edit: false, zoom: null, zoomFor: null };
 try { const r = localStorage.getItem("sop-role"); if (r) state.role = r; } catch (e) {}
 
 const roleSel = $("role");
@@ -359,7 +375,7 @@ function drawMap(p) {
   p.lanes.forEach((l, i) => { const rows = l.rows || 1; laneY[l.role] = { y, rows }; y += rows * ROWH; });
   const H = y;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.style.minWidth = Math.min(1050, W) + "px"; svg.style.maxWidth = Math.round(W * 1.15) + "px"; 
+  geo.W = W; geo.H = H;
 
   const defs = el("defs", {}, svg);
   const mk = el("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
@@ -649,8 +665,29 @@ function render() {
   $("editbtn").classList.toggle("on", state.edit); $("editbtn").textContent = state.edit ? "Editing…" : "Edit chart";
   $("toolbar").hidden = !state.edit;
   $("editedtag").hidden = !EDITS.processes[p.id];
-  drawTree(); drawMap(p); drawPanel(p);
+  if (state.zoomFor !== p.id) { state.zoom = null; state.zoomFor = p.id; }
+  drawTree(); drawMap(p); drawPanel(p); applyZoom();
 }
+// Zoom: null = fit the whole chart in the view; otherwise a scale factor on the chart's natural size
+function fitScale() {
+  const w = $("scroll").clientWidth, h = Math.max(420, innerHeight - 180);
+  const k = Math.min(w / geo.W, h / geo.H);
+  return Math.min(k, 1.15);
+}
+function applyZoom() {
+  const svg = $("map"), k = state.zoom ?? fitScale();
+  svg.style.width = Math.round(geo.W * k) + "px";
+  $("zpct").textContent = Math.round(k * 100) + "%";
+}
+function zoomBy(f) {
+  const cur = state.zoom ?? fitScale();
+  state.zoom = Math.max(0.3, Math.min(3, cur * f)); applyZoom();
+}
+$("zin").onclick = () => zoomBy(1.25);
+$("zout").onclick = () => zoomBy(0.8);
+$("zfit").onclick = () => { state.zoom = null; applyZoom(); };
+$("scroll").addEventListener("wheel", e => { if (!e.ctrlKey) return; e.preventDefault(); zoomBy(e.deltaY < 0 ? 1.1 : 0.9); }, { passive: false });
+addEventListener("resize", () => { if (state.zoom == null) applyZoom(); });
 $("docclose").onclick = closeDoc;
 $("editbtn").onclick = () => { state.edit = !state.edit; state.sel = null; render(); };
 $("donebtn").onclick = () => { state.edit = false; state.sel = null; render(); };
