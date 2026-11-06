@@ -9,13 +9,14 @@ import { getWorkflow, listMyWorkflows } from "@/lib/workflows";
 export default async function MapPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const [profile, chart, charts, { data: sops }, { data: roles }] = await Promise.all([
+  const [profile, chart, charts, { data: sops }, { data: roles }, { data: departments }] = await Promise.all([
     getMyProfile(),
     getWorkflow(id),
     listMyWorkflows(),
     // The database only returns SOPs this person may open.
     supabase.from("sops").select("id, title, revision, status").neq("status", "archived"),
     supabase.from("roles").select("id, name, department_id").order("name"),
+    supabase.from("departments").select("id, name").order("name"),
   ]);
   // Not found and not allowed look the same.
   if (!chart) notFound();
@@ -49,8 +50,10 @@ export default async function MapPage({ params }: { params: Promise<{ id: string
           steps={steps}
           sops={sops ?? []}
           readableCharts={charts.map((c) => c.id)}
+          charts={charts.map((c) => ({ id: c.id, name: c.name }))}
           viewer={{ roleId: profile?.role?.id ?? null, deptId: profile?.role?.department?.id ?? null }}
           roles={roles ?? []}
+          departments={departments ?? []}
           isAdmin={isAdmin}
         />
       </main>

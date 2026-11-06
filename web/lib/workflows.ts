@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 
-export type Lane = { key: string; label: string; color: string; rows?: number };
+// A lane belongs to a role or a department; its steps take that owner.
+export type Lane = { key: string; label: string; color: string; rows?: number; role_id?: number; department_id?: number };
 export type Edge = { from: string; to: string; label?: string; route?: "lv" | "rv" | "down-over"; exit?: "bottom" };
 
 export type WorkflowSummary = {
