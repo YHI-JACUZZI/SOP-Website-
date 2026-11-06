@@ -15,6 +15,9 @@ export default function SignedInBar({ profile }: { profile: Profile | null }) {
         <Link href="/" className="text-[#d6d2ce] hover:text-white">
           My SOPs
         </Link>
+        <Link href="/map" className="text-[#d6d2ce] hover:text-white">
+          Company map
+        </Link>
         {profile?.role?.is_admin && (
           <>
             <Link href="/admin/import" className="text-[#d6d2ce] hover:text-white">

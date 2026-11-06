@@ -10,12 +10,12 @@ export type Profile = {
     name: string;
     is_admin: boolean;
     is_manager: boolean;
-    department: { name: string } | null;
+    department: { id: number; name: string } | null;
   } | null;
 };
 
 export const PROFILE_FIELDS =
-  "id, email, full_name, active, role:roles(id, name, is_admin, is_manager, department:departments(name))";
+  "id, email, full_name, active, role:roles(id, name, is_admin, is_manager, department:departments(id, name))";
 
 // The signed-in person's profile, or null if they aren't signed in
 // (or the Phase 3 database setup hasn't been run yet).
