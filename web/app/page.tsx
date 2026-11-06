@@ -1,21 +1,29 @@
-export default function Home() {
+import TopBar from "@/components/TopBar";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b-4 border-brand-rule bg-bar px-6 py-4 text-white">
-        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-rule">
-          Yancey Home Improvements
-        </p>
-        <h1 className="font-display text-2xl font-extrabold">SOP Hub</h1>
-      </header>
+      <TopBar>
+        <form action="/auth/signout" method="post">
+          <button type="submit" className="text-sm text-[#d6d2ce] underline hover:text-white">
+            Sign out
+          </button>
+        </form>
+      </TopBar>
 
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center gap-4 px-6 py-16">
-        <h2 className="font-display text-3xl font-bold">Hello from the real build</h2>
-        <p className="text-lg text-muted">
-          This is the starter site. Sign-in, role-based SOPs and the company
-          map get added here one phase at a time.
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-6 py-12">
+        <h1 className="font-display text-3xl font-bold">My SOPs</h1>
+        <p className="text-muted">
+          Signed in as <span className="font-semibold text-foreground">{user?.email}</span>
         </p>
         <p className="rounded-lg bg-surface p-4 text-sm text-muted ring-1 ring-line">
-          Phase 1 of the build plan: starter site live.
+          Your SOPs will show up here once roles are set up (Phase 3 of the build plan).
         </p>
       </main>
     </div>
