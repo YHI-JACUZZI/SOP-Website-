@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -86,8 +86,10 @@ type Fields = {
 };
 
 // Put the Scribe content into the Yancey SOP layout: the SOP's current
-// version if it has one, otherwise the blank template.
-function buildSop(base: string, f: Fields): string {
+// version if it has one, otherwise the blank template. With content=false
+// only the header, details table and revision history are refreshed, so
+// edits typed into the preview are kept.
+function buildSop(base: string, f: Fields, content = true): string {
   const d = new DOMParser().parseFromString(base, "text/html");
   const H = (re: RegExp) => Array.from(d.querySelectorAll("h1")).find((h) => re.test(h.textContent ?? ""));
   const mk = (html: string) => {
@@ -127,9 +129,9 @@ function buildSop(base: string, f: Fields): string {
   row(/Supersedes/i, f.supersedes);
 
   const hp = H(/Purpose/);
-  if (hp && f.desc) setBody(hp, mk(`<p>${esc(f.desc)}</p>`), false);
+  if (content && hp && f.desc) setBody(hp, mk(`<p>${esc(f.desc)}</p>`), false);
   const hproc = H(/Procedure/);
-  if (hproc) {
+  if (content && hproc) {
     setBody(
       hproc,
       f.steps.flatMap((st, i) =>
@@ -146,7 +148,9 @@ function buildSop(base: string, f: Fields): string {
   const table = hr && Array.from(d.querySelectorAll("table")).find((t) => hr.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING);
   const tb = table?.tBodies[0];
   if (tb) {
-    let r = Array.from(tb.rows).find((x) => /^\[|^$/.test(x.cells[1]?.textContent?.trim() ?? ""));
+    let r =
+      Array.from(tb.rows).find((x) => x.cells[0]?.textContent?.trim() === f.rev) ??
+      Array.from(tb.rows).find((x) => /^\[|^$/.test(x.cells[1]?.textContent?.trim() ?? ""));
     if (!r) {
       r = tb.rows[tb.rows.length - 1].cloneNode(true) as HTMLTableRowElement;
       tb.appendChild(r);
@@ -182,13 +186,21 @@ export default function ImportForm({
   const [preview, setPreview] = useState("");
   const [base, setBase] = useState<string | null>(null);
   const [busy, setBusy] = useState("");
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [edited, setEdited] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   const existing = sops.find((s) => s.id === target) ?? null;
   const id = existing ? existing.id : newId.trim().toUpperCase();
   const deptName = departments.find((d) => d.id === deptId)?.name ?? "";
   const roleNames = roles.filter((r) => roleIds.includes(r.id)).map((r) => r.name).join(", ");
-  const ready = parsed && SOP_ID.test(id) && title.trim() && deptId !== "";
+  const missing = [
+    !parsed && "upload the Scribe file",
+    !SOP_ID.test(id) && "enter an SOP ID like SOP-PRD-003",
+    !title.trim() && "add a title",
+    deptId === "" && "choose a department",
+  ].filter(Boolean) as string[];
+  const ready = missing.length === 0;
 
   const fields = useMemo<Fields | null>(() => {
     if (!parsed) return null;
@@ -243,9 +255,26 @@ export default function ImportForm({
 
   async function makePreview() {
     if (!fields) return;
+    if (edited && !window.confirm("Rebuild the preview from the Word file? Your typed edits will be lost.")) return;
     setBusy("Building the preview…");
     setPreview(buildSop(await baseHtml(), fields));
+    setEdited(false);
     setBusy("");
+  }
+
+  // Let the admin type straight into the preview. Scripts never run in it
+  // (the sandbox has no allow-scripts); same-origin only lets this page read
+  // the edited document back when publishing.
+  function onPreviewLoad() {
+    const doc = frame.current?.contentDocument;
+    if (!doc) return;
+    doc.designMode = "on";
+    doc.addEventListener("input", () => setEdited(true));
+  }
+
+  function previewHtml(): string | null {
+    const doc = frame.current?.contentDocument;
+    return preview && doc?.documentElement ? "<!doctype html>\n" + doc.documentElement.outerHTML : null;
   }
 
   async function publish() {
@@ -254,7 +283,8 @@ export default function ImportForm({
     setBusy("Publishing…");
     const supabase = createClient();
     const oldHtml = existing ? await baseHtml() : "";
-    const html = buildSop(await baseHtml(), fields);
+    const typed = previewHtml();
+    const html = typed ? buildSop(typed, fields, false) : buildSop(await baseHtml(), fields);
     const docs = supabase.storage.from("sop-docs");
     const asHtml = (s: string) => new Blob([s], { type: "text/html" });
 
@@ -377,6 +407,9 @@ export default function ImportForm({
             Publish
           </button>
         </div>
+        {!ready && parsed && !busy && (
+          <p className="text-sm text-muted">To publish, {missing.join(", ")}.</p>
+        )}
         {busy && <p role="status" className="text-sm text-muted">{busy}</p>}
         {message && (
           <p role="status" className={`rounded-lg p-3 text-sm ${message.ok ? "bg-[#e1f4e8] text-[#12663a]" : "bg-[#fbe4de] text-[#a3290f]"}`}>
@@ -387,7 +420,14 @@ export default function ImportForm({
 
       <div className="min-h-[70vh] overflow-hidden rounded-xl bg-white ring-1 ring-line">
         {preview ? (
-          <iframe title="SOP preview" srcDoc={preview} sandbox="" className="h-full min-h-[70vh] w-full" />
+          <div className="flex h-full min-h-[70vh] flex-col">
+            <p className="border-b border-line bg-[#fff3d6] px-4 py-2 text-sm text-[#6b3f00]">
+              Click anywhere in the document to edit the text. Your edits are saved when you click Publish.
+              {edited && " (edited)"}
+            </p>
+            <iframe ref={frame} title="SOP preview" srcDoc={preview} sandbox="allow-same-origin"
+              onLoad={onPreviewLoad} className="min-h-[70vh] w-full flex-1" />
+          </div>
         ) : (
           <p className="p-6 text-muted">Upload a file and click Preview to see it in the template.</p>
         )}
