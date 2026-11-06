@@ -1,15 +1,19 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { createClient } from "@/lib/supabase/server";
 import { getSop } from "@/lib/sops";
 
 // Serves the SOP document itself, only after the database confirms this
-// person may read it.
+// person may read it. Imported SOPs live in Supabase storage; the original
+// three ship with the site as a fallback.
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const sop = await getSop(id);
   if (!sop) return new Response("Not found", { status: 404 });
 
-  const html = await readFile(path.join(process.cwd(), "content/sops", `${sop.id}.html`), "utf8");
+  const html = await loadDoc(sop.id);
+  if (html === null) return new Response("Not found", { status: 404 });
+
   return new Response(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
@@ -19,4 +23,16 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         "default-src 'none'; img-src data: 'self'; style-src 'unsafe-inline'; font-src data:; frame-ancestors 'self'",
     },
   });
+}
+
+async function loadDoc(id: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.storage.from("sop-docs").download(`${id}.html`);
+  if (data) return data.text();
+
+  try {
+    return await readFile(path.join(process.cwd(), "content/sops", `${id}.html`), "utf8");
+  } catch {
+    return null;
+  }
 }

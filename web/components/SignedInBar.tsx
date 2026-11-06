@@ -16,9 +16,14 @@ export default function SignedInBar({ profile }: { profile: Profile | null }) {
           My SOPs
         </Link>
         {profile?.role?.is_admin && (
-          <Link href="/admin/people" className="text-[#d6d2ce] hover:text-white">
-            People
-          </Link>
+          <>
+            <Link href="/admin/import" className="text-[#d6d2ce] hover:text-white">
+              Import SOP
+            </Link>
+            <Link href="/admin/people" className="text-[#d6d2ce] hover:text-white">
+              People
+            </Link>
+          </>
         )}
         <form action="/auth/signout" method="post">
           <button type="submit" className="text-[#d6d2ce] underline hover:text-white">
