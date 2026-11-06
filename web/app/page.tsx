@@ -1,8 +1,10 @@
+import Link from "next/link";
 import SignedInBar from "@/components/SignedInBar";
 import { getMyProfile } from "@/lib/profile";
+import { listMySops } from "@/lib/sops";
 
 export default async function Home() {
-  const profile = await getMyProfile();
+  const [profile, sops] = await Promise.all([getMyProfile(), listMySops()]);
   const name = profile?.full_name || profile?.email;
 
   return (
@@ -22,10 +24,31 @@ export default async function Home() {
             before your SOPs show up.
           </p>
         )}
-        <p className="rounded-lg bg-surface p-4 text-sm text-muted ring-1 ring-line">
-          Your SOPs will show up here once they move into the site (Phase 4 of
-          the build plan).
-        </p>
+
+        <h2 className="mt-4 font-display text-xl font-bold">My SOPs</h2>
+        {sops.length === 0 ? (
+          <p className="rounded-lg bg-surface p-4 text-sm text-muted ring-1 ring-line">
+            No SOPs for your role yet.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {sops.map((sop) => (
+              <li key={sop.id}>
+                <Link
+                  href={`/sops/${sop.id}`}
+                  className="flex flex-col gap-0.5 rounded-xl bg-surface px-4 py-3.5 ring-1 ring-line hover:ring-accent"
+                >
+                  <span className="font-mono text-[11px] tracking-wide text-accent">{sop.id}</span>
+                  <span className="font-semibold">{sop.title}</span>
+                  <span className="text-sm text-muted">
+                    Rev {sop.revision}
+                    {sop.department && ` · ${sop.department.name}`}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </main>
     </div>
   );

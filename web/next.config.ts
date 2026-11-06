@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The SOP documents are read from disk by the /sops/[id]/doc route, so
+  // make sure Vercel ships them with it.
+  outputFileTracingIncludes: {
+    "/sops/[id]/doc": ["./content/sops/**"],
+  },
 };
 
 export default nextConfig;
