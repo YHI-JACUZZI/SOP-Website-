@@ -11,6 +11,15 @@
   --brand-rule: #f47c20;
   --accent: #c25508;
   --bar: #111111;
+  /* Flowchart lane colours, same as the test site. */
+  --lane-a: #fbfaf9;
+  --lane-b: #f3f1ee;
+  --warn: #9a5b00;
+  --warn-bg: #fff3d6;
+  --r-sales: #2f6fd6; --r-sm: #6a4fd1; --r-pm: #c47a0c; --r-admin: #198a4a; --r-prod: #c03a78;
+  --r-pc: #0f8a7a; --r-fm: #a326c9; --r-wh: #d9700f; --r-inst: #3c9a3c; --r-roof: #4a5f8f;
+  --r-sales-bg: #e6eefb; --r-sm-bg: #ece8fb; --r-pm-bg: #fbf0dc; --r-admin-bg: #e1f4e8; --r-prod-bg: #fae6ef;
+  --r-pc-bg: #daf3ef; --r-fm-bg: #f5e3fa; --r-wh-bg: #fdeedd; --r-inst-bg: #e3f4e1; --r-roof-bg: #e6eaf3;
 }
 
 @theme inline {
@@ -37,6 +46,14 @@
     --line: #34302c;
     --accent: #f68c3a;
     --bar: #000000;
+    --lane-a: #141414;
+    --lane-b: #1b1a19;
+    --warn: #f1c46b;
+    --warn-bg: #3a2f14;
+    --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2;
+    --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f; --r-roof: #a3b4dc;
+    --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c;
+    --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317; --r-roof-bg: #1f2638;
   }
 }
 
