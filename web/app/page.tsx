@@ -38,7 +38,12 @@ export default async function Home() {
                   href={`/sops/${sop.id}`}
                   className="flex flex-col gap-0.5 rounded-xl bg-surface px-4 py-3.5 ring-1 ring-line hover:ring-accent"
                 >
-                  <span className="font-mono text-[11px] tracking-wide text-accent">{sop.id}</span>
+                  <span className="flex items-center gap-2 font-mono text-[11px] tracking-wide text-accent">
+                    {sop.id}
+                    {sop.status === "draft" && (
+                      <span className="rounded bg-[#fff3d6] px-1.5 py-0.5 text-[#6b3f00]">DRAFT</span>
+                    )}
+                  </span>
                   <span className="font-semibold">{sop.title}</span>
                   <span className="text-sm text-muted">
                     Rev {sop.revision}
