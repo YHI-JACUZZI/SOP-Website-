@@ -18,6 +18,11 @@ export default function SignedInBar({ profile }: { profile: Profile | null }) {
         <Link href="/map" className="text-[#d6d2ce] hover:text-white">
           Company map
         </Link>
+        {(profile?.role?.is_admin || profile?.role?.is_manager) && (
+          <Link href="/team" className="text-[#d6d2ce] hover:text-white">
+            Team progress
+          </Link>
+        )}
         {profile?.role?.is_admin && (
           <>
             <Link href="/admin/import" className="text-[#d6d2ce] hover:text-white">
