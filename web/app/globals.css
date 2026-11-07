@@ -35,6 +35,7 @@
   --font-display: var(--font-archivo);
   --font-sans: var(--font-instrument-sans);
   --font-mono: var(--font-jetbrains-mono);
+  --font-signature: var(--font-allura);
 }
 
 @media (prefers-color-scheme: dark) {

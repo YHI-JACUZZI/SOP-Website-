@@ -3,26 +3,39 @@ import SignedInBar from "@/components/SignedInBar";
 import { getMyProfile } from "@/lib/profile";
 import { listMySops } from "@/lib/sops";
 import { createClient } from "@/lib/supabase/server";
-import { shortDate, statusFor, STATUS_STYLE, type Assignment, type Completion, type View } from "@/lib/tracking";
+import { certNumber } from "@/lib/signoff";
+import { shortDate, statusFor, STATUS_STYLE, type Assignment, type Completion, type Refresher, type View } from "@/lib/tracking";
 
-const ORDER = { overdue: 0, reread: 1, reading: 2, todo: 3, done: 4 } as const;
+type Cert = { sop_id: string; revision: string; completed_at: string; certificate_id: string; sop: { title: string } | null };
+
+const ORDER = { overdue: 0, refresh: 1, reread: 2, reading: 3, todo: 4, done: 5 } as const;
 
 export default async function Home() {
   const supabase = await createClient();
-  const [profile, sops, { data: completions }, { data: views }, { data: assignments }] = await Promise.all([
-    getMyProfile(),
+  const profile = await getMyProfile();
+  const me = profile?.id ?? "";
+  const [sops, { data: completions }, { data: views }, { data: assignments }, { data: refreshers }, { data: signed }, { data: passed }] = await Promise.all([
     listMySops(),
-    supabase.from("completions").select("sop_id, person_id, revision, completed_at").returns<Completion[]>(),
-    supabase.from("sop_views").select("sop_id, person_id, first_viewed_at, last_viewed_at").returns<View[]>(),
-    supabase.from("assignments").select("id, sop_id, person_id, role_id, due_date").returns<Assignment[]>(),
+    supabase.from("completions").select("sop_id, person_id, revision, completed_at").eq("person_id", me).returns<Completion[]>(),
+    supabase.from("sop_views").select("sop_id, person_id, first_viewed_at, last_viewed_at").eq("person_id", me).returns<View[]>(),
+    supabase.from("assignments").select("id, sop_id, person_id, role_id, due_date, refresh_months").returns<Assignment[]>(),
+    supabase.from("refreshers").select("sop_id, person_id, revision, score, passed, completed_at").eq("person_id", me).returns<Refresher[]>(),
+    supabase.from("completions").select("sop_id, revision, completed_at, certificate_id, sop:sops(title)")
+      .eq("person_id", me).not("signed_name", "is", null).returns<Cert[]>(),
+    supabase.from("refreshers").select("sop_id, revision, completed_at, certificate_id, sop:sops(title)")
+      .eq("person_id", me).eq("passed", true).returns<Cert[]>(),
   ]);
+  const certs = [
+    ...(signed ?? []).map((c) => ({ ...c, kind: "Sign-off" })),
+    ...(passed ?? []).map((c) => ({ ...c, kind: "Refresher" })),
+  ].sort((a, b) => b.completed_at.localeCompare(a.completed_at));
   const name = profile?.full_name || profile?.email;
   const rows = sops
     .map((sop) => ({
       sop,
       ...statusFor({
         sopId: sop.id, revision: sop.revision, personId: profile?.id ?? "", roleId: profile?.role?.id ?? null,
-        completions: completions ?? [], views: views ?? [], assignments: assignments ?? [],
+        completions: completions ?? [], views: views ?? [], assignments: assignments ?? [], refreshers: refreshers ?? [],
       }),
     }))
     .sort((a, b) => ORDER[a.status] - ORDER[b.status] || (a.due ?? "9").localeCompare(b.due ?? "9") || a.sop.id.localeCompare(b.sop.id));
@@ -58,7 +71,7 @@ export default async function Home() {
           </p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {rows.map(({ sop, status, date, due }) => (
+            {rows.map(({ sop, status, date, due, nextRefresh }) => (
               <li key={sop.id}>
                 <Link
                   href={`/sops/${sop.id}`}
@@ -80,6 +93,7 @@ export default async function Home() {
                       {date && ` ${shortDate(date)}`}
                     </span>
                     {due && status !== "done" && <span>Due {shortDate(due)}</span>}
+                    {status === "done" && nextRefresh && <span>Refresher {shortDate(nextRefresh)}</span>}
                     <span>
                       Rev {sop.revision}
                       {sop.department && ` · ${sop.department.name}`}
@@ -89,6 +103,25 @@ export default async function Home() {
               </li>
             ))}
           </ul>
+        )}
+
+        {certs.length > 0 && (
+          <>
+            <h2 className="mt-6 font-display text-xl font-bold">My certificates</h2>
+            <ul className="flex flex-col divide-y divide-line rounded-xl bg-surface ring-1 ring-line">
+              {certs.map((c) => (
+                <li key={c.certificate_id}>
+                  <Link href={`/certificates/${c.certificate_id}`} className="flex flex-wrap items-baseline gap-x-3 px-4 py-3 hover:bg-background">
+                    <span className="flex-1 font-semibold">{c.sop?.title ?? c.sop_id}</span>
+                    <span className="text-sm text-muted">
+                      {c.kind} · Rev {c.revision} · {shortDate(c.completed_at)}
+                    </span>
+                    <span className="sr-only">Certificate {certNumber(c.certificate_id)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </main>
     </div>

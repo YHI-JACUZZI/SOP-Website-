@@ -1,7 +1,5 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { createClient } from "@/lib/supabase/server";
 import { getSop } from "@/lib/sops";
+import { loadDoc } from "@/lib/sopDoc";
 
 // Serves the SOP document itself, only after the database confirms this
 // person may read it. Imported SOPs live in Supabase storage; the original
@@ -25,14 +23,3 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   });
 }
 
-async function loadDoc(id: string): Promise<string | null> {
-  const supabase = await createClient();
-  const { data } = await supabase.storage.from("sop-docs").download(`${id}.html`);
-  if (data) return data.text();
-
-  try {
-    return await readFile(path.join(process.cwd(), "content/sops", `${id}.html`), "utf8");
-  } catch {
-    return null;
-  }
-}
