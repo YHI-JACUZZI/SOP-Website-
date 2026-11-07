@@ -35,8 +35,6 @@ border-bottom: 2px solid var(--orange-2); padding: 22px 0 6px; margin-bottom: 28
 body > p:first-of-type { margin: 0; font-weight: 700; letter-spacing: .02em; }
 div[data-custom-style="Title"] p { font-size: 2rem; line-height: 1.2; font-weight: 700; color: var(--orange); margin: .3em 0 .2em;
 padding-bottom: 8px; border-bottom: 1.5px solid #4F81BD; }
-div[data-custom-style="Title"] + p { font-size: .85rem; margin: .6em 0 .2em; }
-div[data-custom-style="Title"] + p + p { color: var(--muted); font-size: .85rem; margin: 0 0 18px; padding-bottom: 18px; border-bottom: 2px solid var(--orange-2); }
 h1 { color: var(--orange); font-size: 1.3rem; font-weight: 700; margin: 1.6em 0 .5em; }
 h2, h3 { color: var(--orange); font-size: 1.05rem; }
 table { border-collapse: collapse; width: 100%; font-size: .85rem; margin: 10px 0 18px; }
@@ -49,10 +47,16 @@ img { max-width: 100%; height: auto; display: block; margin: 12px auto; backgrou
 ol { padding-left: 1.6em; } li { margin: .5em 0; }
 blockquote { margin: 0 0 0 1.6em; padding: 0; border: 0; }
 a { color: var(--orange); }
+body { padding-top: 28px; }
+.sopmeta { color: #666666; font-size: .85rem; margin: .6em 0 18px; padding-bottom: 18px; border-bottom: 2px solid #F47C20; }
+.sopmeta p { margin: 0; }
+.toc { margin: 0 0 8px; }
+.toc a { display: block; color: #1F1F1F; text-decoration: none; padding: 3px 0; border-bottom: 1px dotted #D9D9D9; }
+.toc a:hover { color: #E36C0A; }
+h1[id] { scroll-margin-top: 12px; }
 </style>
 </head>
 <body>
-<div class="runhead">YANCEY HOME IMPROVEMENTS  |  STANDARD OPERATING PROCEDURE</div>
 <header id="title-block-header">
 <h1 class="title">[SOP Title]</h1>
 </header>
@@ -60,87 +64,22 @@ a { color: var(--orange); }
 <div data-custom-style="Title">
 <p>[SOP Title]</p>
 </div>
-<p><strong>STANDARD OPERATING PROCEDURE</strong></p>
-<p>Department: [Department] • SOP ID: [SOP-XXX] • Revision: [00]</p>
-<table>
-<colgroup>
-<col style="width: 50%"/>
-<col style="width: 49%"/>
-</colgroup>
-<thead>
-<tr class="header">
-<th><strong>DOCUMENT CONTROL</strong></th>
-<th><strong>DETAILS</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Document owner</td>
-<td>[Name / Role]</td>
-</tr>
-<tr class="even">
-<td>Process owner / department</td>
-<td>[Team or department]</td>
-</tr>
-<tr class="odd">
-<td>Effective date</td>
-<td>[YYYY-MM-DD]</td>
-</tr>
-<tr class="even">
-<td>Next review date</td>
-<td>[YYYY-MM-DD]</td>
-</tr>
-<tr class="odd">
-<td>Document status</td>
-<td>[Draft / In Review / Approved / Retired]</td>
-</tr>
-<tr class="even">
-<td>Supersedes</td>
-<td>[Prior SOP ID / revision, or N/A]</td>
-</tr>
-</tbody>
-</table>
-<h1 id="approval-sign-off">Approval &amp; Sign-off</h1>
-<table>
-<colgroup>
-<col style="width: 25%"/>
-<col style="width: 25%"/>
-<col style="width: 25%"/>
-<col style="width: 24%"/>
-</colgroup>
-<thead>
-<tr class="header">
-<th><strong>Role</strong></th>
-<th><strong>Name</strong></th>
-<th><strong>Approval / Signature</strong></th>
-<th><strong>Date</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Prepared by</td>
-<td>[Name]</td>
-<td>[Signature or approval record]</td>
-<td>[Date]</td>
-</tr>
-<tr class="even">
-<td>Reviewed by</td>
-<td>[Name]</td>
-<td>[Signature or approval record]</td>
-<td>[Date]</td>
-</tr>
-<tr class="odd">
-<td>Approved by</td>
-<td>[Name]</td>
-<td>[Signature or approval record]</td>
-<td>[Date]</td>
-</tr>
-</tbody>
-</table>
+<div class="sopmeta"><p>Department: [Department]</p><p>SOP ID: [SOP-XXX]</p><p>Revision: [00]</p></div>
 <h1 id="table-of-contents">Table of Contents</h1>
-<p><em>Before publishing, update this table in Microsoft Word:
-right-click the table and choose “Update Field” → “Update entire
-table.”</em></p>
+<nav class="toc">
+<a href="#purpose" target="_self">1. Purpose</a>
+<a href="#scope" target="_self">2. Scope</a>
+<a href="#definitions-acronyms" target="_self">3. Definitions &amp; Acronyms</a>
+<a href="#roles-responsibilities" target="_self">4. Roles &amp; Responsibilities</a>
+<a href="#required-tools-systems-materials" target="_self">5. Required Tools, Systems &amp; Materials</a>
+<a href="#safety-quality-compliance" target="_self">6. Safety, Quality &amp; Compliance</a>
+<a href="#procedure" target="_self">7. Procedure</a>
+<a href="#exceptions-troubleshooting" target="_self">8. Exceptions &amp; Troubleshooting</a>
+<a href="#records-documentation" target="_self">9. Records &amp; Documentation</a>
+<a href="#related-documents-references" target="_self">10. Related Documents &amp; References</a>
+<a href="#revision-history" target="_self">11. Revision History</a>
+<a href="#approval-sign-off" target="_self">Approval &amp; Sign-off</a>
+</nav>
 <h1 id="purpose">1. Purpose</h1>
 <p>State why this SOP exists and the intended outcome.</p>
 <h1 id="scope">2. Scope</h1>
@@ -261,17 +200,81 @@ when.</p>
 
 </tbody>
 </table>
-<h1 id="publishing-use-checklist">12. Publishing &amp; Use
-Checklist</h1>
-<p>☐ Title, SOP ID, owner, revision, and effective date are
-complete.</p>
-<p>☐ Approvals are recorded before release.</p>
-<p>☐ Table of contents is updated and page numbers are correct.</p>
-<p>☐ Steps have been validated by a qualified process owner or
-subject-matter expert.</p>
-<p>☐ Required training and related forms are identified.</p>
-<p>☐ Superseded copies are removed from points of use or clearly marked
-obsolete.</p>
+<h1 id="approval-sign-off">Approval &amp; Sign-off</h1>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 24%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Role</strong></th>
+<th><strong>Name</strong></th>
+<th><strong>Approval / Signature</strong></th>
+<th><strong>Date</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Prepared by</td>
+<td>[Name]</td>
+<td>[Signature or approval record]</td>
+<td>[Date]</td>
+</tr>
+<tr class="even">
+<td>Reviewed by</td>
+<td>[Name]</td>
+<td>[Signature or approval record]</td>
+<td>[Date]</td>
+</tr>
+<tr class="odd">
+<td>Approved by</td>
+<td>[Name]</td>
+<td>[Signature or approval record]</td>
+<td>[Date]</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 49%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>DOCUMENT CONTROL</strong></th>
+<th><strong>DETAILS</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Document owner</td>
+<td>[Name / Role]</td>
+</tr>
+<tr class="even">
+<td>Process owner / department</td>
+<td>[Team or department]</td>
+</tr>
+<tr class="odd">
+<td>Effective date</td>
+<td>[YYYY-MM-DD]</td>
+</tr>
+<tr class="even">
+<td>Next review date</td>
+<td>[YYYY-MM-DD]</td>
+</tr>
+<tr class="odd">
+<td>Document status</td>
+<td>[Draft / In Review / Approved / Retired]</td>
+</tr>
+<tr class="even">
+<td>Supersedes</td>
+<td>[Prior SOP ID / revision, or N/A]</td>
+</tr>
+</tbody>
+</table>
 <div class="runfoot">YANCEY HOME IMPROVEMENTS  •  INTERNAL DOCUMENT  •  Verify current revision before use</div>
 </body>
 </html>
