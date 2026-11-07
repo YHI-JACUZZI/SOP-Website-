@@ -314,6 +314,7 @@ svg#map { display: block; height: auto; margin: 0 auto; }
   <iframe id="docframe" title="SOP document"></iframe>
 </div>
 
+<script src="lib/sop-layout.js"></script>
 <script>
 // ---- Data: add new processes to PROCESSES; the page draws them automatically ----
 const ROLES = {
@@ -436,6 +437,15 @@ const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).
 const NS = "http://www.w3.org/2000/svg";
 const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
 const $ = id => document.getElementById(id);
+// Table-of-contents links jump within the SOP (srcdoc frames resolve "#x" against this page otherwise)
+$("docframe").addEventListener("load", () => {
+  const doc = $("docframe").contentDocument; if (!doc) return;
+  doc.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a) return;
+    const t = doc.getElementById(decodeURIComponent(a.getAttribute("href").slice(1))); if (!t) return;
+    e.preventDefault(); t.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
 
 let state = { proc: "jacuzzi-general", role: "all", sel: null, edit: false, zoom: null, zoomFor: null };
 try { const r = localStorage.getItem("sop-role"); if (r) state.role = r; } catch (e) {}
@@ -453,7 +463,7 @@ function sopOf(s, p = cur()) {
   return im ? { doc: "local:" + impKey(p, s), docTitle: im.title, docStatus: im.status, local: true } : { doc: s.doc, docTitle: s.docTitle, docStatus: s.docStatus };
 }
 async function getDocHtml(url) {
-  if (url.startsWith("local:")) { const im = IMPORTS[url.slice(6)]; if (!im) throw new Error("missing"); return im.html; }
+  if (url.startsWith("local:")) { const im = IMPORTS[url.slice(6)]; if (!im) throw new Error("missing"); return modernizeSop(im.html); }
   const res = await fetch(url); if (!res.ok) throw new Error(res.status); return res.text();
 }
 const visible = p => state.role === "all" || p.steps.some(s => s.role === state.role);
@@ -950,7 +960,7 @@ async function parseScribe(buf) {
 // Put the Scribe content into the Yancey SOP layout: the step's current SOP if it has one, otherwise the blank template
 async function buildSop(target, f) {
   const base = target.doc ? await getDocHtml(target.doc) : await getDocHtml("sops/_template.html");
-  const d = new DOMParser().parseFromString(base, "text/html");
+  const d = new DOMParser().parseFromString(modernizeSop(base), "text/html");
   const H = re => [...d.querySelectorAll("h1")].find(h => re.test(h.textContent));
   const setBody = (h, nodes, keepFirst) => {
     let n = h.nextElementSibling; if (keepFirst && n && n.tagName === "P") n = n.nextElementSibling;
@@ -961,8 +971,8 @@ async function buildSop(target, f) {
   d.title = f.title;
   const ht = d.querySelector("h1.title"); if (ht) ht.textContent = f.title;
   const tt = d.querySelector('[data-custom-style="Title"]'); if (tt) tt.innerHTML = `<p>${esc(f.title)}</p>`;
-  const meta = [...d.querySelectorAll("p")].find(p => /SOP ID:/.test(p.textContent));
-  if (meta) meta.textContent = `Department: ${f.dept} • SOP ID: ${f.sop} • Revision: ${f.rev}`;
+  const meta = d.querySelector(".sopmeta");
+  if (meta) meta.outerHTML = sopMetaHtml(f.dept, f.sop, f.rev);
   const row = (re, v) => { const tr = [...d.querySelectorAll("tr")].find(r => r.cells.length > 1 && re.test(r.cells[0].textContent)); if (tr && v) tr.cells[1].textContent = v; return tr; };
   const owner = row(/Document owner/i); if (owner && /^\[/.test(owner.cells[1].textContent.trim()) && f.by) owner.cells[1].textContent = f.by;
   const po = row(/Process owner/i); if (po && /^\[/.test(po.cells[1].textContent.trim())) po.cells[1].textContent = f.dept;

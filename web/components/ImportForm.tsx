@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { modernizeSop, sopMetaHtml } from "@/lib/sop-layout";
 
 type SopRow = { id: string; title: string; revision: string; department_id: number | null; status: string };
 type Role = { id: number; name: string; department_id: number | null };
@@ -90,7 +91,7 @@ type Fields = {
 // only the header, details table and revision history are refreshed, so
 // edits typed into the preview are kept.
 function buildSop(base: string, f: Fields, content = true): string {
-  const d = new DOMParser().parseFromString(base, "text/html");
+  const d = new DOMParser().parseFromString(modernizeSop(base), "text/html");
   const H = (re: RegExp) => Array.from(d.querySelectorAll("h1")).find((h) => re.test(h.textContent ?? ""));
   const mk = (html: string) => {
     const t = d.createElement("template");
@@ -118,8 +119,8 @@ function buildSop(base: string, f: Fields, content = true): string {
   if (ht) ht.textContent = f.title;
   const tt = d.querySelector('[data-custom-style="Title"]');
   if (tt) tt.innerHTML = `<p>${esc(f.title)}</p>`;
-  const meta = Array.from(d.querySelectorAll("p")).find((p) => /SOP ID:/.test(p.textContent ?? ""));
-  if (meta) meta.textContent = `Department: ${f.dept} • SOP ID: ${f.id} • Revision: ${f.rev}`;
+  const meta = d.querySelector(".sopmeta");
+  if (meta) meta.outerHTML = sopMetaHtml(f.dept, f.id, f.rev);
   const owner = row(/Document owner/i);
   if (owner && /^\[/.test(owner.cells[1].textContent!.trim()) && f.by) owner.cells[1].textContent = f.by;
   const po = row(/Process owner/i);
