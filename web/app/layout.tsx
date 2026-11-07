@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Allura, Archivo, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -18,6 +18,13 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+// Typed signatures on sign-offs and certificates.
+const allura = Allura({
+  variable: "--font-allura",
+  subsets: ["latin"],
+  weight: "400",
+});
+
 export const metadata: Metadata = {
   title: "SOP Hub",
   description: "Company SOPs and workflows, by role.",
@@ -31,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${archivo.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${archivo.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} ${allura.variable} antialiased`}
       >
         {children}
       </body>
