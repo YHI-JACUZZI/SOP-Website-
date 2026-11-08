@@ -1,4 +1,4 @@
-// Status of one person's progress on one SOP, shared by My SOPs and the team dashboard.
+// Status of one person's progress on one SOP, shared by My dashboard and Team progress.
 
 export type Status = "done" | "refresh" | "reread" | "overdue" | "reading" | "todo";
 

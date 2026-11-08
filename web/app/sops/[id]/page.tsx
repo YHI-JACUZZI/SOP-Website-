@@ -62,7 +62,7 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
       <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-6 py-4">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-baseline gap-x-4">
-            <Link href="/" className="text-sm font-medium text-accent">← My SOPs</Link>
+            <Link href="/" className="text-sm font-medium text-accent">← My dashboard</Link>
             <span className="font-mono text-xs tracking-wide text-accent">{sop.id} · Rev {sop.revision}</span>
           </div>
           <h1 className="font-display text-2xl font-bold">{sop.title}</h1>

@@ -49,12 +49,12 @@ export default async function CertificatePage({
       <div className="print:hidden"><SignedInBar profile={profile} /></div>
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5 px-4 py-8 sm:px-6 print:p-0">
         <div className="flex flex-wrap items-center gap-3 print:hidden">
-          <Link href="/" className="flex-1 text-sm font-medium text-accent">← My SOPs</Link>
+          <Link href="/" className="flex-1 text-sm font-medium text-accent">← My dashboard</Link>
           <PrintButton />
         </div>
         {fresh && (
           <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm font-semibold text-[#12663a] print:hidden">
-            Signed and saved. This certificate is kept under My certificates on your home page, and your manager can see it too.
+            Signed and saved. This certificate is kept under My certificates on your dashboard, and your manager can see it too.
           </p>
         )}
 
