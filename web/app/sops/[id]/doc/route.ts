@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@/lib/supabase/server";
 import { getSop } from "@/lib/sops";
+import { modernizeSop } from "@/lib/sop-layout";
 
 // Serves the SOP document itself, only after the database confirms this
 // person may read it. Imported SOPs live in Supabase storage; the original
@@ -28,7 +29,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 async function loadDoc(id: string): Promise<string | null> {
   const supabase = await createClient();
   const { data } = await supabase.storage.from("sop-docs").download(`${id}.html`);
-  if (data) return data.text();
+  // Copies imported before the 2026-11-07 template change get the new layout on the way out.
+  if (data) return modernizeSop(await data.text());
 
   try {
     return await readFile(path.join(process.cwd(), "content/sops", `${id}.html`), "utf8");
