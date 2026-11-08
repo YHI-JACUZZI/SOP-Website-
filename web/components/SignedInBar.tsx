@@ -13,7 +13,7 @@ export default function SignedInBar({ profile }: { profile: Profile | null }) {
           </span>
         )}
         <Link href="/" className="text-[#d6d2ce] hover:text-white">
-          My SOPs
+          My dashboard
         </Link>
         <Link href="/map" className="text-[#d6d2ce] hover:text-white">
           Company map

@@ -11,7 +11,7 @@ export default function NotFound() {
           It may not exist, or it isn&apos;t part of your role.
         </p>
         <Link href="/" className="font-medium text-accent">
-          Back to My SOPs
+          Back to My dashboard
         </Link>
       </main>
     </div>

@@ -5,8 +5,9 @@ import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import {
   isAssigned, shortDate, statusFor, STATUS_STYLE,
-  type Assignment, type Completion, type View,
+  type Assignment, type Completion, type Refresher, type View,
 } from "@/lib/tracking";
+import { DEFAULT_REFRESH_MONTHS, REFRESH_CHOICES } from "@/lib/signoff";
 import { assignSop, removeAssignment } from "./actions";
 
 type Dept = { id: number; name: string };
@@ -34,7 +35,7 @@ export default async function TeamPage({
     : depts.find((d) => d.id === me.role!.department?.id);
   if (!dept) redirect("/");
 
-  const [{ data: roles }, { data: people }, { data: sops }, { data: sopRoles }, { data: completions }, { data: views }, { data: assignments }] =
+  const [{ data: roles }, { data: people }, { data: sops }, { data: sopRoles }, { data: completions }, { data: views }, { data: assignments }, { data: refreshers }] =
     await Promise.all([
       supabase.from("roles").select("id, name, department_id").eq("department_id", dept.id).order("name").returns<Role[]>(),
       supabase.from("profiles").select(PROFILE_FIELDS).eq("active", true).returns<Profile[]>(),
@@ -42,7 +43,8 @@ export default async function TeamPage({
       supabase.from("sop_roles").select("sop_id, role_id").returns<{ sop_id: string; role_id: number }[]>(),
       supabase.from("completions").select("sop_id, person_id, revision, completed_at").returns<Completion[]>(),
       supabase.from("sop_views").select("sop_id, person_id, first_viewed_at, last_viewed_at").returns<View[]>(),
-      supabase.from("assignments").select("id, sop_id, person_id, role_id, due_date").order("due_date").returns<Assignment[]>(),
+      supabase.from("assignments").select("id, sop_id, person_id, role_id, due_date, refresh_months").order("due_date").returns<Assignment[]>(),
+      supabase.from("refreshers").select("sop_id, person_id, revision, score, passed, completed_at").returns<Refresher[]>(),
     ]);
 
   const deptRoles = roles ?? [];
@@ -51,27 +53,33 @@ export default async function TeamPage({
     .filter((p) => p.role && roleIds.has(p.role.id))
     .sort((a, b) => (a.role!.name + (a.full_name || a.email)).localeCompare(b.role!.name + (b.full_name || b.email)));
   const columns = sops ?? [];
-  const C = completions ?? [], V = views ?? [], A = assignments ?? [];
+  const C = completions ?? [], V = views ?? [], A = assignments ?? [], R = refreshers ?? [];
 
   const rows = team.map((p) => {
     const roleId = p.role!.id;
     const cells = columns.map((sop) => {
       const relevant = (sopRoles ?? []).some((r) => r.sop_id === sop.id && r.role_id === roleId) || isAssigned(sop.id, p.id, roleId, A);
       if (!relevant) return null;
-      return statusFor({ sopId: sop.id, revision: sop.revision, personId: p.id, roleId, completions: C, views: V, assignments: A });
+      return statusFor({ sopId: sop.id, revision: sop.revision, personId: p.id, roleId, completions: C, views: V, assignments: A, refreshers: R });
     });
     const times = [
       ...V.filter((v) => v.person_id === p.id).map((v) => v.last_viewed_at),
       ...C.filter((c) => c.person_id === p.id).map((c) => c.completed_at),
+      ...R.filter((x) => x.person_id === p.id).map((x) => x.completed_at),
     ].sort();
     return { p, cells, last: times.at(-1) ?? null };
   });
   const all = rows.flatMap((r) => r.cells).filter((c) => c !== null);
+  // Latest refresher score per person and SOP, averaged: how well people are retaining.
+  const scores = all.map((c) => c.score).filter((x): x is number => x !== null);
+  const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   const stats = [
     { label: "People", value: team.length, color: undefined },
     { label: "SOPs assigned", value: all.length, color: undefined },
     { label: "Completed", value: all.filter((c) => c.status === "done").length, color: "#12663A" },
     { label: "Overdue", value: all.filter((c) => c.status === "overdue").length, color: "#A3290F" },
+    { label: "Refreshers due", value: all.filter((c) => c.status === "refresh").length, color: "#1D4E9E" },
+    { label: "Avg quiz score", value: avg === null ? "—" : `${avg}%`, color: undefined },
   ];
   const overdueOnly = show === "overdue";
   const shown = overdueOnly ? rows.filter((r) => r.cells.some((c) => c?.status === "overdue")) : rows;
@@ -112,7 +120,7 @@ export default async function TeamPage({
         {error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{error}</p>}
         {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           {stats.map((s) => (
             <div key={s.label} className="flex flex-col gap-1 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted">{s.label}</span>
@@ -157,9 +165,11 @@ export default async function TeamPage({
                             title={c.due ? `Due ${shortDate(c.due)}` : undefined}>
                             {STATUS_STYLE[c.status].text}{c.date && ` ${shortDate(c.date)}`}
                           </span>
-                        ) : (
-                          <span className="text-muted">—</span>
+                        ) : null}
+                        {c?.score != null && (
+                          <span className="mt-1 block text-xs text-muted" title="Latest refresher quiz score">Quiz {c.score}%</span>
                         )}
+                        {!c && <span className="text-muted">—</span>}
                       </td>
                     ))}
                     <td className="whitespace-nowrap px-4 py-3 text-muted">{last ? shortDate(last) : "Never"}</td>
@@ -203,6 +213,14 @@ export default async function TeamPage({
               <span className="font-semibold">Due date (optional)</span>
               <input type="date" name="due_date" className={input} />
             </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-semibold">Refresher</span>
+              <select name="refresh_months" className={input} defaultValue={String(DEFAULT_REFRESH_MONTHS)}>
+                <option value="">No refresher</option>
+                {REFRESH_CHOICES.map((m) => <option key={m} value={m}>Every {m === 1 ? "month" : `${m} months`}</option>)}
+              </select>
+              <span className="text-xs text-muted">After signing, they review the SOP, take its quiz and sign again this often.</span>
+            </label>
             <button type="submit" className="h-11 rounded-lg bg-[#c25508] font-semibold text-white">Assign</button>
           </form>
 
@@ -216,7 +234,7 @@ export default async function TeamPage({
                   <li key={a.id} className="flex items-center gap-3 py-2">
                     <span className="flex-1">
                       <span className="font-semibold">{columns.find((s) => s.id === a.sop_id)?.title ?? a.sop_id}</span>
-                      <span className="text-muted"> · {who(a)}{a.due_date ? ` · due ${shortDate(a.due_date)}` : ""}</span>
+                      <span className="text-muted"> · {who(a)}{a.due_date ? ` · due ${shortDate(a.due_date)}` : ""}{a.refresh_months ? ` · refresher every ${a.refresh_months === 1 ? "month" : `${a.refresh_months} months`}` : ""}</span>
                     </span>
                     <form action={removeAssignment}>
                       <input type="hidden" name="id" value={a.id} />

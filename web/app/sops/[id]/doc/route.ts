@@ -1,12 +1,8 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { createClient } from "@/lib/supabase/server";
 import { getSop } from "@/lib/sops";
-import { modernizeSop } from "@/lib/sop-layout";
+import { loadDoc } from "@/lib/sopDoc";
 
 // Serves the SOP document itself, only after the database confirms this
-// person may read it. Imported SOPs live in Supabase storage; the original
-// three ship with the site as a fallback.
+// person may read it.
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const sop = await getSop(id);
@@ -24,17 +20,4 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         "default-src 'none'; img-src data: 'self'; style-src 'unsafe-inline'; font-src data:; frame-ancestors 'self'",
     },
   });
-}
-
-async function loadDoc(id: string): Promise<string | null> {
-  const supabase = await createClient();
-  const { data } = await supabase.storage.from("sop-docs").download(`${id}.html`);
-  // Copies imported before the 2026-11-07 template change get the new layout on the way out.
-  if (data) return modernizeSop(await data.text());
-
-  try {
-    return await readFile(path.join(process.cwd(), "content/sops", `${id}.html`), "utf8");
-  } catch {
-    return null;
-  }
 }

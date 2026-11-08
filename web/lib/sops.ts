@@ -5,10 +5,12 @@ export type Sop = {
   title: string;
   revision: string;
   status: string;
+  kind: "sop" | "handbook" | "policy";
+  for_everyone: boolean;
   department: { name: string } | null;
 };
 
-const SOP_FIELDS = "id, title, revision, status, department:departments(name)";
+const SOP_FIELDS = "id, title, revision, status, kind, for_everyone, department:departments(name)";
 
 // SOP IDs look like SOP-PRD-001. Anything else is never a file we serve.
 export const SOP_ID_PATTERN = /^SOP-[A-Z]{3}-\d{3}$/;

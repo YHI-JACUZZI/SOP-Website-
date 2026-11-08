@@ -12,12 +12,14 @@ export async function assignSop(formData: FormData) {
   const sopId = String(formData.get("sop_id") ?? "");
   const [kind, target] = String(formData.get("target") ?? "").split(":");
   const due = String(formData.get("due_date") ?? "") || null;
+  const months = Number(formData.get("refresh_months")) || null;
   if (!sopId || !target || (kind !== "role" && kind !== "person")) redirect(back("error=Pick+an+SOP+and+who+it%27s+for."));
 
   const supabase = await createClient();
   const { error } = await supabase.from("assignments").insert({
     sop_id: sopId,
     due_date: due,
+    refresh_months: months,
     ...(kind === "role" ? { role_id: Number(target) } : { person_id: target }),
   });
   if (error) redirect(back(`error=${encodeURIComponent("Couldn't assign it: " + error.message)}`));
