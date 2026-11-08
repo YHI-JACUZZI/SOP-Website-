@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DashboardHeader from "@/components/DashboardHeader";
 import SignedInBar from "@/components/SignedInBar";
 import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
 import { listMySops } from "@/lib/sops";
@@ -53,8 +54,9 @@ export default async function Home() {
     ...(passed ?? []).map((c) => ({ ...c, kind: "Refresher" })),
   ].sort((a, b) => b.completed_at.localeCompare(a.completed_at));
 
-  const name = profile?.full_name?.split(" ")[0] || profile?.email;
+  // Your work: SOPs for your role, plus any handbook section or policy assigned to you.
   const rows = sops
+    .filter((sop) => sop.kind === "sop" || isAssigned(sop.id, me, profile?.role?.id ?? null, A))
     .map((sop) => ({
       sop,
       ...statusFor({
@@ -64,6 +66,7 @@ export default async function Home() {
     }))
     .sort((a, b) => ORDER[a.status] - ORDER[b.status] || (a.due ?? "9").localeCompare(b.due ?? "9") || a.sop.id.localeCompare(b.sop.id));
   const open = rows.filter((r) => r.status !== "done");
+  const sopRows = rows.filter((r) => r.sop.kind === "sop");
   const count = (s: Status) => rows.filter((r) => r.status === s).length;
   const tiles = [
     { label: "To finish", value: open.length, color: undefined },
@@ -93,20 +96,7 @@ export default async function Home() {
       <SignedInBar profile={profile} />
 
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">My dashboard</p>
-          <h1 className="font-display text-3xl font-bold">Hi, {name}</h1>
-          {profile?.role ? (
-            <p className="text-muted">
-              {profile.role.name}
-              {profile.role.department && ` · ${profile.role.department.name}`}
-            </p>
-          ) : (
-            <p className="mt-2 rounded-lg bg-[#fff3d6] p-4 text-sm text-[#6b3f00]">
-              You don&apos;t have a role yet. An admin needs to pick one for you before your SOPs show up.
-            </p>
-          )}
-        </div>
+        <DashboardHeader profile={profile} active="sops" />
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {tiles.map((t) => (
@@ -123,7 +113,7 @@ export default async function Home() {
               <h2 className="font-display text-xl font-bold">Up next</h2>
               {open.length === 0 ? (
                 <p className="rounded-xl bg-[#e1f4e8] p-4 font-semibold text-[#12663a]">
-                  {sops.length ? "You're all caught up. Nice work." : "Nothing to do yet."}
+                  {rows.length ? "You're all caught up. Nice work." : "Nothing to do yet."}
                 </p>
               ) : (
                 <ul className="flex flex-col gap-3">
@@ -150,11 +140,11 @@ export default async function Home() {
 
             <section className="flex flex-col gap-3">
               <h2 className="font-display text-xl font-bold">My SOPs</h2>
-              {sops.length === 0 ? (
+              {sopRows.length === 0 ? (
                 <p className="rounded-lg bg-surface p-4 text-sm text-muted ring-1 ring-line">No SOPs for your role yet.</p>
               ) : (
                 <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-xl bg-surface ring-1 ring-line">
-                  {rows.map(({ sop, status, date, due, nextRefresh }) => (
+                  {sopRows.map(({ sop, status, date, due, nextRefresh }) => (
                     <li key={sop.id}>
                       <Link href={`/sops/${sop.id}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 hover:bg-background">
                         <span className="flex min-w-0 flex-1 flex-col">
