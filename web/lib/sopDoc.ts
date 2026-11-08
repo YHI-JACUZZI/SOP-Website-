@@ -1,6 +1,7 @@
 import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { modernizeSop } from "@/lib/sop-layout";
 import { createClient } from "@/lib/supabase/server";
 
 // The SOP document's HTML. Imported SOPs live in Supabase storage; the
@@ -9,7 +10,8 @@ import { createClient } from "@/lib/supabase/server";
 export async function loadDoc(id: string): Promise<string | null> {
   const supabase = await createClient();
   const { data } = await supabase.storage.from("sop-docs").download(`${id}.html`);
-  if (data) return data.text();
+  // Copies imported before the 2026-11-07 template change get the new layout on the way out.
+  if (data) return modernizeSop(await data.text());
 
   try {
     return await readFile(path.join(process.cwd(), "content/sops", `${id}.html`), "utf8");
@@ -34,7 +36,8 @@ const text = (html: string) =>
 
 // Rows of the "Revision History" table in the SOP template, oldest first.
 export function revisionHistory(html: string): RevisionRow[] {
-  const at = html.search(/Revision History/i);
+  // The heading, not the table-of-contents link to it.
+  const at = html.search(/<h[1-6][^>]*>(?:(?!<\/h[1-6]>)[\s\S])*Revision History/i);
   if (at < 0) return [];
   const table = html.slice(at).match(/<table[\s\S]*?<\/table>/i)?.[0];
   if (!table) return [];

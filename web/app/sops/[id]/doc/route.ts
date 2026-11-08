@@ -2,8 +2,7 @@ import { getSop } from "@/lib/sops";
 import { loadDoc } from "@/lib/sopDoc";
 
 // Serves the SOP document itself, only after the database confirms this
-// person may read it. Imported SOPs live in Supabase storage; the original
-// three ship with the site as a fallback.
+// person may read it.
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const sop = await getSop(id);
@@ -22,4 +21,3 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     },
   });
 }
-
