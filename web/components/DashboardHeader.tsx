@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/profile";
 
-export type DashTab = "sops" | "dept" | "handbook" | "people" | "policies" | "search";
+export type DashTab = "sops" | "onboarding" | "dept" | "handbook" | "people" | "policies" | "search";
 
 const TABS: { id: DashTab; label: string; href: string }[] = [
   { id: "sops", label: "My SOPs", href: "/" },
+  { id: "onboarding", label: "Onboarding", href: "/onboarding" },
   { id: "dept", label: "My Dept", href: "/dept" },
   { id: "handbook", label: "Employee handbook", href: "/handbook" },
   { id: "people", label: "People", href: "/people" },
