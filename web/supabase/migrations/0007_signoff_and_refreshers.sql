@@ -17,7 +17,7 @@ alter table public.completions drop constraint if exists signed_name_length;
 alter table public.completions add constraint signed_name_length
   check (signed_name is null or length(trim(signed_name)) between 2 and 120);
 
--- The signing time and signer always come from the database, never the browser.
+-- The database stamps who signed and when; the browser cannot change them.
 create or replace function public.stamp_signoff()
 returns trigger
 language plpgsql security definer set search_path = public
@@ -95,10 +95,10 @@ from (values
   ('SOP-PRD-000', 'When do you change the payment schedule?', '["When the down payment is anything other than 1000 dollars", "On every job", "Never"]', 0, 2),
   ('SOP-PRD-000', 'What must you uncheck before approving the customer order?', '["Save", "Internal", "Notify, so the customer does not see it"]', 2, 3),
   ('SOP-PRD-001', 'Where is the costing file for a job?', '["On the JobTread message board", "In Dropbox: Jacuzzi Open > Job Name > FINAL COSTING CONTRACTS SPECIAL QUOTES", "With the warehouse"]', 1, 1),
-  ('SOP-PRD-001', 'Something is sold on the contract but missing from the pricing. What do you do?', '["Add it in the After Presite column", "Leave it out", "Ask the customer to pay separately"]', 0, 2),
+  ('SOP-PRD-001', 'Something is sold on the contract but missing in pricing. What do you do?', '["Add it in the After Presite column", "Leave it out", "Ask the customer to pay separately"]', 0, 2),
   ('SOP-PRD-001', 'On the survey call the customer wants to add something. What next?', '["Add it at no charge", "Tell them it cannot be changed", "Generate a Change Order for them to sign"]', 2, 3),
   ('SOP-PRD-002', 'What do you check before ordering materials?', '["That all earlier tasks in the job schedule are complete", "Installer availability", "Nothing, just order"]', 0, 1),
-  ('SOP-PRD-002', 'What goes into the JobTread files as proof of what was ordered?', '["A photo of the contract", "The exported cut sheet", "The installer PO"]', 1, 2),
+  ('SOP-PRD-002', 'What is saved in JobTread files as proof of what was ordered?', '["A photo of the contract", "The exported cut sheet", "The installer PO"]', 1, 2),
   ('SOP-PRD-002', 'Where do you upload the .CSV order file?', '["The JobTread budget tab", "Dropbox", "The Jacuzzi ordering site: Quick Order > File Upload"]', 2, 3)
 ) as v (sop_id, question, choices, answer, sort)
 where exists (select 1 from public.sops s where s.id = v.sop_id)
