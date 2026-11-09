@@ -1,39 +1,32 @@
-import Link from "next/link";
+import NavLink from "@/components/NavLink";
 import TopBar from "@/components/TopBar";
 import type { Profile } from "@/lib/profile";
+
+// Every dashboard section (and the documents opened from it) keeps "My dashboard" lit.
+const DASHBOARD = ["/", "/dept", "/handbook", "/people", "/policies", "/search", "/onboarding", "/sops", "/certificates"];
 
 // Top bar for signed-in pages: role tag, admin links and sign out.
 export default function SignedInBar({ profile }: { profile: Profile | null }) {
   return (
     <TopBar>
-      <nav className="flex flex-wrap items-center gap-4 text-sm">
+      <nav className="flex flex-wrap items-center gap-x-1.5 gap-y-2 text-sm">
         {profile?.role && (
-          <span className="rounded bg-brand-rule px-2 py-0.5 font-mono text-[11px] uppercase tracking-wider text-bar">
+          <span className="mr-2 rounded border border-brand-rule px-2 py-0.5 font-mono text-[11px] uppercase tracking-wider text-brand-rule">
             {profile.role.name}
           </span>
         )}
-        <Link href="/" className="text-[#d6d2ce] hover:text-white">
-          My dashboard
-        </Link>
-        <Link href="/map" className="text-[#d6d2ce] hover:text-white">
-          Company map
-        </Link>
+        <NavLink href="/" match={DASHBOARD}>My dashboard</NavLink>
+        <NavLink href="/map">Company map</NavLink>
         {(profile?.role?.is_admin || profile?.role?.is_manager) && (
-          <Link href="/team" className="text-[#d6d2ce] hover:text-white">
-            Team progress
-          </Link>
+          <NavLink href="/team">Team progress</NavLink>
         )}
         {profile?.role?.is_admin && (
           <>
-            <Link href="/admin/import" className="text-[#d6d2ce] hover:text-white">
-              Import SOP
-            </Link>
-            <Link href="/admin/people" className="text-[#d6d2ce] hover:text-white">
-              People
-            </Link>
+            <NavLink href="/admin/import">Import SOP</NavLink>
+            <NavLink href="/admin/people">Manage people</NavLink>
           </>
         )}
-        <form action="/auth/signout" method="post">
+        <form action="/auth/signout" method="post" className="ml-1.5">
           <button type="submit" className="text-[#d6d2ce] underline hover:text-white">
             Sign out
           </button>
