@@ -63,3 +63,58 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
+
+/* Org chart tree lines (wide screens). */
+.org ul {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+}
+.org > ul { padding-top: 0; }
+.org li {
+  position: relative;
+  list-style: none;
+  padding: 20px 6px 0;
+  text-align: center;
+}
+.org li::before,
+.org li::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 50%;
+  width: 50%;
+  height: 20px;
+  border-top: 2px solid var(--line);
+}
+.org li::after {
+  right: auto;
+  left: 50%;
+  border-left: 2px solid var(--line);
+}
+.org li:only-child::before,
+.org li:only-child::after { border-top: 0; }
+.org li:only-child::before { display: none; }
+.org li:first-child::before,
+.org li:last-child::after { border: 0 none; }
+.org li:last-child::before {
+  border-right: 2px solid var(--line);
+  border-radius: 0 8px 0 0;
+}
+.org li:first-child::after { border-radius: 8px 0 0 0; }
+.org li:only-child::after {
+  border-left: 2px solid var(--line);
+  border-radius: 0;
+}
+.org ul ul::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 20px;
+  border-left: 2px solid var(--line);
+}
+.org > ul > li { padding-top: 0; }
+.org > ul > li::before,
+.org > ul > li::after { display: none; }

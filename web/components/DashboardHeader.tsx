@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { setMyName } from "@/app/profile/actions";
 import type { Profile } from "@/lib/profile";
 
-export type DashTab = "sops" | "onboarding" | "dept" | "handbook" | "people" | "policies" | "search";
+export type DashTab = "sops" | "onboarding" | "dept" | "handbook" | "people" | "org" | "policies" | "search";
 
 const TABS: { id: DashTab; label: string; href: string }[] = [
   { id: "sops", label: "My SOPs", href: "/" },
@@ -9,6 +10,7 @@ const TABS: { id: DashTab; label: string; href: string }[] = [
   { id: "dept", label: "My Dept", href: "/dept" },
   { id: "handbook", label: "Employee handbook", href: "/handbook" },
   { id: "people", label: "People", href: "/people" },
+  { id: "org", label: "Org chart", href: "/org" },
   { id: "policies", label: "Policies", href: "/policies" },
   { id: "search", label: "Search", href: "/search" },
 ];
@@ -36,6 +38,17 @@ export default function DashboardHeader({ profile, active, q = "" }: { profile: 
           <button type="submit" className="h-10 rounded-lg bg-bar px-4 text-sm font-semibold text-white">Search</button>
         </form>
       </div>
+      {profile && !profile.full_name && (
+        <form action={setMyName} className="flex flex-col gap-2 rounded-lg bg-[#fff3d6] p-4 text-sm text-[#6b3f00] sm:flex-row sm:items-end">
+          <input type="hidden" name="back" value={TABS.find((t) => t.id === active)?.href ?? "/"} />
+          <div className="flex flex-1 flex-col gap-1">
+            <label htmlFor="my-name" className="font-semibold">What&apos;s your name? It shows to your team instead of your email.</label>
+            <input id="my-name" name="full_name" required minLength={2} maxLength={120} autoComplete="name" placeholder="First and last name"
+              className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-foreground sm:max-w-sm" />
+          </div>
+          <button type="submit" className="h-10 rounded-lg bg-[#c25508] px-4 font-semibold text-white">Save name</button>
+        </form>
+      )}
       {!profile?.role && (
         <p className="rounded-lg bg-[#fff3d6] p-4 text-sm text-[#6b3f00]">
           You don&apos;t have a role yet. An admin needs to pick one for you before your SOPs show up.

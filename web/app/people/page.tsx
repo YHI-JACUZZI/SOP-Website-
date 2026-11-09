@@ -10,7 +10,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const [profile, people] = await Promise.all([getMyProfile(), listPeople()]);
   const needle = q.trim().toLowerCase();
   const shown = needle
-    ? people.filter((p) => [p.full_name, p.email, p.role, p.department].some((v) => v?.toLowerCase().includes(needle)))
+    ? people.filter((p) => [p.full_name, p.email, p.job_title, p.role, p.department].some((v) => v?.toLowerCase().includes(needle)))
     : people;
   const groups = new Map<string, typeof shown>();
   shown.forEach((p) => {
