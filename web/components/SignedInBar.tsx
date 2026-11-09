@@ -3,7 +3,7 @@ import TopBar from "@/components/TopBar";
 import type { Profile } from "@/lib/profile";
 
 // Every dashboard section (and the documents opened from it) keeps "My dashboard" lit.
-const DASHBOARD = ["/", "/dept", "/handbook", "/people", "/policies", "/search", "/onboarding", "/sops", "/certificates"];
+const DASHBOARD = ["/", "/dept", "/handbook", "/people", "/policies", "/search", "/onboarding", "/org", "/sops", "/certificates"];
 
 // Top bar for signed-in pages: role tag, admin links and sign out.
 export default function SignedInBar({ profile }: { profile: Profile | null }) {

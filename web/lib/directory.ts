@@ -8,6 +8,8 @@ export type Person = {
   is_manager: boolean;
   department_id: number | null;
   department: string | null;
+  job_title: string | null;
+  reports_to: string | null;
 };
 
 // Everyone active in the company (name, email, role, department).

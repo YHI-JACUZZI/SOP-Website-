@@ -11,7 +11,7 @@ export default function PersonCard({ p }: { p: Person }) {
           {displayName(p)}
           {p.is_manager && <span className="rounded bg-[#fff3d6] px-1.5 py-0.5 text-[11px] font-semibold text-[#6b3f00]">Manager</span>}
         </span>
-        <span className="text-sm text-muted">{p.role ?? "No role yet"}{p.department && ` · ${p.department}`}</span>
+        <span className="text-sm text-muted">{p.job_title || p.role || "No role yet"}{p.department && ` · ${p.department}`}</span>
         <a href={`mailto:${p.email}`} className="truncate text-sm text-accent underline">{p.email}</a>
       </span>
     </li>
