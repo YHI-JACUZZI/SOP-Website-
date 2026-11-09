@@ -35,29 +35,49 @@ export async function savePerson(formData: FormData) {
   redirect(`/admin/people?notice=Saved.`);
 }
 
-export async function invitePerson(formData: FormData) {
+export type LinkState = { link?: string; email?: string; error?: string; added?: boolean };
+
+const NO_KEY = "Adding people needs the Supabase secret key in Vercel first (one-time setup).";
+
+// Builds a sign-in link that runs through this site's /auth/confirm page.
+async function siteLink(hashedToken: string, type: "invite" | "recovery") {
+  const origin = (await headers()).get("origin") ?? "";
+  return `${origin}/auth/confirm?token_hash=${encodeURIComponent(hashedToken)}&type=${type}&next=/update-password`;
+}
+
+// Creates the account and hands back a link to send them yourself (text,
+// Teams, email). No email goes out from the site.
+export async function addPerson(_prev: LinkState, formData: FormData): Promise<LinkState> {
   await requireAdmin();
   const admin = createAdminClient();
-  if (!admin) {
-    redirect("/admin/people?error=Invites need the Supabase secret key added to Vercel first.");
-  }
+  if (!admin) return { error: NO_KEY };
 
-  const email = String(formData.get("email")).trim().toLowerCase();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Type a valid email address." };
   const roleId = Number(formData.get("role_id")) || null;
   const fullName = text(formData.get("full_name"));
-  const origin = (await headers()).get("origin");
+  const jobTitle = text(formData.get("job_title"));
 
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${origin}/auth/confirm?next=/update-password`,
-  });
-  if (error) {
-    redirect(`/admin/people?error=${encodeURIComponent(error.message)}`);
+  const { data, error } = await admin.auth.admin.generateLink({ type: "invite", email });
+  if (error || !data.properties) {
+    const taken = /already|registered|exists/i.test(error?.message ?? "");
+    return { error: taken ? `${email} already has an account. Use "Get sign-in link" on their row below.` : `Couldn't add them: ${error?.message}` };
   }
 
-  // The database creates their profile when the invite goes out; set the role on it.
-  if (data.user && (roleId || fullName)) {
-    await admin.from("profiles").update({ role_id: roleId, full_name: fullName }).eq("id", data.user.id);
-  }
+  // The database creates their profile with the account; fill it in.
+  await admin.from("profiles").update({ role_id: roleId, full_name: fullName, job_title: jobTitle }).eq("id", data.user.id);
   revalidatePath("/admin/people");
-  redirect(`/admin/people?notice=${encodeURIComponent(`Invite sent to ${email}.`)}`);
+  return { link: await siteLink(data.properties.hashed_token, "invite"), email, added: true };
+}
+
+// A fresh sign-in link for someone who already has an account (lost link,
+// forgot password, never finished signing up).
+export async function signInLink(_prev: LinkState, formData: FormData): Promise<LinkState> {
+  await requireAdmin();
+  const admin = createAdminClient();
+  if (!admin) return { error: NO_KEY };
+  const email = String(formData.get("email") ?? "");
+  const { data, error } = await admin.auth.admin.generateLink({ type: "recovery", email });
+  if (error || !data.properties) return { error: `Couldn't make a link: ${error?.message}` };
+  return { link: await siteLink(data.properties.hashed_token, "recovery"), email };
 }
