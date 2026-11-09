@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import SignedInBar from "@/components/SignedInBar";
 import { createClient } from "@/lib/supabase/server";
 import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
-import { invitePerson, savePerson } from "./actions";
+import { AddPersonForm, SignInLinkButton } from "@/components/LinkForms";
+import { savePerson } from "./actions";
 
 type Role = { id: number; name: string; department: { name: string } | null };
 type Person = Profile & { job_title: string | null; reports_to: string | null };
@@ -60,22 +61,9 @@ export default async function ManagePeoplePage({
         {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
 
         <section className="flex flex-col gap-3 rounded-xl bg-surface p-5 ring-1 ring-line">
-          <h2 className="font-display text-lg font-bold">Invite someone</h2>
-          <form action={invitePerson} className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
-            <div className="flex flex-col gap-1">
-              <label htmlFor="invite-name" className={label}>Full name</label>
-              <input id="invite-name" name="full_name" className={field} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label htmlFor="invite-email" className={label}>Work email</label>
-              <input id="invite-email" name="email" type="email" required className={field} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label htmlFor="invite-role" className={label}>Role</label>
-              <RoleSelect id="invite-role" roles={roles ?? []} />
-            </div>
-            <button type="submit" className="h-10 rounded-lg bg-[#c25508] px-4 font-semibold text-white">Send invite</button>
-          </form>
+          <h2 className="font-display text-lg font-bold">Add someone</h2>
+          <p className="-mt-2 text-sm text-muted">Makes their account and gives you a sign-in link to send them yourself.</p>
+          <AddPersonForm roles={roles ?? []} />
         </section>
 
         <section className="flex flex-col gap-3">
@@ -107,6 +95,9 @@ export default async function ManagePeoplePage({
                   </div>
                   <button type="submit" className="h-10 rounded-lg px-4 font-semibold text-accent ring-1 ring-accent md:mb-5">Save</button>
                 </form>
+                <div className="mt-2 border-t border-line pt-2">
+                  <SignInLinkButton email={p.email} />
+                </div>
               </li>
             ))}
           </ul>
