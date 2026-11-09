@@ -1,4 +1,5 @@
 import NavLink from "@/components/NavLink";
+import SignOutButton from "@/components/SignOutButton";
 import TopBar from "@/components/TopBar";
 import type { Profile } from "@/lib/profile";
 
@@ -26,11 +27,7 @@ export default function SignedInBar({ profile }: { profile: Profile | null }) {
             <NavLink href="/admin/people">Manage people</NavLink>
           </>
         )}
-        <form action="/auth/signout" method="post" className="ml-1.5">
-          <button type="submit" className="text-[#d6d2ce] underline hover:text-white">
-            Sign out
-          </button>
-        </form>
+        <SignOutButton />
       </nav>
     </TopBar>
   );

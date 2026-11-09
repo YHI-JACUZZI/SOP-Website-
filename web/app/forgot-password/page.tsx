@@ -17,7 +17,7 @@ export default async function ForgotPasswordPage({
     >
       <form action={sendReset} className="flex flex-col gap-5">
         <Field id="email" label="Work email" type="email" autoComplete="email" />
-        <SubmitButton>Send reset link</SubmitButton>
+        <SubmitButton pendingLabel="Sending…">Send reset link</SubmitButton>
       </form>
       <Link href="/login" className="self-center font-medium text-accent">
         Back to sign in

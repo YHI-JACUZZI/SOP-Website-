@@ -1,3 +1,4 @@
+import PendingButton from "@/components/PendingButton";
 import TopBar from "@/components/TopBar";
 
 // Shared frame for the sign-in, forgot-password and set-password screens.
@@ -67,13 +68,10 @@ export function Field({
   );
 }
 
-export function SubmitButton({ children }: { children: React.ReactNode }) {
+export function SubmitButton({ children, pendingLabel = "One moment…" }: { children: React.ReactNode; pendingLabel?: string }) {
   return (
-    <button
-      type="submit"
-      className="h-12 rounded-lg bg-[#c25508] text-base font-semibold text-white hover:bg-[#a84a07]"
-    >
+    <PendingButton pendingLabel={pendingLabel} className="h-12 rounded-lg bg-[#c25508] text-base font-semibold text-white hover:bg-[#a84a07]">
       {children}
-    </button>
+    </PendingButton>
   );
 }
