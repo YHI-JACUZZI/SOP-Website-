@@ -92,11 +92,11 @@ insert into public.quiz_questions (sop_id, question, choices, answer, sort)
 select v.sop_id, v.question, v.choices::jsonb, v.answer, v.sort
 from (values
   ('SOP-PRD-000', 'Where do you enter the contract price?', '["In the customer notes", "Extended price on the Jacuzzi Project line in the Budget tab", "Only on the payment schedule tab"]', 1, 1),
-  ('SOP-PRD-000', 'When do you change the payment schedule?', '["When the down payment is anything other than $1,000", "On every job", "Never"]', 0, 2),
-  ('SOP-PRD-000', 'What must you uncheck before approving the customer order?', '["Save", "Internal", "Notify, so the customer doesn''t see it"]', 2, 3),
+  ('SOP-PRD-000', 'When do you change the payment schedule?', '["When the down payment is anything other than 1000 dollars", "On every job", "Never"]', 0, 2),
+  ('SOP-PRD-000', 'What must you uncheck before approving the customer order?', '["Save", "Internal", "Notify, so the customer does not see it"]', 2, 3),
   ('SOP-PRD-001', 'Where is the costing file for a job?', '["On the JobTread message board", "In Dropbox: Jacuzzi Open > Job Name > FINAL COSTING CONTRACTS SPECIAL QUOTES", "With the warehouse"]', 1, 1),
   ('SOP-PRD-001', 'Something is sold on the contract but missing from the pricing. What do you do?', '["Add it in the After Presite column", "Leave it out", "Ask the customer to pay separately"]', 0, 2),
-  ('SOP-PRD-001', 'On the survey call the customer wants to add something. What next?', '["Add it at no charge", "Tell them it can''t be changed", "Generate a Change Order for them to sign"]', 2, 3),
+  ('SOP-PRD-001', 'On the survey call the customer wants to add something. What next?', '["Add it at no charge", "Tell them it cannot be changed", "Generate a Change Order for them to sign"]', 2, 3),
   ('SOP-PRD-002', 'What do you check before ordering materials?', '["That all earlier tasks in the job schedule are complete", "Installer availability", "Nothing, just order"]', 0, 1),
   ('SOP-PRD-002', 'What goes into the JobTread files as proof of what was ordered?', '["A photo of the contract", "The exported cut sheet", "The installer PO"]', 1, 2),
   ('SOP-PRD-002', 'Where do you upload the .CSV order file?', '["The JobTread budget tab", "Dropbox", "The Jacuzzi ordering site: Quick Order > File Upload"]', 2, 3)
@@ -148,7 +148,7 @@ declare
   cert uuid;
 begin
   if me is null or not public.can_read_sop(sop) then
-    raise exception 'You can''t take this refresher.';
+    raise exception 'You cannot take this refresher.';
   end if;
   if signed is null or length(trim(signed)) not between 2 and 120 then
     raise exception 'Type your full name to sign.';

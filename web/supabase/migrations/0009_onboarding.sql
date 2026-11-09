@@ -94,7 +94,7 @@ from (values
   ('Getting to know us',   'Meet your manager',                          'manager',  1,  90),
   ('Getting to know us',   'Office and warehouse tour',                  'manager',  2, 100),
   ('Getting to know us',   'Introduce to the team',                      'manager',  2, 110),
-  ('Training',             'Read and sign your role''s SOPs',            'employee', 14, 120),
+  ('Training',             'Read and sign the SOPs for your role',            'employee', 14, 120),
   ('Training',             'Shadow a job from start to finish',          'manager',  21, 130),
   ('Training',             '30-day check-in with your manager',          'manager',  30, 140)
 ) as v (category, title, owner, due_days, sort)
