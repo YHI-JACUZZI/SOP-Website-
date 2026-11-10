@@ -18,7 +18,7 @@ export default async function UpdatePasswordPage({
       <form action={updatePassword} className="flex flex-col gap-5">
         <Field id="password" label="New password" type="password" autoComplete="new-password" />
         <Field id="confirm" label="Type it again" type="password" autoComplete="new-password" />
-        <SubmitButton>Save password</SubmitButton>
+        <SubmitButton pendingLabel="Saving…">Save password</SubmitButton>
       </form>
     </AuthCard>
   );
