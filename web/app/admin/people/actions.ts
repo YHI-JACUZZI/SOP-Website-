@@ -14,8 +14,11 @@ async function requireAdmin() {
 
 const text = (v: FormDataEntryValue | null) => String(v ?? "").replace(/\s+/g, " ").trim() || null;
 
-// Name, job title, manager and role for one person.
-export async function savePerson(formData: FormData) {
+export type RowState = { saved?: number; error?: string };
+
+// Name, job title, manager and role for one person. Answers the row itself
+// so it can say "Saved" right next to the button.
+export async function savePerson(_prev: RowState, formData: FormData): Promise<RowState> {
   await requireAdmin();
   const id = String(formData.get("id"));
   const reportsTo = String(formData.get("reports_to") ?? "") || null;
@@ -30,9 +33,33 @@ export async function savePerson(formData: FormData) {
       role_id: Number(formData.get("role_id")) || null,
     })
     .eq("id", id);
-  if (error) redirect(`/admin/people?error=${encodeURIComponent("Couldn't save: " + error.message)}`);
-  revalidatePath("/admin/people");
-  redirect(`/admin/people?notice=Saved.`);
+  if (error) return { error: `Couldn't save: ${error.message}` };
+  revalidatePath("/", "layout");
+  return { saved: Date.now() };
+}
+
+// Removing someone switches their account off: they can't sign in, they
+// drop out of People and the Org chart, and their access ends. Their signed
+// SOPs and certificates are kept, and Restore brings them back.
+export async function setPersonActive(formData: FormData) {
+  await requireAdmin();
+  const me = await getMyProfile();
+  const id = String(formData.get("id"));
+  const active = formData.get("active") === "true";
+  if (id === me?.id) redirect(`/admin/people?error=${encodeURIComponent("You can't remove yourself.")}`);
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update({ active }).eq("id", id);
+  if (error) redirect(`/admin/people?error=${encodeURIComponent("Couldn't update: " + error.message)}`);
+  if (!active) await supabase.from("profiles").update({ reports_to: null }).eq("reports_to", id);
+
+  // Also block or unblock sign-in, when the secret key is set up.
+  const admin = createAdminClient();
+  if (admin) await admin.auth.admin.updateUserById(id, { ban_duration: active ? "none" : "876000h" });
+
+  revalidatePath("/", "layout");
+  const who = String(formData.get("name") ?? "They");
+  redirect(`/admin/people?notice=${encodeURIComponent(active ? `${who} is back.` : `${who} has been removed. You can restore them at the bottom of the page.`)}`);
 }
 
 export type LinkState = { link?: string; email?: string; error?: string; added?: boolean };
