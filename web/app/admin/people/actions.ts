@@ -39,10 +39,10 @@ export type LinkState = { link?: string; email?: string; error?: string; added?:
 
 const NO_KEY = "Adding people needs the Supabase secret key in Vercel first (one-time setup).";
 
-// Builds a sign-in link that runs through this site's /auth/confirm page.
+// Builds a sign-in link to this site's Continue page (/auth/accept).
 async function siteLink(hashedToken: string, type: "invite" | "recovery") {
   const origin = (await headers()).get("origin") ?? "";
-  return `${origin}/auth/confirm?token_hash=${encodeURIComponent(hashedToken)}&type=${type}&next=/update-password`;
+  return `${origin}/auth/accept?token_hash=${encodeURIComponent(hashedToken)}&type=${type}&next=/update-password`;
 }
 
 // Creates the account and hands back a link to send them yourself (text,
