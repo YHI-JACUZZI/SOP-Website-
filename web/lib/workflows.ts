@@ -13,6 +13,7 @@ export type WorkflowSummary = {
 
 export type Workflow = WorkflowSummary & {
   summary: string | null;
+  department_id: number | null;
   parent_step: string | null;
   lanes: Lane[];
   edges: Edge[];
@@ -53,7 +54,7 @@ export async function getWorkflow(id: string): Promise<{ workflow: Workflow; ste
   const [{ data: workflow }, { data: steps }] = await Promise.all([
     supabase
       .from("workflows")
-      .select(`${SUMMARY_FIELDS}, summary, parent_step, lanes, edges, routing`)
+      .select(`${SUMMARY_FIELDS}, summary, department_id, parent_step, lanes, edges, routing`)
       .eq("id", id)
       .maybeSingle<Workflow>(),
     supabase

@@ -1,13 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ChartTools from "@/components/ChartTools";
 import FlowChart from "@/components/FlowChart";
 import SignedInBar from "@/components/SignedInBar";
 import { getMyProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkflow, listMyWorkflows } from "@/lib/workflows";
 
-export default async function MapPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MapPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string; notice?: string }>;
+}) {
   const { id } = await params;
+  const { error, notice } = await searchParams;
   const supabase = await createClient();
   const [profile, chart, charts, { data: sops }, { data: roles }, { data: departments }] = await Promise.all([
     getMyProfile(),
@@ -38,6 +46,16 @@ export default async function MapPage({ params }: { params: Promise<{ id: string
             </Link>
           ))}
         </nav>
+        {isAdmin && (
+          <ChartTools
+            key={workflow.id}
+            chart={{ id: workflow.id, name: workflow.name, summary: workflow.summary, department_id: workflow.department_id, parent_id: workflow.parent_id }}
+            charts={charts.map((c) => ({ id: c.id, name: c.name }))}
+            departments={departments ?? []}
+          />
+        )}
+        {error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{error}</p>}
+        {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
         <div className="flex flex-col gap-1">
           {parent && (
             <Link href={`/map/${parent.id}`} className="text-sm font-medium text-accent">← {parent.name}</Link>
