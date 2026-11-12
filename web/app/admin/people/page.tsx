@@ -22,7 +22,7 @@ export default async function ManagePeoplePage({
   const { error, notice } = await searchParams;
   const supabase = await createClient();
   const [{ data: people }, { data: roles }] = await Promise.all([
-    supabase.from("profiles").select(`${PROFILE_FIELDS}, job_title, reports_to`).order("full_name", { nullsFirst: true }).order("email").returns<Person[]>(),
+    supabase.from("profiles").select(`${PROFILE_FIELDS}, job_title, reports_to, last_seen_at`).order("full_name", { nullsFirst: true }).order("email").returns<Person[]>(),
     supabase.from("roles").select("id, name, department:departments(name)").order("name").returns<Role[]>(),
   ]);
   const everyone = people ?? [];

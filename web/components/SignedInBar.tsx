@@ -1,3 +1,4 @@
+import Heartbeat from "@/components/Heartbeat";
 import NavLink from "@/components/NavLink";
 import SignOutButton from "@/components/SignOutButton";
 import TopBar from "@/components/TopBar";
@@ -28,6 +29,7 @@ export default function SignedInBar({ profile }: { profile: Profile | null }) {
           </>
         )}
         <SignOutButton />
+        {profile && <Heartbeat />}
       </nav>
     </TopBar>
   );

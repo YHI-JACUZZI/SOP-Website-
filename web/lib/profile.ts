@@ -5,6 +5,7 @@ export type Profile = {
   email: string;
   full_name: string | null;
   active: boolean;
+  last_seen_at?: string | null;
   role: {
     id: number;
     name: string;
@@ -26,10 +27,10 @@ export async function getMyProfile(): Promise<Profile | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data } = await supabase
-    .from("profiles")
-    .select(PROFILE_FIELDS)
-    .eq("id", user.id)
-    .maybeSingle<Profile>();
+  // Also note that they're active (for "Online now"); at most once a minute.
+  const [{ data }] = await Promise.all([
+    supabase.from("profiles").select(PROFILE_FIELDS).eq("id", user.id).maybeSingle<Profile>(),
+    supabase.rpc("touch_last_seen"),
+  ]);
   return data;
 }
