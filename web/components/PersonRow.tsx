@@ -2,10 +2,11 @@
 
 import { useActionState, useEffect, useState } from "react";
 import PendingButton from "@/components/PendingButton";
+import PresenceBadge from "@/components/PresenceBadge";
 import { savePerson, setPersonActive, type RowState } from "@/app/admin/people/actions";
 
 type Role = { id: number; name: string; department: { name: string } | null };
-type Person = { id: string; email: string; full_name: string | null; job_title: string | null; reports_to: string | null; role: { id: number; name: string } | null };
+type Person = { id: string; email: string; full_name: string | null; job_title: string | null; reports_to: string | null; last_seen_at?: string | null; role: { id: number; name: string } | null };
 
 const field = "h-10 w-full rounded-lg border border-line bg-surface px-2 text-sm";
 const label = "text-xs font-semibold uppercase tracking-wide text-muted";
@@ -39,6 +40,7 @@ export default function PersonRow({ p, others, roles, isMe, children }: {
           <label htmlFor={`n-${p.id}`} className={label}>Name</label>
           <input id={`n-${p.id}`} name="full_name" defaultValue={p.full_name ?? ""} placeholder="Add their name" className={field} />
           <span className="truncate text-xs text-muted">{p.email}</span>
+          <PresenceBadge lastSeen={p.last_seen_at} />
         </div>
         <div className="flex flex-col gap-1 md:pb-5">
           <label htmlFor={`t-${p.id}`} className={label}>Job title</label>

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import PresenceBadge from "@/components/PresenceBadge";
+import { presence } from "@/lib/presence";
 import SignedInBar from "@/components/SignedInBar";
 import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
@@ -38,7 +40,7 @@ export default async function TeamPage({
   const [{ data: roles }, { data: people }, { data: sops }, { data: sopRoles }, { data: completions }, { data: views }, { data: assignments }, { data: refreshers }] =
     await Promise.all([
       supabase.from("roles").select("id, name, department_id").eq("department_id", dept.id).order("name").returns<Role[]>(),
-      supabase.from("profiles").select(PROFILE_FIELDS).eq("active", true).returns<Profile[]>(),
+      supabase.from("profiles").select(`${PROFILE_FIELDS}, last_seen_at`).eq("active", true).returns<Profile[]>(),
       supabase.from("sops").select("id, title, revision").eq("department_id", dept.id).eq("status", "published").order("id").returns<SopRow[]>(),
       supabase.from("sop_roles").select("sop_id, role_id").returns<{ sop_id: string; role_id: number }[]>(),
       supabase.from("completions").select("sop_id, person_id, revision, completed_at").returns<Completion[]>(),
@@ -75,6 +77,7 @@ export default async function TeamPage({
   const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   const stats = [
     { label: "People", value: team.length, color: undefined },
+    { label: "Online now", value: team.filter((p) => presence(p.last_seen_at).online).length, color: "#12663A" },
     { label: "SOPs assigned", value: all.length, color: undefined },
     { label: "Completed", value: all.filter((c) => c.status === "done").length, color: "#12663A" },
     { label: "Overdue", value: all.filter((c) => c.status === "overdue").length, color: "#A3290F" },
@@ -120,7 +123,7 @@ export default async function TeamPage({
         {error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{error}</p>}
         {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
           {stats.map((s) => (
             <div key={s.label} className="flex flex-col gap-1 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted">{s.label}</span>
@@ -149,13 +152,13 @@ export default async function TeamPage({
                   {columns.map((s) => (
                     <th key={s.id} className="px-4 py-3 font-semibold" title={s.id}>{s.title}</th>
                   ))}
-                  <th className="px-4 py-3 font-semibold">Last active</th>
+                  <th className="px-4 py-3 font-semibold">Last SOP activity</th>
                 </tr>
               </thead>
               <tbody>
                 {shown.map(({ p, cells, last }) => (
                   <tr key={p.id} className="border-t border-line">
-                    <td className="px-4 py-3 font-semibold">{p.full_name || p.email}</td>
+                    <td className="px-4 py-3"><span className="block font-semibold">{p.full_name || p.email}</span><PresenceBadge lastSeen={p.last_seen_at} /></td>
                     <td className="px-4 py-3 text-muted">{p.role!.name}</td>
                     {cells.map((c, i) => (
                       <td key={columns[i].id} className="px-4 py-3">
@@ -172,7 +175,7 @@ export default async function TeamPage({
                         {!c && <span className="text-muted">—</span>}
                       </td>
                     ))}
-                    <td className="whitespace-nowrap px-4 py-3 text-muted">{last ? shortDate(last) : "Never"}</td>
+<td className="whitespace-nowrap px-4 py-3 text-muted">{last ? shortDate(last) : "Never"}</td>
                   </tr>
                 ))}
                 {shown.length === 0 && (
