@@ -83,7 +83,7 @@ export default function ShellChrome({ person, progress }: { person: Person; prog
             return (
               <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] ${
-                  active ? "bg-brand font-semibold text-white shadow-sm" : "text-nav-text hover:bg-nav-hover hover:text-foreground"
+                  active ? "bg-[image:var(--glow)] font-bold text-white shadow-[var(--glow-shadow)]" : "text-nav-text hover:bg-nav-hover hover:text-foreground"
                 }`}>
                 <Icon name={item.icon} />
                 <span className="flex-1">{item.label}</span>

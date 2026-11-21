@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Allura, Archivo, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Allura, JetBrains_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 
-const archivo = Archivo({
-  variable: "--font-archivo",
+// "Ember" look: Manrope for headings and text.
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["500", "700", "800"],
-});
-
-const instrumentSans = Instrument_Sans({
-  variable: "--font-instrument-sans",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -36,12 +32,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Each person's light/dark pick (no cookie = follow their device).
-  const theme = (await cookies()).get("theme")?.value;
+  // Each person's light/dark pick. Ember is dark first, so dark is the default.
+  const theme = (await cookies()).get("theme")?.value === "light" ? "light" : "dark";
   return (
-    <html lang="en" data-theme={theme === "dark" || theme === "light" ? theme : undefined}>
+    <html lang="en" data-theme={theme}>
       <body
-        className={`${archivo.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} ${allura.variable} antialiased`}
+        className={`${manrope.variable} ${jetbrainsMono.variable} ${allura.variable} antialiased`}
       >
         {children}
       </body>

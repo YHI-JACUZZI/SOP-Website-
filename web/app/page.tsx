@@ -111,7 +111,7 @@ export default async function Home() {
         <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           {tiles.map((t, i) => (
             <div key={t.label} className={`flex min-w-0 flex-col gap-2 rounded-[var(--radius-card)] p-4 sm:px-5 ${
-              i === 0 ? "bg-brand text-white" : "border border-line bg-surface shadow-[var(--shadow)]"}`}>
+              i === 0 ? "bg-[image:var(--glow-card)] text-white shadow-[var(--glow-shadow)]" : "border border-line bg-surface shadow-[var(--shadow)]"}`}>
               <span className={`flex items-center gap-2 text-sm font-semibold ${i === 0 ? "text-white/90" : "text-muted"}`}>
                 <span style={{ color: i === 0 ? undefined : t.color ?? "var(--accent)" }}><Icon name={t.icon} /></span>
                 {t.label}
