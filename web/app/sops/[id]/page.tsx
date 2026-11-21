@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import RefresherForm from "@/components/RefresherForm";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import SignOffForm from "@/components/SignOffForm";
 import { getMyProfile } from "@/lib/profile";
 import { PASS_MARK, refresherStatement, signOffStatement } from "@/lib/signoff";
@@ -57,8 +57,7 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
   const quizCount = canEditQuiz ? (await supabase.from("quiz_questions").select("id", { count: "exact", head: true }).eq("sop_id", sop.id)).count ?? 0 : 0;
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={profile} />
+    <AppShell profile={profile}>
       <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-6 py-4">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-baseline gap-x-4">
@@ -69,7 +68,7 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
         </div>
         {profile && (assigned ? (
           needsSign || needsRefresh ? (
-            <a href="#sign-off" className="flex h-11 items-center rounded-lg bg-[#c25508] px-5 font-semibold text-white">
+            <a href="#sign-off" className="flex h-11 items-center rounded-lg bg-btn px-5 font-semibold text-white">
               {needsRefresh ? "Take refresher ↓" : "Sign off ↓"}
             </a>
           ) : (
@@ -80,7 +79,7 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
         ) : current ? (
           <form action={undoComplete} className="flex items-center gap-3">
             <input type="hidden" name="id" value={sop.id} />
-            <span className="rounded-lg bg-[#e1f4e8] px-3 py-2 text-sm font-semibold text-[#12663a]">
+            <span className="rounded-lg bg-ok-bg px-3 py-2 text-sm font-semibold text-ok">
               ✓ Completed {shortDate(current.completed_at)}
             </span>
             {!current.signed_name && <button type="submit" className="text-sm text-muted underline">Undo</button>}
@@ -88,7 +87,7 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
         ) : (
           <form action={markComplete}>
             <input type="hidden" name="id" value={sop.id} />
-            <button type="submit" className="h-11 rounded-lg bg-[#c25508] px-5 font-semibold text-white">Mark as complete</button>
+            <button type="submit" className="h-11 rounded-lg bg-btn px-5 font-semibold text-white">Mark as complete</button>
           </form>
         ))}
       </div>
@@ -124,7 +123,7 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
               <SignOffForm sopId={sop.id} statement={signOffStatement(sop)} suggested={suggested} />
             </>
           ) : assigned && current ? (
-            <div className="flex flex-col gap-3 rounded-xl bg-surface p-5 ring-1 ring-line">
+            <div className="flex flex-col gap-3 rounded-xl bg-surface p-5 border border-line">
               <h2 className="font-display text-xl font-bold">Signed off</h2>
               {current.signed_name ? (
                 <>
@@ -151,14 +150,14 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
           )}
         </section>
       )}
-    </div>
+    </AppShell>
   );
 }
 
 function Changes({ rows, lastRev, lastDate }: { rows: RevisionRow[]; lastRev: string | null; lastDate: string | null }) {
   if (!lastRev) return null;
   return (
-    <div className="rounded-xl bg-surface p-4 ring-1 ring-line">
+    <div className="rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow)]">
       <h3 className="font-semibold">What changed since you signed Revision {lastRev}{lastDate && ` on ${shortDate(lastDate)}`}</h3>
       {rows.length === 0 ? (
         <p className="mt-1 text-sm text-muted">Nothing. The SOP hasn&apos;t changed since then.</p>

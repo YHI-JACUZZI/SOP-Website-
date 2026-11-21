@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import ImportForm from "@/components/ImportForm";
 import { createClient } from "@/lib/supabase/server";
 import { getMyProfile } from "@/lib/profile";
@@ -18,8 +18,7 @@ export default async function ImportPage() {
     ]);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={me} />
+    <AppShell profile={me}>
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-6 py-10">
         <div className="flex flex-col gap-1">
           <h1 className="font-display text-3xl font-bold">Import an SOP</h1>
@@ -36,6 +35,6 @@ export default async function ImportPage() {
           me={me.full_name || me.email}
         />
       </main>
-    </div>
+    </AppShell>
   );
 }

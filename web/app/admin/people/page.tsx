@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { createClient } from "@/lib/supabase/server";
 import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
 import { AddPersonForm, SignInLinkButton } from "@/components/LinkForms";
@@ -31,8 +31,7 @@ export default async function ManagePeoplePage({
   const missingNames = current.filter((p) => !p.full_name).length;
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={me} />
+    <AppShell profile={me}>
 
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-10 sm:px-6">
         <div>
@@ -43,10 +42,10 @@ export default async function ManagePeoplePage({
           </p>
         </div>
 
-        {error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{error}</p>}
-        {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
+        {error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{error}</p>}
+        {notice && <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm text-ok">{notice}</p>}
 
-        <section className="flex flex-col gap-3 rounded-xl bg-surface p-5 ring-1 ring-line">
+        <section className="flex flex-col gap-3 rounded-xl bg-surface p-5 border border-line">
           <h2 className="font-display text-lg font-bold">Add someone</h2>
           <p className="-mt-2 text-sm text-muted">Makes their account and gives you a sign-in link to send them yourself.</p>
           <AddPersonForm roles={roles ?? []} />
@@ -65,7 +64,7 @@ export default async function ManagePeoplePage({
         </section>
 
         {removed.length > 0 && (
-          <details className="rounded-xl bg-surface p-4 ring-1 ring-line">
+          <details className="rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow)]">
             <summary className="cursor-pointer font-display text-lg font-bold">Removed ({removed.length})</summary>
             <p className="mt-2 text-sm text-muted">They can&apos;t sign in and don&apos;t show on People or the Org chart. Their signed SOPs and certificates are kept.</p>
             <ul className="mt-3 flex flex-col divide-y divide-line">
@@ -84,6 +83,6 @@ export default async function ManagePeoplePage({
           </details>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }

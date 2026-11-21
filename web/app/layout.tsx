@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Allura, Archivo, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -30,13 +31,15 @@ export const metadata: Metadata = {
   description: "Company SOPs and workflows, by role.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Each person's light/dark pick (no cookie = follow their device).
+  const theme = (await cookies()).get("theme")?.value;
   return (
-    <html lang="en">
+    <html lang="en" data-theme={theme === "dark" || theme === "light" ? theme : undefined}>
       <body
         className={`${archivo.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} ${allura.variable} antialiased`}
       >

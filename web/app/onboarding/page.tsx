@@ -1,6 +1,6 @@
 import Link from "next/link";
 import DashboardHeader from "@/components/DashboardHeader";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { displayName, listPeople } from "@/lib/directory";
 import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
 import { listMySops } from "@/lib/sops";
@@ -88,15 +88,14 @@ export default async function OnboardingPage({
   const who = target ? displayName(target) : "";
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={me} />
+    <AppShell profile={me}>
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <DashboardHeader profile={me} active="onboarding" />
-        {error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{error}</p>}
-        {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
+        {error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{error}</p>}
+        {notice && <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm text-ok">{notice}</p>}
 
         {leads && (
-          <form className="flex flex-wrap items-end gap-3 rounded-xl bg-surface p-4 ring-1 ring-line">
+          <form className="flex flex-wrap items-end gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow)]">
             <label className="flex min-w-60 flex-1 flex-col gap-1 text-sm">
               <span className="font-semibold">Whose onboarding?</span>
               <select name="person" defaultValue={viewingSelf ? "" : personId} className={input}>
@@ -106,17 +105,17 @@ export default async function OnboardingPage({
                 ))}
               </select>
             </label>
-            <button type="submit" className="h-10 rounded-lg bg-bar px-4 text-sm font-semibold text-white">Show</button>
+            <button type="submit" className="h-10 rounded-lg bg-ink px-4 text-sm font-semibold text-on-ink">Show</button>
           </form>
         )}
 
         {/* Header card, like a profile banner */}
-        <section className="overflow-hidden rounded-2xl ring-1 ring-line">
-          <div className="flex flex-wrap items-end gap-4 bg-bar px-5 py-5 text-white sm:px-6">
+        <section className="overflow-hidden rounded-2xl border border-line">
+          <div className="flex flex-wrap items-end gap-4 bg-ink px-5 py-5 text-on-ink sm:px-6">
             <div className="min-w-0 flex-1">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-rule">Onboarding</p>
+              <p className="text-xs font-bold uppercase tracking-[0.08em] text-brand-rule">Onboarding</p>
               <h2 className="font-display text-2xl font-bold">{viewingSelf ? "Your onboarding" : who}</h2>
-              <p className="text-sm text-[#d6d2ce]">
+              <p className="text-sm text-on-ink/75">
                 {target?.role?.name ?? "No role yet"}
                 {target?.role?.department && ` · ${target.role.department.name}`}
                 {start ? ` · Started ${shortDate(start)}` : " · No start date yet"}
@@ -127,7 +126,7 @@ export default async function OnboardingPage({
               <div className="h-2 overflow-hidden rounded-full bg-white/15" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Onboarding complete">
                 <div className="h-full rounded-full bg-brand-rule" style={{ width: `${pct}%` }} />
               </div>
-              <span className="text-right text-xs text-[#d6d2ce]">{doneTotal} of {rows.length} tasks done</span>
+              <span className="text-right text-xs text-on-ink/75">{doneTotal} of {rows.length} tasks done</span>
             </div>
           </div>
           <div aria-hidden className="h-1 bg-brand-rule" />
@@ -137,10 +136,10 @@ export default async function OnboardingPage({
             {[...steps, { name: "All done", done: allDone, count: "", last: null }].map((s, i, all) => (
               <li key={s.name} className="relative flex min-w-28 flex-1 flex-col items-center px-1 text-center">
                 {i < all.length - 1 && (
-                  <span aria-hidden className={`absolute left-1/2 top-5 h-1 w-full ${s.done ? "bg-[#1f8a4c]" : "bg-line"}`} />
+                  <span aria-hidden className={`absolute left-1/2 top-5 h-1 w-full ${s.done ? "bg-ok-strong" : "bg-line"}`} />
                 )}
                 <span className={`relative z-10 flex size-10 items-center justify-center rounded-full border-2 font-bold ${
-                  s.done ? "border-[#1f8a4c] bg-[#e1f4e8] text-[#12663a]" : "border-line bg-surface text-muted"}`}>
+                  s.done ? "border-ok-strong bg-ok-bg text-ok" : "border-line bg-surface text-muted"}`}>
                   {s.done ? "✓" : i + 1}
                 </span>
                 <span className={`mt-2 text-sm font-semibold leading-tight ${s.done ? "" : "text-muted"}`}>{s.name}</span>
@@ -157,14 +156,14 @@ export default async function OnboardingPage({
               <span className="font-semibold">Start date</span>
               <input type="date" name="start_date" defaultValue={start ?? ""} className={input} />
             </label>
-            <button type="submit" className="h-10 rounded-lg bg-surface px-4 font-semibold ring-1 ring-line hover:ring-accent">Save</button>
+            <button type="submit" className="h-10 rounded-lg bg-surface px-4 font-semibold border border-line hover:ring-accent">Save</button>
             <span className="pb-2 text-muted">Due dates count from this day.</span>
           </form>
         )}
 
         {/* Checklist */}
-        <section className="flex flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-line">
-          <div className="flex items-center justify-between border-b-2 border-[#1f8a4c] px-4 py-3">
+        <section className="flex flex-col overflow-hidden rounded-xl bg-surface border border-line">
+          <div className="flex items-center justify-between border-b-2 border-ok-strong px-4 py-3">
             <h2 className="font-display text-lg font-bold">Onboarding tasks</h2>
             {!start && <span className="text-xs text-muted">Due dates show once a start date is set.</span>}
           </div>
@@ -184,7 +183,7 @@ export default async function OnboardingPage({
                         <button type="submit" disabled={!canTick}
                           aria-label={`${done ? "Untick" : "Tick"} ${t.title}`}
                           className={`flex size-6 items-center justify-center rounded-md border-2 text-sm font-bold ${
-                            done ? "border-[#1f8a4c] bg-[#1f8a4c] text-white" : "border-line bg-surface"
+                            done ? "border-ok-strong bg-ok-strong text-white" : "border-line bg-surface"
                           } ${canTick ? "cursor-pointer hover:border-accent" : "cursor-default opacity-60"}`}>
                           {done ? "✓" : ""}
                         </button>
@@ -197,7 +196,7 @@ export default async function OnboardingPage({
                           {OWNER[t.owner]}
                           {done
                             ? ` · Completed by ${done.by} on ${shortDate(done.at)}`
-                            : due && <span className={overdue ? "font-semibold text-[#a3290f]" : ""}> · {overdue ? "Overdue, was due" : "Due"} {shortDate(due)}</span>}
+                            : due && <span className={overdue ? "font-semibold text-danger" : ""}> · {overdue ? "Overdue, was due" : "Due"} {shortDate(due)}</span>}
                           {auto && !done && " · Ticks itself when the document is signed"}
                           {t.sop_id && !doc && !done && ` · ${t.sop_id}`}
                         </p>
@@ -211,7 +210,7 @@ export default async function OnboardingPage({
         </section>
 
         {isAdmin && (
-          <details className="rounded-xl bg-surface p-5 ring-1 ring-line">
+          <details className="rounded-xl bg-surface p-5 border border-line">
             <summary className="cursor-pointer font-display text-lg font-bold">Edit the onboarding checklist</summary>
             <p className="mt-2 text-sm text-muted">
               These tasks apply to every new hire unless you limit one to a department or role. Removing a task removes it for everyone.
@@ -231,7 +230,7 @@ export default async function OnboardingPage({
                   <form action={removeTask}>
                     <input type="hidden" name="person" value={personId} />
                     <input type="hidden" name="task" value={t.id} />
-                    <button type="submit" className="text-[#a3290f] underline">Remove</button>
+                    <button type="submit" className="text-danger underline">Remove</button>
                   </form>
                 </li>
               ))}
@@ -276,14 +275,14 @@ export default async function OnboardingPage({
                   {docs.map((d) => <option key={d.id} value={d.id}>{d.id} · {d.title}</option>)}
                 </select>
               </label>
-              <button type="submit" className="h-10 self-end rounded-lg bg-[#c25508] px-5 text-sm font-semibold text-white sm:col-span-2 sm:justify-self-start">
+              <button type="submit" className="h-10 self-end rounded-lg bg-btn px-5 text-sm font-semibold text-white sm:col-span-2 sm:justify-self-start">
                 Add task
               </button>
             </form>
           </details>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }
 

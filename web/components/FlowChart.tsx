@@ -278,12 +278,12 @@ export default function FlowChart({
               </select>
             </label>
           )}
-          {editing && <span className="rounded bg-[#fff3d6] px-2 py-1 font-semibold text-[#6b3f00]">Editing{dirty ? " · unsaved changes" : ""}</span>}
+          {editing && <span className="rounded bg-caution-bg px-2 py-1 font-semibold text-caution">Editing{dirty ? " · unsaved changes" : ""}</span>}
           <div className="flex-1" />
           {isAdmin && !editing && (
-            <button type="button" onClick={startEditing} className="h-9 rounded-lg bg-bar px-4 font-semibold text-white">Edit chart</button>
+            <button type="button" onClick={startEditing} className="h-9 rounded-lg bg-ink px-4 font-semibold text-on-ink">Edit chart</button>
           )}
-          <div className="flex overflow-hidden rounded-lg ring-1 ring-line">
+          <div className="flex overflow-hidden rounded-lg border border-line">
             <button type="button" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(0.4, (z ?? 1) - 0.15))}
               className="h-9 w-9 bg-surface font-semibold">−</button>
             <button type="button" onClick={() => setZoom(null)} className="h-9 border-x border-line bg-surface px-3 font-semibold">
@@ -294,7 +294,7 @@ export default function FlowChart({
           </div>
         </div>
 
-        <div className="overflow-auto rounded-xl bg-surface ring-1 ring-line">
+        <div className="overflow-auto rounded-xl bg-surface border border-line">
           <svg ref={svgRef} onClick={(e) => { if (editing && e.target === e.currentTarget) setSelKey(null); }} viewBox={`0 0 ${geo.W} ${geo.H}`} width={zoom === null ? "100%" : geo.W * zoom} height={zoom === null ? undefined : geo.H * zoom} role="img"
             aria-label={`${workflow.name} flowchart`} className="block">
             <defs>
@@ -393,7 +393,7 @@ export default function FlowChart({
         </div>
       </div>
 
-      <aside className="flex flex-col gap-3 self-start rounded-xl bg-surface p-5 ring-1 ring-line">
+      <aside className="flex flex-col gap-3 self-start rounded-xl bg-surface p-5 border border-line">
         <h2 className="font-display text-lg font-bold">{editing ? "Edit chart" : "Step details"}</h2>
         {editing ? (
           <ChartEditPanel draft={draft} setDraft={update} selKey={selKey} setSelKey={setSelKey}
@@ -441,7 +441,7 @@ function StepPanel({
       </span>
       {step.sop_id && (
         sop ? (
-          <Link href={`/sops/${sop.id}`} className="flex flex-col rounded-lg p-3 ring-1 ring-line hover:ring-accent">
+          <Link href={`/sops/${sop.id}`} className="flex flex-col rounded-lg p-3 border border-line hover:ring-accent">
             <span className="font-mono text-[11px] tracking-wide text-accent">
               {sop.id} · Rev {sop.revision}{sop.status === "draft" && " · DRAFT"}
             </span>
@@ -455,7 +455,7 @@ function StepPanel({
         )
       )}
       {canDrill && step.drill_id && (
-        <Link href={`/map/${step.drill_id}`} className="h-10 rounded-lg bg-[#c25508] px-4 text-center font-semibold leading-10 text-white">
+        <Link href={`/map/${step.drill_id}`} className="h-10 rounded-lg bg-btn px-4 text-center font-semibold leading-10 text-white">
           Open detailed flowchart
         </Link>
       )}

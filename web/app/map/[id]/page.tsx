@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ChartTools from "@/components/ChartTools";
 import FlowChart from "@/components/FlowChart";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { getMyProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkflow, listMyWorkflows } from "@/lib/workflows";
@@ -33,14 +33,13 @@ export default async function MapPage({
   const isAdmin = !!profile?.role?.is_admin;
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={profile} />
+    <AppShell profile={profile}>
       <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-4 px-4 py-6 sm:px-6">
         <nav aria-label="Charts" className="flex flex-wrap gap-2 text-sm">
           {charts.map((c) => (
             <Link key={c.id} href={`/map/${c.id}`} aria-current={c.id === workflow.id ? "page" : undefined}
               className={`rounded-lg px-3 py-1.5 font-semibold ring-1 ${
-                c.id === workflow.id ? "bg-bar text-white ring-bar" : "bg-surface ring-line hover:ring-accent"
+                c.id === workflow.id ? "bg-ink text-on-ink ring-ink" : "bg-surface ring-line hover:ring-accent"
               }`}>
               {c.parent_id ? "↳ " : ""}{c.name}
             </Link>
@@ -54,8 +53,8 @@ export default async function MapPage({
             departments={departments ?? []}
           />
         )}
-        {error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{error}</p>}
-        {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
+        {error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{error}</p>}
+        {notice && <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm text-ok">{notice}</p>}
         <div className="flex flex-col gap-1">
           {parent && (
             <Link href={`/map/${parent.id}`} className="text-sm font-medium text-accent">← {parent.name}</Link>
@@ -75,6 +74,6 @@ export default async function MapPage({
           isAdmin={isAdmin}
         />
       </main>
-    </div>
+    </AppShell>
   );
 }

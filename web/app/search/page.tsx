@@ -1,7 +1,7 @@
 import Link from "next/link";
 import DashboardHeader from "@/components/DashboardHeader";
 import PersonCard from "@/components/PersonCard";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { listPeople } from "@/lib/directory";
 import { getMyProfile } from "@/lib/profile";
 import { listMySops } from "@/lib/sops";
@@ -32,12 +32,11 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const total = docHits.length + peopleHits.length + chartHits.length + stepHits.length;
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={profile} />
+    <AppShell profile={profile}>
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <DashboardHeader profile={profile} active="search" q={q} />
         {!needle ? (
-          <p className="rounded-xl bg-surface p-4 text-sm text-muted ring-1 ring-line">
+          <p className="rounded-xl bg-surface p-4 text-sm text-muted border border-line">
             Search SOPs, the handbook, policies, people and the steps on the process charts. Try a name, an SOP ID or a word like “install”.
           </p>
         ) : (
@@ -48,7 +47,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             {docHits.length > 0 && (
               <section className="flex flex-col gap-3">
                 <h2 className="font-display text-xl font-bold">Documents</h2>
-                <ul className="flex flex-col divide-y divide-line rounded-xl bg-surface ring-1 ring-line">
+                <ul className="flex flex-col divide-y divide-line rounded-xl bg-surface border border-line">
                   {docHits.map((d) => (
                     <li key={d.id}>
                       <Link href={`/sops/${d.id}`} className="flex flex-wrap items-baseline gap-x-3 px-4 py-3 hover:bg-background">
@@ -67,7 +66,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             {(stepHits.length > 0 || chartHits.length > 0) && (
               <section className="flex flex-col gap-3">
                 <h2 className="font-display text-xl font-bold">On the process charts</h2>
-                <ul className="flex flex-col divide-y divide-line rounded-xl bg-surface ring-1 ring-line">
+                <ul className="flex flex-col divide-y divide-line rounded-xl bg-surface border border-line">
                   {chartHits.map((c) => (
                     <li key={c.id}>
                       <Link href={`/map/${c.id}`} className="flex gap-3 px-4 py-3 hover:bg-background">
@@ -99,6 +98,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           </>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }

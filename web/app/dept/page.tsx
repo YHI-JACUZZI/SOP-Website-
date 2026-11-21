@@ -1,7 +1,7 @@
 import Link from "next/link";
 import DashboardHeader from "@/components/DashboardHeader";
 import PersonCard from "@/components/PersonCard";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { listPeople } from "@/lib/directory";
 import { getMyProfile } from "@/lib/profile";
 import { listMySops } from "@/lib/sops";
@@ -30,22 +30,21 @@ export default async function DeptPage({ searchParams }: { searchParams: Promise
   const deptCharts = dept ? charts.filter((c) => c.department?.name === dept.name) : [];
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={profile} />
+    <AppShell profile={profile}>
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <DashboardHeader profile={profile} active="dept" />
         {isAdmin && (
           <nav aria-label="Department" className="flex flex-wrap gap-2 text-sm">
             {depts.map((d) => (
               <Link key={d.id} href={`/dept?dept=${d.id}`} aria-current={d.id === dept?.id ? "page" : undefined}
-                className={`rounded-lg px-3 py-1.5 font-semibold ring-1 ${d.id === dept?.id ? "bg-bar text-white ring-bar" : "bg-surface ring-line hover:ring-accent"}`}>
+                className={`rounded-lg px-3 py-1.5 font-semibold ring-1 ${d.id === dept?.id ? "bg-ink text-on-ink ring-ink" : "bg-surface ring-line hover:ring-accent"}`}>
                 {d.name}
               </Link>
             ))}
           </nav>
         )}
         {!dept ? (
-          <p className="rounded-lg bg-surface p-4 text-sm text-muted ring-1 ring-line">You&apos;re not in a department yet.</p>
+          <p className="rounded-lg bg-surface p-4 text-sm text-muted border border-line">You&apos;re not in a department yet.</p>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="flex min-w-0 flex-col gap-6">
@@ -69,9 +68,9 @@ export default async function DeptPage({ searchParams }: { searchParams: Promise
               <section className="flex flex-col gap-3">
                 <h2 className="font-display text-lg font-bold">{dept.name} SOPs</h2>
                 {deptSops.length === 0 ? (
-                  <p className="rounded-xl bg-surface p-4 text-sm text-muted ring-1 ring-line">None you can open yet.</p>
+                  <p className="rounded-xl bg-surface p-4 text-sm text-muted border border-line">None you can open yet.</p>
                 ) : (
-                  <ul className="flex flex-col divide-y divide-line rounded-xl bg-surface ring-1 ring-line">
+                  <ul className="flex flex-col divide-y divide-line rounded-xl bg-surface border border-line">
                     {deptSops.map((s) => (
                       <li key={s.id}>
                         <Link href={`/sops/${s.id}`} className="flex flex-col px-4 py-2.5 hover:bg-background">
@@ -84,8 +83,8 @@ export default async function DeptPage({ searchParams }: { searchParams: Promise
                 )}
               </section>
               {deptCharts.map((c) => (
-                <Link key={c.id} href={`/map/${c.id}`} className="flex flex-col gap-1 rounded-xl bg-bar p-4 text-white ring-1 ring-bar hover:ring-accent">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-rule">Process chart</span>
+                <Link key={c.id} href={`/map/${c.id}`} className="flex flex-col gap-1 rounded-xl bg-ink p-4 text-on-ink ring-1 ring-ink hover:ring-accent">
+                  <span className="text-xs font-bold uppercase tracking-[0.08em] text-brand-rule">Process chart</span>
                   <span className="font-semibold">{c.name} →</span>
                 </Link>
               ))}
@@ -93,6 +92,6 @@ export default async function DeptPage({ searchParams }: { searchParams: Promise
           </div>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }

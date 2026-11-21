@@ -1,6 +1,6 @@
 import Link from "next/link";
 import DashboardHeader from "@/components/DashboardHeader";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { fileDocument } from "@/app/library/actions";
 import { getMyProfile } from "@/lib/profile";
 import { listMySops } from "@/lib/sops";
@@ -47,19 +47,18 @@ export default async function LibrarySection({
   const others = docs.filter((d) => d.kind !== kind);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={profile} />
+    <AppShell profile={profile}>
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <DashboardHeader profile={profile} active={copy.tab} />
         <div>
           <h2 className="font-display text-2xl font-bold">{copy.title}</h2>
           <p className="text-muted">{copy.intro}</p>
         </div>
-        {searchParams.error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{searchParams.error}</p>}
-        {searchParams.notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{searchParams.notice}</p>}
+        {searchParams.error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{searchParams.error}</p>}
+        {searchParams.notice && <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm text-ok">{searchParams.notice}</p>}
 
         {mine.length === 0 ? (
-          <p className="rounded-xl bg-surface p-4 text-sm text-muted ring-1 ring-line">{copy.empty}</p>
+          <p className="rounded-xl bg-surface p-4 text-sm text-muted border border-line">{copy.empty}</p>
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2">
             {mine.map((d) => {
@@ -69,10 +68,10 @@ export default async function LibrarySection({
                 : null;
               return (
                 <li key={d.id}>
-                  <Link href={`/sops/${d.id}`} className="flex h-full flex-col gap-1 rounded-xl bg-surface p-4 ring-1 ring-line hover:ring-accent">
+                  <Link href={`/sops/${d.id}`} className="flex h-full flex-col gap-1 rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow)] hover:ring-accent">
                     <span className="flex items-center gap-2 font-mono text-[11px] tracking-wide text-accent">
                       {d.id}
-                      {d.status === "draft" && <span className="rounded bg-[#fff3d6] px-1.5 py-0.5 text-[#6b3f00]">DRAFT</span>}
+                      {d.status === "draft" && <span className="rounded bg-caution-bg px-1.5 py-0.5 text-caution">DRAFT</span>}
                     </span>
                     <span className="font-semibold">{d.title}</span>
                     <span className="mt-auto flex flex-wrap items-center gap-2 pt-1 text-xs text-muted">
@@ -100,7 +99,7 @@ export default async function LibrarySection({
         )}
 
         {isAdmin && (
-          <form action={fileDocument} className="flex flex-col gap-3 rounded-xl bg-surface p-5 ring-1 ring-line">
+          <form action={fileDocument} className="flex flex-col gap-3 rounded-xl bg-surface p-5 border border-line">
             <h3 className="font-display text-lg font-bold">Admins: add a document to {copy.title}</h3>
             <p className="text-sm text-muted">
               First bring the Word file in with <Link href="/admin/import" className="text-accent underline">Import SOP</Link> (an ID
@@ -116,13 +115,13 @@ export default async function LibrarySection({
               </select>
             </label>
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="for_everyone" defaultChecked={kind === "handbook"} className="size-4 accent-[#c25508]" />
+              <input type="checkbox" name="for_everyone" defaultChecked={kind === "handbook"} className="size-4 accent-btn" />
               Everyone in the company can open it
             </label>
-            <button type="submit" className="h-10 self-start rounded-lg bg-[#c25508] px-5 text-sm font-semibold text-white">Add</button>
+            <button type="submit" className="h-10 self-start rounded-lg bg-btn px-5 text-sm font-semibold text-white">Add</button>
           </form>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }

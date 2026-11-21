@@ -20,6 +20,30 @@
   --r-pc: #0f8a7a; --r-fm: #a326c9; --r-wh: #d9700f; --r-inst: #3c9a3c; --r-roof: #4a5f8f;
   --r-sales-bg: #e6eefb; --r-sm-bg: #ece8fb; --r-pm-bg: #fbf0dc; --r-admin-bg: #e1f4e8; --r-prod-bg: #fae6ef;
   --r-pc-bg: #daf3ef; --r-fm-bg: #f5e3fa; --r-wh-bg: #fdeedd; --r-inst-bg: #e3f4e1; --r-roof-bg: #e6eaf3;
+
+  --surface-2: #faf9f7;
+  --sidebar: #ffffff;
+  --nav-text: #3f3a35;
+  --nav-hover: #f3f1ee;
+  --chip: #f0ede9;
+  --track: #efebe6;
+  --btn: #c25508;
+  --btn-hover: #a84a07;
+  --danger: #a3290f;
+  --danger-bg: #fbe4de;
+  --ok: #12663a;
+  --ok-strong: #1f8a4c;
+  --ok-bg: #e1f4e8;
+  --caution: #6b3f00;
+  --caution-bg: #fff3d6;
+  --info: #1d4e9e;
+  --info-bg: #e6eefb;
+  --ink: #161412;
+  --on-ink: #ffffff;
+  --shadow: 0 1px 2px rgb(20 16 12 / 0.04), 0 2px 8px rgb(20 16 12 / 0.04);
+  --radius-card: 18px;
+  --radius-ctl: 12px;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -36,17 +60,58 @@
   --font-sans: var(--font-instrument-sans);
   --font-mono: var(--font-jetbrains-mono);
   --font-signature: var(--font-allura);
+  --color-surface-2: var(--surface-2);
+  --color-sidebar: var(--sidebar);
+  --color-nav-text: var(--nav-text);
+  --color-nav-hover: var(--nav-hover);
+  --color-chip: var(--chip);
+  --color-track: var(--track);
+  --color-btn: var(--btn);
+  --color-btn-hover: var(--btn-hover);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-ok: var(--ok);
+  --color-ok-strong: var(--ok-strong);
+  --color-ok-bg: var(--ok-bg);
+  --color-caution: var(--caution);
+  --color-caution-bg: var(--caution-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
 }
 
+/* Dark mode: each person picks Light, Dark or "match my device" with the
+   sun/moon button. The choice sits on <html data-theme>. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0d0d0d;
-    --surface: #181818;
-    --foreground: #f1efed;
-    --muted: #a8a29c;
-    --line: #34302c;
+  :root:not([data-theme="light"]) {
+    --background: #0f0e0d;
+    --surface: #1c1a18;
+    --surface-2: #171513;
+    --foreground: #f3f0ed;
+    --muted: #b0a9a2;
+    --line: #2e2a27;
     --accent: #f68c3a;
     --bar: #000000;
+    --sidebar: #161412;
+    --nav-text: #d6d0ca;
+    --nav-hover: #231f1c;
+    --chip: #2a2724;
+    --track: #2e2a27;
+    --btn: #d9620c;
+    --btn-hover: #e8731c;
+    --danger: #ff8a6b;
+    --danger-bg: #3a1c15;
+    --ok: #6fd49a;
+    --ok-strong: #3fae6c;
+    --ok-bg: #15301f;
+    --caution: #f1c46b;
+    --caution-bg: #3a2f14;
+    --info: #8ab4f8;
+    --info-bg: #1b2b45;
+    --ink: #f3f0ed;
+    --on-ink: #161412;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
     --lane-a: #141414;
     --lane-b: #1b1a19;
     --warn: #f1c46b;
@@ -55,13 +120,87 @@
     --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f; --r-roof: #a3b4dc;
     --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c;
     --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317; --r-roof-bg: #1f2638;
+    color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --background: #0f0e0d;
+  --surface: #1c1a18;
+  --surface-2: #171513;
+  --foreground: #f3f0ed;
+  --muted: #b0a9a2;
+  --line: #2e2a27;
+  --accent: #f68c3a;
+  --bar: #000000;
+  --sidebar: #161412;
+  --nav-text: #d6d0ca;
+  --nav-hover: #231f1c;
+  --chip: #2a2724;
+  --track: #2e2a27;
+  --btn: #d9620c;
+  --btn-hover: #e8731c;
+  --danger: #ff8a6b;
+  --danger-bg: #3a1c15;
+  --ok: #6fd49a;
+  --ok-strong: #3fae6c;
+  --ok-bg: #15301f;
+  --caution: #f1c46b;
+  --caution-bg: #3a2f14;
+  --info: #8ab4f8;
+  --info-bg: #1b2b45;
+  --ink: #f3f0ed;
+  --on-ink: #161412;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  --lane-a: #141414;
+  --lane-b: #1b1a19;
+  --warn: #f1c46b;
+  --warn-bg: #3a2f14;
+  --r-sales: #7aa7f2; --r-sm: #a693f0; --r-pm: #e7a94a; --r-admin: #5cc98a; --r-prod: #ec82b2;
+  --r-pc: #4fd1bd; --r-fm: #d58aef; --r-wh: #f2a35a; --r-inst: #7fd67f; --r-roof: #a3b4dc;
+  --r-sales-bg: #1b2b45; --r-sm-bg: #262043; --r-pm-bg: #3a2b12; --r-admin-bg: #15342a; --r-prod-bg: #3b1d2c;
+  --r-pc-bg: #11352f; --r-fm-bg: #331a3d; --r-wh-bg: #3a2512; --r-inst-bg: #183317; --r-roof-bg: #1f2638;
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* The logo has a light and a dark version; show the one that fits the theme. */
+.logo-dark { display: none; }
+:root[data-theme="dark"] .logo-light { display: none; }
+:root[data-theme="dark"] .logo-dark { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-light { display: none; }
+  :root:not([data-theme="light"]) .logo-dark { display: block; }
+}
+
+/* Gentle motion: pages fade up a touch, controls ease between states.
+   Everything holds still for people who turn motion off on their device. */
+@media (prefers-reduced-motion: no-preference) {
+  body { transition: background-color 0.2s ease, color 0.2s ease; }
+  a, button, input, select, textarea, summary, label {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: 0.16s;
+    transition-timing-function: ease;
+  }
+  button:not(:disabled):active, a.press:active { transform: scale(0.98); }
+  .page-enter { animation: page-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .lift { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+  .lift:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgb(20 16 12 / 0.08); }
+  .drawer { transition: transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .fade { transition: opacity 0.2s ease; }
+  .pop { animation: pop-in 0.16s ease-out both; transform-origin: top right; }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.97) translateY(-4px); }
+  to { opacity: 1; transform: none; }
 }
 
 /* Org chart tree lines (wide screens). */

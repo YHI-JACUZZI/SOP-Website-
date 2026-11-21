@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { getMyProfile } from "@/lib/profile";
 import { PASS_MARK } from "@/lib/signoff";
 import { getSop } from "@/lib/sops";
@@ -30,8 +30,7 @@ export default async function QuizPage({
   const questions = data ?? [];
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={profile} />
+    <AppShell profile={profile}>
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5 px-4 py-8 sm:px-6">
         <div>
           <Link href={`/sops/${sop.id}`} className="text-sm font-medium text-accent">← {sop.title}</Link>
@@ -41,21 +40,21 @@ export default async function QuizPage({
             They never see the right answers, only which questions they missed. Three to five short questions works well.
           </p>
         </div>
-        {error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{error}</p>}
-        {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
+        {error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{error}</p>}
+        {notice && <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm text-ok">{notice}</p>}
 
         {questions.length === 0 && (
-          <p className="rounded-lg bg-surface p-4 text-sm text-muted ring-1 ring-line">
+          <p className="rounded-lg bg-surface p-4 text-sm text-muted border border-line">
             No questions yet. Without any, a refresher is just a re-read and a new signature.
           </p>
         )}
         {questions.map((q, i) => (
-          <div key={q.id} className="rounded-xl bg-surface p-5 ring-1 ring-line">
+          <div key={q.id} className="rounded-xl bg-surface p-5 border border-line">
             <QuestionForm sopId={sop.id} q={q} heading={`Question ${i + 1}`} />
             <form action={deleteQuestion} className="mt-2">
               <input type="hidden" name="sop_id" value={sop.id} />
               <input type="hidden" name="qid" value={q.id} />
-              <button type="submit" className="text-sm text-[#a3290f] underline">Remove question</button>
+              <button type="submit" className="text-sm text-danger underline">Remove question</button>
             </form>
           </div>
         ))}
@@ -64,7 +63,7 @@ export default async function QuizPage({
           <QuestionForm sopId={sop.id} heading="Add a question" />
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 }
 
@@ -85,13 +84,13 @@ function QuestionForm({ sopId, q, heading }: { sopId: string; q?: Q; heading: st
         {slots.map((_, i) => (
           <div key={i} className="flex items-center gap-2">
             <input type="radio" name="answer" value={i} required defaultChecked={q ? q.answer === i : false}
-              aria-label={`Answer ${i + 1} is right`} id={`a-${key}-${i}`} className="size-4 accent-[#c25508]" />
+              aria-label={`Answer ${i + 1} is right`} id={`a-${key}-${i}`} className="size-4 accent-btn" />
             <input name={`c${i}`} defaultValue={q?.choices[i] ?? ""} placeholder={i < 2 ? `Answer ${i + 1}` : `Answer ${i + 1} (optional)`}
               aria-label={`Answer ${i + 1}`} className={`${input} flex-1`} />
           </div>
         ))}
       </fieldset>
-      <button type="submit" className="h-10 self-start rounded-lg bg-[#c25508] px-5 text-sm font-semibold text-white">
+      <button type="submit" className="h-10 self-start rounded-lg bg-btn px-5 text-sm font-semibold text-white">
         {q ? "Save" : "Add question"}
       </button>
     </form>
