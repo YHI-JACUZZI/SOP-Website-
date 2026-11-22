@@ -61,7 +61,11 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
       <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-6 py-4">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-baseline gap-x-4">
-            <Link href="/sops" className="text-sm font-medium text-accent">← My SOPs</Link>
+            {sop.kind === "policy" ? (
+              <Link href="/policies" className="text-sm font-medium text-accent">← Policies</Link>
+            ) : (
+              <Link href="/sops" className="text-sm font-medium text-accent">← My SOPs</Link>
+            )}
             <span className="font-mono text-xs tracking-wide text-accent">{sop.id} · Rev {sop.revision}</span>
           </div>
           <h1 className="font-display text-2xl font-bold">{sop.title}</h1>
@@ -105,7 +109,7 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
               <div>
                 <h2 className="font-display text-2xl font-bold">Refresher</h2>
                 <p className="text-muted">
-                  Due {st.due && shortDate(st.due)}. Read through the SOP above again, answer the questions and sign.
+                  Due {st.due && shortDate(st.due)}. Read through the {sop.kind === "policy" ? "policy" : "SOP"} above again, answer the questions and sign.
                 </p>
               </div>
               <Changes rows={changes} lastRev={lastSigned?.revision ?? null} lastDate={lastSigned?.completed_at ?? null} />
@@ -116,7 +120,7 @@ export default async function SopPage({ params }: { params: Promise<{ id: string
               <div>
                 <h2 className="font-display text-2xl font-bold">Sign off</h2>
                 <p className="text-muted">
-                  This SOP is assigned to you{st.due ? `, due ${shortDate(st.due)}` : ""}. When you&apos;ve read it, sign below.
+                  This {sop.kind === "policy" ? "policy" : "SOP"} is assigned to you{st.due ? `, due ${shortDate(st.due)}` : ""}. When you&apos;ve read it, sign below.
                 </p>
               </div>
               {lastSigned && <Changes rows={changes} lastRev={lastSigned.revision} lastDate={lastSigned.completed_at} />}
@@ -160,7 +164,7 @@ function Changes({ rows, lastRev, lastDate }: { rows: RevisionRow[]; lastRev: st
     <div className="rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow)]">
       <h3 className="font-semibold">What changed since you signed Revision {lastRev}{lastDate && ` on ${shortDate(lastDate)}`}</h3>
       {rows.length === 0 ? (
-        <p className="mt-1 text-sm text-muted">Nothing. The SOP hasn&apos;t changed since then.</p>
+        <p className="mt-1 text-sm text-muted">Nothing. It hasn&apos;t changed since then.</p>
       ) : (
         <ul className="mt-2 flex flex-col gap-1 text-sm">
           {rows.map((r) => (

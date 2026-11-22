@@ -1,11 +1,12 @@
 // Wording people agree to when they sign. A copy is saved with each
 // signature, so changing this later doesn't change what someone already signed.
 // DRAFT: have HR or your attorney review before going live.
-export function signOffStatement(sop: { id: string; title: string; revision: string }) {
+export function signOffStatement(sop: { id: string; title: string; revision: string; kind?: string }) {
+  const what = sop.kind === "policy" ? "policy" : "procedure";
   return (
     `I confirm that I have read and understand ${sop.id} ${sop.title} (Revision ${sop.revision}). ` +
     "I have had the chance to ask questions about it, and I will follow it in my work. " +
-    "I understand that not following this procedure may lead to retraining or other action under company policy. " +
+    `I understand that not following this ${what} may lead to retraining or other action under company policy. ` +
     "I agree that typing my name below is my electronic signature and has the same effect as signing by hand."
   );
 }
@@ -24,5 +25,7 @@ export const PASS_MARK = 80;
 // How often an assignment can ask for a refresher, in months.
 export const REFRESH_CHOICES = [1, 2, 3, 6, 12];
 export const DEFAULT_REFRESH_MONTHS = 2;
+// Policies: re-read and re-sign once a year (no quiz unless someone writes one).
+export const DEFAULT_POLICY_REFRESH_MONTHS = 12;
 
 export const certNumber = (id: string) => id.replace(/-/g, "").slice(0, 10).toUpperCase();

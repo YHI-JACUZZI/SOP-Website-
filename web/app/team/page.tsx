@@ -7,7 +7,7 @@ import {
   isAssigned, shortDate, statusFor, STATUS_STYLE,
   type Assignment, type Completion, type Refresher, type View,
 } from "@/lib/tracking";
-import { DEFAULT_REFRESH_MONTHS, REFRESH_CHOICES } from "@/lib/signoff";
+import { DEFAULT_POLICY_REFRESH_MONTHS, DEFAULT_REFRESH_MONTHS, REFRESH_CHOICES } from "@/lib/signoff";
 import { assignSop, removeAssignment } from "./actions";
 
 type Dept = { id: number; name: string };
@@ -19,12 +19,16 @@ const input = "h-10 rounded-lg border border-line bg-surface px-2 text-sm";
 export default async function TeamPage({
   searchParams,
 }: {
-  searchParams: Promise<{ dept?: string; show?: string; error?: string; notice?: string }>;
+  searchParams: Promise<{ dept?: string; show?: string; type?: string; error?: string; notice?: string }>;
 }) {
   const me = await getMyProfile();
   const isAdmin = !!me?.role?.is_admin;
   if (!me?.role || (!isAdmin && !me.role.is_manager)) redirect("/");
-  const { dept: deptParam, show, error, notice } = await searchParams;
+  const { dept: deptParam, show, type, error, notice } = await searchParams;
+  // Two views of the same table: the department's SOPs, or company policies.
+  const policies = type === "policies";
+  const noun = policies ? "policy" : "SOP";
+  const nouns = policies ? "policies" : "SOPs";
 
   const supabase = await createClient();
   const { data: departments } = await supabase.from("departments").select("id, name").order("name").returns<Dept[]>();
@@ -39,7 +43,10 @@ export default async function TeamPage({
     await Promise.all([
       supabase.from("roles").select("id, name, department_id").eq("department_id", dept.id).order("name").returns<Role[]>(),
       supabase.from("profiles").select(PROFILE_FIELDS).eq("active", true).returns<Profile[]>(),
-      supabase.from("sops").select("id, title, revision").eq("department_id", dept.id).eq("status", "published").order("id").returns<SopRow[]>(),
+      policies
+        // Policies apply across the company, so every policy you can see is listed.
+        ? supabase.from("sops").select("id, title, revision").eq("kind", "policy").eq("status", "published").order("id").returns<SopRow[]>()
+        : supabase.from("sops").select("id, title, revision").eq("department_id", dept.id).neq("kind", "policy").eq("status", "published").order("id").returns<SopRow[]>(),
       supabase.from("sop_roles").select("sop_id, role_id").returns<{ sop_id: string; role_id: number }[]>(),
       supabase.from("completions").select("sop_id, person_id, revision, completed_at").returns<Completion[]>(),
       supabase.from("sop_views").select("sop_id, person_id, first_viewed_at, last_viewed_at").returns<View[]>(),
@@ -75,7 +82,7 @@ export default async function TeamPage({
   const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   const stats = [
     { label: "People", value: team.length, color: undefined },
-    { label: "SOPs assigned", value: all.length, color: undefined },
+    { label: `${nouns} assigned`, value: all.length, color: undefined },
     { label: "Completed", value: all.filter((c) => c.status === "done").length, color: "var(--ok)" },
     { label: "Overdue", value: all.filter((c) => c.status === "overdue").length, color: "var(--danger)" },
     { label: "Refreshers due", value: all.filter((c) => c.status === "refresh").length, color: "var(--info)" },
@@ -84,7 +91,7 @@ export default async function TeamPage({
   const overdueOnly = show === "overdue";
   const shown = overdueOnly ? rows.filter((r) => r.cells.some((c) => c?.status === "overdue")) : rows;
   const q = (extra: Record<string, string>) => {
-    const sp = new URLSearchParams({ ...(isAdmin ? { dept: String(dept.id) } : {}), ...extra });
+    const sp = new URLSearchParams({ ...(isAdmin ? { dept: String(dept.id) } : {}), ...(policies ? { type: "policies" } : {}), ...extra });
     const s = sp.toString();
     return `/team${s ? `?${s}` : ""}`;
   };
@@ -107,7 +114,7 @@ export default async function TeamPage({
           {isAdmin && (
             <nav aria-label="Department" className="flex flex-wrap gap-2 text-sm">
               {depts.map((d) => (
-                <Link key={d.id} href={`/team?dept=${d.id}`} aria-current={d.id === dept.id ? "page" : undefined}
+                <Link key={d.id} href={`/team?dept=${d.id}${policies ? "&type=policies" : ""}`} aria-current={d.id === dept.id ? "page" : undefined}
                   className={`rounded-lg px-3 py-1.5 font-semibold ring-1 ${d.id === dept.id ? "bg-ink text-on-ink ring-ink" : "bg-surface ring-line hover:ring-accent"}`}>
                   {d.name}
                 </Link>
@@ -127,6 +134,18 @@ export default async function TeamPage({
             </div>
           ))}
         </div>
+
+        <nav aria-label="What to show" className="flex self-start overflow-hidden rounded-xl border border-line bg-surface p-1 text-sm">
+          {([["SOPs", false], ["Policies", true]] as const).map(([label, on]) => {
+            const sp = new URLSearchParams({ ...(isAdmin ? { dept: String(dept.id) } : {}), ...(on ? { type: "policies" } : {}) }).toString();
+            return (
+              <Link key={label} href={`/team${sp ? `?${sp}` : ""}`} aria-current={on === policies ? "page" : undefined}
+                className={`rounded-lg px-4 py-1.5 font-semibold ${on === policies ? "bg-ink text-on-ink" : "text-muted hover:text-foreground"}`}>
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
 
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="flex-1 font-display text-xl font-bold">Who has finished what</h2>
@@ -182,17 +201,20 @@ export default async function TeamPage({
           </div>
         )}
         <p className="-mt-3 text-sm text-muted">
-          A dash means that SOP isn&apos;t for that person&apos;s role and hasn&apos;t been assigned to them.
+          {columns.length === 0
+            ? `No published ${nouns} ${policies ? "yet" : `in ${dept.name} yet`}.`
+            : `A dash means that ${noun} isn't for that person's role and hasn't been assigned to them.`}
         </p>
 
         <section className="grid gap-6 md:grid-cols-2">
           <form action={assignSop} className="flex flex-col gap-3 rounded-xl bg-surface p-5 border border-line">
-            <h2 className="font-display text-xl font-bold">Assign an SOP</h2>
+            <h2 className="font-display text-xl font-bold">Assign {policies ? "a policy" : "an SOP"}</h2>
             <input type="hidden" name="dept" value={isAdmin ? String(dept.id) : ""} />
+            <input type="hidden" name="type" value={policies ? "policies" : ""} />
             <label className="flex flex-col gap-1 text-sm">
-              <span className="font-semibold">SOP</span>
+              <span className="font-semibold">{policies ? "Policy" : "SOP"}</span>
               <select name="sop_id" required className={input} defaultValue="">
-                <option value="" disabled>Choose an SOP…</option>
+                <option value="" disabled>Choose {policies ? "a policy" : "an SOP"}…</option>
                 {columns.map((s) => <option key={s.id} value={s.id}>{s.id} · {s.title}</option>)}
               </select>
             </label>
@@ -200,6 +222,10 @@ export default async function TeamPage({
               <span className="font-semibold">For</span>
               <select name="target" required className={input} defaultValue="">
                 <option value="" disabled>Choose a role or person…</option>
+                <optgroup label="Groups">
+                  <option value={`dept:${dept.id}`}>Everyone in {dept.name}</option>
+                  {isAdmin && <option value="company:all">Everyone in the company</option>}
+                </optgroup>
                 <optgroup label="Everyone in a role">
                   {deptRoles.map((r) => <option key={r.id} value={`role:${r.id}`}>{r.name}</option>)}
                 </optgroup>
@@ -214,11 +240,15 @@ export default async function TeamPage({
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-semibold">Refresher</span>
-              <select name="refresh_months" className={input} defaultValue={String(DEFAULT_REFRESH_MONTHS)}>
+              <select key={noun} name="refresh_months" className={input} defaultValue={String(policies ? DEFAULT_POLICY_REFRESH_MONTHS : DEFAULT_REFRESH_MONTHS)}>
                 <option value="">No refresher</option>
                 {REFRESH_CHOICES.map((m) => <option key={m} value={m}>Every {m === 1 ? "month" : `${m} months`}</option>)}
               </select>
-              <span className="text-xs text-muted">After signing, they review the SOP, take its quiz and sign again this often.</span>
+              <span className="text-xs text-muted">
+                {policies
+                  ? "After signing, they re-read the policy and sign again this often. Policies have no quiz unless you write one."
+                  : "After signing, they review the SOP, take its quiz and sign again this often."}
+              </span>
             </label>
             <button type="submit" className="h-11 rounded-lg bg-btn font-semibold text-white">Assign</button>
           </form>
@@ -238,6 +268,7 @@ export default async function TeamPage({
                     <form action={removeAssignment}>
                       <input type="hidden" name="id" value={a.id} />
                       <input type="hidden" name="dept" value={isAdmin ? String(dept.id) : ""} />
+                      <input type="hidden" name="type" value={policies ? "policies" : ""} />
                       <button type="submit" className="text-danger underline">Remove</button>
                     </form>
                   </li>

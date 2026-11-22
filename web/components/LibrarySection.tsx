@@ -1,6 +1,7 @@
 import Link from "next/link";
 import DashboardHeader from "@/components/DashboardHeader";
 import AppShell from "@/components/AppShell";
+import QuickStats from "@/components/QuickStats";
 import { fileDocument } from "@/app/library/actions";
 import { getMyProfile } from "@/lib/profile";
 import { listMySops } from "@/lib/sops";
@@ -45,6 +46,10 @@ export default async function LibrarySection({
   const mine = docs.filter((d) => d.kind === kind);
   const isAdmin = !!profile?.role?.is_admin;
   const others = docs.filter((d) => d.kind !== kind);
+  // Quick numbers for the ones assigned to you (same as My SOPs).
+  const myStatuses = mine
+    .filter((d) => isAssigned(d.id, me, roleId, A))
+    .map((d) => statusFor({ sopId: d.id, revision: d.revision, personId: me, roleId, completions: completions ?? [], views: [], assignments: A, refreshers: refreshers ?? [] }).status);
 
   return (
     <AppShell profile={profile}>
@@ -54,6 +59,12 @@ export default async function LibrarySection({
           <h2 className="font-display text-2xl font-bold">{copy.title}</h2>
           <p className="text-muted">{copy.intro}</p>
         </div>
+        {kind === "policy" && (
+          <section aria-label="Policies assigned to you" className="flex flex-col gap-2">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">Assigned to you</h3>
+            <QuickStats statuses={myStatuses} />
+          </section>
+        )}
         {searchParams.error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{searchParams.error}</p>}
         {searchParams.notice && <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm text-ok">{searchParams.notice}</p>}
 
