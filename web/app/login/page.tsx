@@ -14,7 +14,7 @@ export default async function LoginPage({
       <form action={signIn} className="flex flex-col gap-5">
         <Field id="email" label="Work email" type="email" autoComplete="email" />
         <Field id="password" label="Password" type="password" autoComplete="current-password" />
-        <SubmitButton pendingLabel="Signing in…">Sign in</SubmitButton>
+        <SubmitButton pendingLabel="Signing in…" slowScreen="Signing you in…">Sign in</SubmitButton>
       </form>
       <Link href="/forgot-password" className="self-center font-semibold text-accent hover:underline">
         Forgot password?

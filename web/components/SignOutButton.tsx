@@ -16,9 +16,11 @@ export default function SignOutButton() {
   );
 }
 
+// Full-screen "please wait". It stays invisible for the first 1.5 seconds, so
+// quick sign-ins and sign-outs never flash it; it only appears when it's slow.
 export function LoadingScreen({ label }: { label: string }) {
   return (
-    <div role="status" className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background/90 text-foreground backdrop-blur-sm">
+    <div role="status" className="slow-show fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background/90 text-foreground backdrop-blur-sm">
       <Spinner className="size-10 text-accent" />
       <p className="font-display text-lg font-semibold">{label}</p>
     </div>

@@ -110,6 +110,32 @@ export default function ShellChrome({ person, progress }: { person: Person; prog
   // Close the phone menu after moving to another page.
   useEffect(() => setOpen(false), [path]);
 
+  // While the next page loads, show a thin orange bar along the top instead of
+  // a full loading screen. The current page stays on screen until then.
+  const [going, setGoing] = useState(false);
+  useEffect(() => setGoing(false), [path]);
+  useEffect(() => {
+    if (!going) return;
+    const t = setTimeout(() => setGoing(false), 15000);
+    return () => clearTimeout(t);
+  }, [going]);
+  useEffect(() => {
+    const click = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element).closest?.("a");
+      if (!a || a.target || a.hasAttribute("download")) return;
+      const url = new URL(a.href, location.href);
+      if (url.origin === location.origin && url.pathname !== location.pathname) setGoing(true);
+    };
+    const submit = (e: SubmitEvent) => {
+      const f = e.target as HTMLFormElement;
+      if (!e.defaultPrevented && f.method !== "post" && new URL(f.action).pathname !== location.pathname) setGoing(true);
+    };
+    document.addEventListener("click", click);
+    document.addEventListener("submit", submit);
+    return () => { document.removeEventListener("click", click); document.removeEventListener("submit", submit); };
+  }, []);
+
   const groups: { title: string; items: Item[] }[] = [
     {
       title: "My work",
@@ -149,6 +175,11 @@ export default function ShellChrome({ person, progress }: { person: Person; prog
 
   return (
     <>
+      {going && (
+        <div role="progressbar" aria-label="Loading page" className="fixed inset-x-0 top-0 z-[60] h-[3px] print:hidden">
+          <div className="nav-progress h-full origin-left scale-x-90 bg-[image:var(--glow)] shadow-[var(--glow-shadow)]" />
+        </div>
+      )}
       {/* Side menu: always showing on wide screens, slides in on phones. */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-sidebar lg:block print:hidden"><SidebarBody groups={groups} path={path} progress={progress} pct={pct} /></aside>
       <div className={`fade fixed inset-0 z-40 bg-black/40 lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
