@@ -15,7 +15,7 @@ export async function updatePassword(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({ password });
+  const { error } = await supabase.auth.updateUser({ password, data: { must_change_password: null } });
   if (error) {
     redirect(`/update-password?error=${encodeURIComponent(error.message)}`);
   }
