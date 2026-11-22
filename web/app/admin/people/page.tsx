@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import { createClient } from "@/lib/supabase/server";
 import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
-import { AddPersonForm, SignInLinkButton } from "@/components/LinkForms";
+import { AddPersonForm, ResetPasswordButton } from "@/components/LinkForms";
 import PersonRow from "@/components/PersonRow";
 import { setPersonActive } from "./actions";
 
@@ -47,7 +47,7 @@ export default async function ManagePeoplePage({
 
         <section className="flex flex-col gap-3 rounded-xl bg-surface p-5 border border-line">
           <h2 className="font-display text-lg font-bold">Add someone</h2>
-          <p className="-mt-2 text-sm text-muted">Makes their account and gives you a sign-in link to send them yourself.</p>
+          <p className="-mt-2 text-sm text-muted">Make their account, then either hand them a temporary password or email them an invite.</p>
           <AddPersonForm roles={roles ?? []} />
         </section>
 
@@ -57,7 +57,7 @@ export default async function ManagePeoplePage({
             {current.map((p) => (
               <PersonRow key={p.id} p={p} roles={roles ?? []} isMe={p.id === me.id}
                 others={current.filter((x) => x.id !== p.id)}>
-                <SignInLinkButton email={p.email} />
+                <ResetPasswordButton id={p.id} email={p.email} name={nameOf(p)} />
               </PersonRow>
             ))}
           </ul>

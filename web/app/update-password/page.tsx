@@ -5,14 +5,16 @@ import { updatePassword } from "./actions";
 export default async function UpdatePasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; reason?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, reason } = await searchParams;
 
   return (
     <AuthCard
       title="Set your password"
-      intro="Choose a password with at least 8 characters."
+      intro={reason === "temp"
+        ? "You signed in with a temporary password. Choose your own to carry on (at least 8 characters)."
+        : "Choose a password with at least 8 characters."}
       error={error}
     >
       <form action={updatePassword} className="flex flex-col gap-5">

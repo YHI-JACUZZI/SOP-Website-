@@ -46,5 +46,14 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Someone signed in with a temporary password from an admin: they must
+  // choose their own before they can use the site.
+  if (user?.user_metadata?.must_change_password && !isPublic && path !== "/update-password") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/update-password";
+    url.search = "?reason=temp";
+    return NextResponse.redirect(url);
+  }
+
   return response;
 }

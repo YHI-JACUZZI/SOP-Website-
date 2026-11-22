@@ -4,8 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 // Sends through Resend (resend.com) once RESEND_API_KEY and EMAIL_FROM are set
 // in Vercel. Until then nothing is sent, but every attempt is still written to
 // the email log so admins can see who would have been told.
-export async function sendEmail(to: string[], subject: string, html: string, text: string) {
-  if (to.length === 0) return;
+export async function sendEmail(to: string[], subject: string, html: string, text: string): Promise<{ status: string; detail: string }> {
+  if (to.length === 0) return { status: "not sent", detail: "No one to send to." };
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   let status = "not sent";
@@ -26,6 +26,7 @@ export async function sendEmail(to: string[], subject: string, html: string, tex
   }
   const supabase = await createClient();
   await supabase.from("email_log").insert(to.map((to_email) => ({ to_email, subject, status, detail })));
+  return { status, detail };
 }
 
 export const escapeHtml = (s: string) =>
