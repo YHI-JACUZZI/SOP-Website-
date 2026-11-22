@@ -2,6 +2,7 @@ import Link from "next/link";
 import CountUp from "@/components/CountUp";
 import DashboardHeader from "@/components/DashboardHeader";
 import Icon, { type IconName } from "@/components/Icon";
+import QuickStats from "@/components/QuickStats";
 import AppShell from "@/components/AppShell";
 import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
 import { listMySops } from "@/lib/sops";
@@ -13,6 +14,8 @@ import {
 } from "@/lib/tracking";
 
 type Cert = { sop_id: string; revision: string; completed_at: string; certificate_id: string; sop: { title: string } | null };
+
+const KIND_LABEL = { sop: "SOP", handbook: "Handbook", policy: "Policy" } as const;
 
 const ORDER = { overdue: 0, refresh: 1, reread: 2, reading: 3, todo: 4, done: 5 } as const;
 
@@ -28,7 +31,8 @@ const ACTION: Record<Status, string> = {
 
 // My dashboard: the signed-in person's own work, certificates and (for
 // managers and admins) a snapshot of their team.
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const tab = (await searchParams).tab === "policies" ? "policy" : "sop";
   const supabase = await createClient();
   const profile = await getMyProfile();
   const me = profile?.id ?? "";
@@ -71,6 +75,15 @@ export default async function Home() {
   const count = (s: Status) => rows.filter((r) => r.status === s).length;
   const done = rows.length - open.length;
   const firstOverdue = rows.find((r) => r.status === "overdue");
+  // Progress split by type: the bars on the first card and the SOPs / Policies tabs.
+  const split = (["sop", "policy"] as const).map((kind) => {
+    const of = rows.filter((r) => (kind === "policy" ? r.sop.kind === "policy" : r.sop.kind !== "policy"));
+    const fin = of.filter((r) => r.status === "done").length;
+    return { kind, label: kind === "policy" ? "Policies" : "SOPs", href: kind === "policy" ? "/?tab=policies#my-work" : "/?tab=sops#my-work", done: fin, total: of.length, rows: of };
+  });
+  const current = split[tab === "policy" ? 1 : 0];
+  const tabOpen = current.rows.filter((r) => r.status !== "done");
+  const openSops = split[0].total - split[0].done, openPolicies = split[1].total - split[1].done;
   const tiles: { label: string; value: number; icon: IconName; color?: string; note: string }[] = [
     { label: "To finish", value: open.length, icon: "doc", note: rows.length ? `${done} of ${rows.length} done` : "Nothing assigned yet" },
     { label: "Overdue", value: count("overdue"), icon: "clock", color: count("overdue") ? "var(--danger)" : undefined,
@@ -78,10 +91,15 @@ export default async function Home() {
     { label: "Refreshers due", value: count("refresh"), icon: "refresh", color: count("refresh") ? "var(--info)" : undefined,
       note: count("refresh") ? "Quick review and quiz" : "None right now" },
     { label: "Certificates", value: certs.length, icon: "award", color: certs.length ? "var(--ok)" : undefined,
-      note: certs[0] ? `Latest: ${certs[0].sop?.title ?? certs[0].sop_id}` : "Sign off an SOP to earn one" },
+      note: certs[0] ? `Latest: ${certs[0].sop?.title ?? certs[0].sop_id}` : "Sign off to earn one" },
   ];
   const summary = [
-    open.length ? `${open.length} SOP${open.length === 1 ? "" : "s"} to finish` : "All caught up",
+    open.length
+      ? [
+          openSops ? `${openSops} SOP${openSops === 1 ? "" : "s"}` : null,
+          openPolicies ? `${openPolicies} polic${openPolicies === 1 ? "y" : "ies"}` : null,
+        ].filter(Boolean).join(" and ") + " to finish"
+      : "All caught up",
     count("overdue") ? `${count("overdue")} overdue` : null,
     certs.length ? `${certs.length} certificate${certs.length === 1 ? "" : "s"} earned` : null,
   ].filter(Boolean).join(" · ");
@@ -117,40 +135,61 @@ export default async function Home() {
                 {t.label}
               </span>
               <span className="font-display text-[34px] font-extrabold leading-none" style={{ color: i === 0 ? undefined : t.color }}><CountUp value={t.value} /></span>
-              {i === 0 && rows.length > 0 && (
-                <span className="h-1.5 rounded-full bg-white/30"><span className="grow-x block h-1.5 rounded-full bg-white" style={{ width: `${Math.round((done / rows.length) * 100)}%` }} /></span>
+              {i === 0 && rows.length > 0 ? (
+                <span className="flex flex-col gap-1.5">
+                  {split.filter((b) => b.total > 0).map((b) => (
+                    <Link key={b.kind} href={b.href} className="flex flex-col gap-1 text-[13px] text-white/90 hover:text-white">
+                      <span className="flex justify-between gap-2"><span>{b.label}</span><span>{b.done} of {b.total}</span></span>
+                      <span className="h-1.5 rounded-full bg-white/30"><span className="grow-x block h-1.5 rounded-full bg-white" style={{ width: `${Math.round((b.done / b.total) * 100)}%` }} /></span>
+                    </Link>
+                  ))}
+                </span>
+              ) : (
+                <span className={`truncate text-[13px] ${i === 0 ? "text-white/90" : "text-muted"}`}>{t.note}</span>
               )}
-              <span className={`truncate text-[13px] ${i === 0 ? "text-white/90" : "text-muted"}`}>{t.note}</span>
             </div>
           ))}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex min-w-0 flex-col gap-6">
-            <section className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow)]">
-              <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-                <div>
-                  <h2 className="font-display text-lg font-bold">Up next</h2>
-                  <p className="text-[13px] text-muted">Most urgent first</p>
+            <section id="my-work" className="scroll-mt-24 overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow)]">
+              <div className="flex flex-col gap-4 border-b border-line px-5 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="font-display text-lg font-bold">My work</h2>
+                  <nav aria-label="SOPs or policies" className="flex overflow-hidden rounded-xl border border-line bg-background p-1 text-sm">
+                    {split.map((b) => (
+                      <Link key={b.kind} href={b.href} scroll={false} aria-current={b.kind === tab ? "page" : undefined}
+                        className={`press rounded-lg px-4 py-1.5 font-semibold ${b.kind === tab ? "bg-ink text-on-ink" : "text-muted hover:text-foreground"}`}>
+                        {b.label}
+                      </Link>
+                    ))}
+                  </nav>
                 </div>
-                <Link href="/sops" className="text-sm font-semibold text-accent hover:underline">All my SOPs →</Link>
+                <QuickStats key={tab} statuses={current.rows.map((r) => r.status)} compact />
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[13px] text-muted">Up next, most urgent first</p>
+                  <Link href={tab === "policy" ? "/policies" : "/sops"} className="text-sm font-semibold text-accent hover:underline">
+                    {tab === "policy" ? "All policies →" : "All my SOPs →"}
+                  </Link>
+                </div>
               </div>
-              {open.length === 0 ? (
+              {tabOpen.length === 0 ? (
                 <p className="m-4 rounded-xl bg-ok-bg p-4 font-semibold text-ok">
-                  {rows.length ? "You're all caught up. Nice work." : "Nothing to do yet."}
+                  {current.rows.length ? "You're all caught up. Nice work." : tab === "policy" ? "No policies assigned to you yet." : "Nothing to do yet."}
                 </p>
               ) : (
                 <ul className="stagger flex flex-col divide-y divide-line">
-                  {open.slice(0, 4).map(({ sop, status, due }, i) => (
+                  {tabOpen.slice(0, 4).map(({ sop, status, due }, i) => (
                     <li key={sop.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-ctl)]"
                         style={{ background: STATUS_STYLE[status].bg, color: STATUS_STYLE[status].fg }}>
-                        <Icon name="doc" />
+                        <Icon name={sop.kind === "policy" ? "shield" : "doc"} />
                       </span>
                       <div className="flex min-w-0 flex-1 flex-col">
                         <Link href={`/sops/${sop.id}`} className="truncate font-semibold hover:text-accent">{sop.title}</Link>
                         <span className="text-[13px] text-muted">
-                          {sop.id}{sop.department && ` · ${sop.department.name}`}{due && ` · due ${shortDate(due)}`}
+                          {KIND_LABEL[sop.kind] ?? "SOP"} · {sop.id}{sop.department && ` · ${sop.department.name}`}{due && ` · due ${shortDate(due)}`}
                         </span>
                       </div>
                       <div className="flex w-full items-center justify-between gap-3 pl-15 sm:w-auto sm:pl-0">
@@ -194,7 +233,7 @@ export default async function Home() {
               <h2 className="font-display text-lg font-bold">My certificates</h2>
               {certs.length === 0 ? (
                 <p className="rounded-xl bg-surface p-4 text-sm text-muted border border-line">
-                  Sign off an assigned SOP and your certificate shows up here.
+                  Sign off an assigned SOP or policy and your certificate shows up here.
                 </p>
               ) : (
                 <ul className="flex flex-col divide-y divide-line rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow)]">

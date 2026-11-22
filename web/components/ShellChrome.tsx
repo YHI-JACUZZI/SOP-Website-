@@ -64,7 +64,7 @@ function SidebarBody({ groups, path, progress, pct }: { groups: { title: string;
         </span>
         <span className="flex flex-col">
           <span className="text-sm font-semibold">Training progress</span>
-          <span className="text-xs text-muted">{progress.done} of {progress.total} SOPs done</span>
+          <span className="text-xs text-muted">{progress.done} of {progress.total} done</span>
         </span>
       </Link>
     )}

@@ -62,7 +62,7 @@ export default function DashboardHeader({ profile, active, q = "", summary }: { 
       )}
       {!profile?.role && (
         <p className="rounded-lg bg-caution-bg p-4 text-sm text-caution">
-          You don&apos;t have a role yet. An admin needs to pick one for you before your SOPs show up.
+          You don&apos;t have a role yet. An admin needs to pick one for you before your SOPs and policies show up.
         </p>
       )}
     </div>
