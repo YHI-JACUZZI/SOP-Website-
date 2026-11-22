@@ -119,7 +119,7 @@ export default async function TeamPage({
         {error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{error}</p>}
         {notice && <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm text-ok">{notice}</p>}
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        <div className="stagger grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           {stats.map((s) => (
             <div key={s.label} className="flex flex-col gap-1 rounded-xl bg-surface px-4 py-3 border border-line">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted">{s.label}</span>

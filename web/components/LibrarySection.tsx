@@ -60,7 +60,7 @@ export default async function LibrarySection({
         {mine.length === 0 ? (
           <p className="rounded-xl bg-surface p-4 text-sm text-muted border border-line">{copy.empty}</p>
         ) : (
-          <ul className="grid gap-3 sm:grid-cols-2">
+          <ul className="stagger grid gap-3 sm:grid-cols-2">
             {mine.map((d) => {
               const assigned = isAssigned(d.id, me, roleId, A);
               const st = assigned

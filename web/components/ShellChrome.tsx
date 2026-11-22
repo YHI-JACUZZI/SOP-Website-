@@ -102,8 +102,8 @@ export default function ShellChrome({ person, progress }: { person: Person; prog
 
       {progress.total > 0 && (
         <Link href="/" className="mt-auto flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 hover:border-accent">
-          <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full"
-            style={{ background: `conic-gradient(var(--brand) 0 ${pct}%, var(--track) ${pct}% 100%)` }}>
+          <span className="ring-fill relative flex size-12 shrink-0 items-center justify-center rounded-full"
+            style={{ "--pct": pct, background: "conic-gradient(var(--brand) calc(var(--pct) * 1%), var(--track) 0)" } as React.CSSProperties}>
             <span className="flex size-[38px] items-center justify-center rounded-full bg-surface text-xs font-bold">{pct}%</span>
           </span>
           <span className="flex flex-col">

@@ -32,7 +32,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         {[...groups.entries()].map(([dept, list]) => (
           <section key={dept} className="flex flex-col gap-3">
             <h2 className="font-display text-xl font-bold">{dept}</h2>
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {list.map((p) => <PersonCard key={p.id} p={p} />)}
             </ul>
           </section>

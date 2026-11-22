@@ -196,6 +196,27 @@ body {
   .drawer { transition: transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1); }
   .fade { transition: opacity 0.2s ease; }
   .pop { animation: pop-in 0.16s ease-out both; transform-origin: top right; }
+  /* Cards and list rows settle in one after another. */
+  .stagger > * { animation: page-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .stagger > *:nth-child(2) { animation-delay: 0.05s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.1s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.15s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.2s; }
+  .stagger > *:nth-child(n + 6) { animation-delay: 0.25s; }
+  /* Progress bars and the progress circle fill up when the page opens. */
+  .grow-x { animation: grow-x 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both; transform-origin: left; }
+  .ring-fill { animation: ring-fill 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s both; }
+}
+@property --pct {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+}
+@keyframes ring-fill {
+  from { --pct: 0; }
 }
 @keyframes page-in {
   from { opacity: 0; transform: translateY(6px); }

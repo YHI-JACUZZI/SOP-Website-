@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CountUp from "@/components/CountUp";
 import DashboardHeader from "@/components/DashboardHeader";
 import Icon, { type IconName } from "@/components/Icon";
 import AppShell from "@/components/AppShell";
@@ -108,7 +109,7 @@ export default async function Home() {
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <DashboardHeader profile={profile} active="sops" summary={summary} />
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <div className="stagger grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           {tiles.map((t, i) => (
             <div key={t.label} className={`flex min-w-0 flex-col gap-2 rounded-[var(--radius-card)] p-4 sm:px-5 ${
               i === 0 ? "bg-[image:var(--glow-card)] text-white shadow-[var(--glow-shadow)]" : "border border-line bg-surface shadow-[var(--shadow)]"}`}>
@@ -116,9 +117,9 @@ export default async function Home() {
                 <span style={{ color: i === 0 ? undefined : t.color ?? "var(--accent)" }}><Icon name={t.icon} /></span>
                 {t.label}
               </span>
-              <span className="font-display text-[34px] font-extrabold leading-none" style={{ color: i === 0 ? undefined : t.color }}>{t.value}</span>
+              <span className="font-display text-[34px] font-extrabold leading-none" style={{ color: i === 0 ? undefined : t.color }}><CountUp value={t.value} /></span>
               {i === 0 && rows.length > 0 && (
-                <span className="h-1.5 rounded-full bg-white/30"><span className="block h-1.5 rounded-full bg-white" style={{ width: `${Math.round((done / rows.length) * 100)}%` }} /></span>
+                <span className="h-1.5 rounded-full bg-white/30"><span className="grow-x block h-1.5 rounded-full bg-white" style={{ width: `${Math.round((done / rows.length) * 100)}%` }} /></span>
               )}
               <span className={`truncate text-[13px] ${i === 0 ? "text-white/90" : "text-muted"}`}>{t.note}</span>
             </div>
@@ -139,7 +140,7 @@ export default async function Home() {
                   {rows.length ? "You're all caught up. Nice work." : "Nothing to do yet."}
                 </p>
               ) : (
-                <ul className="flex flex-col divide-y divide-line">
+                <ul className="stagger flex flex-col divide-y divide-line">
                   {open.slice(0, 4).map(({ sop, status, due }, i) => (
                     <li key={sop.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-ctl)]"
