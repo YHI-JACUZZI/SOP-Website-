@@ -13,7 +13,7 @@ type Person = { name: string; email: string; role: string | null; isAdmin: boole
 type Item = { href: string; label: string; icon: IconName; match?: string[]; badge?: number; alert?: boolean };
 
 // Pages that count as part of "Dashboard" in the side menu.
-const DASHBOARD = ["/", "/sops", "/certificates", "/search"];
+const DASHBOARD = ["/", "/certificates", "/search"];
 
 function isActive(path: string, item: Item) {
   return (item.match ?? [item.href]).some((m) => (m === "/" ? path === "/" : path === m || path.startsWith(`${m}/`)));
@@ -36,14 +36,16 @@ function SidebarBody({ groups, path, progress, pct }: { groups: { title: string;
           const active = isActive(path, item);
           return (
             <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
-              className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] ${
-                active ? "font-bold text-white" : "text-nav-text hover:bg-nav-hover hover:text-foreground"
+              className={`relative flex items-center gap-3 rounded-xl px-3 py-1.5 text-[15px] ${
+                active ? "font-bold text-foreground" : "text-nav-text hover:bg-nav-hover hover:text-foreground"
               }`}>
-              <Icon name={item.icon} />
+              <span data-nav-icon className={`relative -mx-[7px] flex size-8 shrink-0 items-center justify-center ${active ? "text-white" : ""}`}>
+                <Icon name={item.icon} />
+              </span>
               <span className="flex-1">{item.label}</span>
               {!!item.badge && (
                 <span className={`min-w-6 rounded-full px-1.5 py-px text-center text-xs font-semibold ${
-                  active ? "bg-white/25 text-white" : item.alert ? "bg-danger text-white" : "bg-chip text-foreground"}`}
+                  item.alert ? "bg-danger text-white" : "bg-chip text-foreground"}`}
                   aria-label={`${item.badge} to finish`}>
                   {item.badge}
                 </span>
@@ -72,11 +74,11 @@ function SidebarBody({ groups, path, progress, pct }: { groups: { title: string;
 
 // Where the orange highlight sat on the last page, so it can slide from there
 // to the new page's menu item instead of just appearing.
-let lastPill: { top: number; height: number } | null = null;
+let lastPill: { top: number; left: number } | null = null;
 // How far the menu was scrolled, so it stays put when the next page opens.
 let lastScroll = 0;
 
-// The glowing highlight behind the current menu item. It glides to the new
+// The glowing square behind the current menu item's icon. It glides to the new
 // item whenever you move to another page.
 function SlidingPill({ path }: { path: string }) {
   const [pos, setPos] = useState(lastPill);
@@ -93,8 +95,10 @@ function SlidingPill({ path }: { path: string }) {
     }
     if (!el) { setPos(null); return; }
     if (!el.offsetHeight) return; // this copy of the menu is hidden (phone vs. desktop)
-    const next = { top: el.offsetTop, height: el.offsetHeight };
-    if (lastPill && (lastPill.top !== next.top || lastPill.height !== next.height)) {
+    const icon = el.querySelector<HTMLElement>("[data-nav-icon]");
+    if (!icon) return;
+    const next = { top: el.offsetTop + icon.offsetTop, left: el.offsetLeft + icon.offsetLeft };
+    if (lastPill && (lastPill.top !== next.top || lastPill.left !== next.left)) {
       setPos(lastPill);
       const raf = requestAnimationFrame(() => requestAnimationFrame(() => setPos(next)));
       lastPill = next;
@@ -104,8 +108,8 @@ function SlidingPill({ path }: { path: string }) {
     lastPill = next;
   }, [path]);
   return (
-    <span ref={me} aria-hidden hidden={!pos} className="pill-slide pointer-events-none absolute inset-x-3.5 top-0 rounded-xl bg-[image:var(--glow)] shadow-[var(--glow-shadow)]"
-      style={pos ? { transform: `translateY(${pos.top}px)`, height: pos.height } : undefined} />
+    <span ref={me} aria-hidden hidden={!pos} className="pill-slide pointer-events-none absolute left-0 top-0 size-8 rounded-[10px] bg-[image:var(--glow)] shadow-[var(--glow-shadow)]"
+      style={pos ? { transform: `translate(${pos.left}px, ${pos.top}px)` } : undefined} />
   );
 }
 
@@ -152,6 +156,7 @@ export default function ShellChrome({ person, progress }: { person: Person; prog
       title: "My work",
       items: [
         { href: "/", label: "Dashboard", icon: "home", match: DASHBOARD, badge: progress.open, alert: progress.overdue > 0 },
+        { href: "/sops", label: "My SOPs", icon: "doc" },
         { href: "/onboarding", label: "Onboarding", icon: "check" },
         { href: "/dept", label: "My department", icon: "team" },
       ],

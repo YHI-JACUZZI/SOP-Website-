@@ -68,7 +68,6 @@ export default async function Home() {
     }))
     .sort((a, b) => ORDER[a.status] - ORDER[b.status] || (a.due ?? "9").localeCompare(b.due ?? "9") || a.sop.id.localeCompare(b.sop.id));
   const open = rows.filter((r) => r.status !== "done");
-  const sopRows = rows.filter((r) => r.sop.kind === "sop");
   const count = (s: Status) => rows.filter((r) => r.status === s).length;
   const done = rows.length - open.length;
   const firstOverdue = rows.find((r) => r.status === "overdue");
@@ -134,6 +133,7 @@ export default async function Home() {
                   <h2 className="font-display text-lg font-bold">Up next</h2>
                   <p className="text-[13px] text-muted">Most urgent first</p>
                 </div>
+                <Link href="/sops" className="text-sm font-semibold text-accent hover:underline">All my SOPs →</Link>
               </div>
               {open.length === 0 ? (
                 <p className="m-4 rounded-xl bg-ok-bg p-4 font-semibold text-ok">
@@ -170,39 +170,6 @@ export default async function Home() {
               )}
             </section>
 
-            <section className="flex flex-col gap-3">
-              <h2 className="font-display text-xl font-bold">My SOPs</h2>
-              {sopRows.length === 0 ? (
-                <p className="rounded-lg bg-surface p-4 text-sm text-muted border border-line">No SOPs for your role yet.</p>
-              ) : (
-                <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow)]">
-                  {sopRows.map(({ sop, status, date, due, nextRefresh }) => (
-                    <li key={sop.id}>
-                      <Link href={`/sops/${sop.id}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 hover:bg-background">
-                        <span className="flex min-w-0 flex-1 flex-col">
-                          <span className="flex items-center gap-2 font-mono text-[11px] tracking-wide text-accent">
-                            {sop.id}
-                            {sop.status === "draft" && <span className="rounded bg-caution-bg px-1.5 py-0.5 text-caution">DRAFT</span>}
-                          </span>
-                          <span className="font-semibold">{sop.title}</span>
-                          <span className="text-xs text-muted">
-                            Rev {sop.revision}
-                            {sop.department && ` · ${sop.department.name}`}
-                            {due && status !== "done" && ` · due ${shortDate(due)}`}
-                            {status === "done" && nextRefresh && ` · refresher ${shortDate(nextRefresh)}`}
-                          </span>
-                        </span>
-                        <span className="whitespace-nowrap rounded-md px-2 py-0.5 text-[13px] font-semibold"
-                          style={{ background: STATUS_STYLE[status].bg, color: STATUS_STYLE[status].fg }}>
-                          {STATUS_STYLE[status].text}
-                          {date && ` ${shortDate(date)}`}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
           </div>
 
           <aside className="flex flex-col gap-6">

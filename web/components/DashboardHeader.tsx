@@ -1,10 +1,11 @@
 import { setMyName } from "@/app/profile/actions";
 import type { Profile } from "@/lib/profile";
 
-export type DashTab = "sops" | "onboarding" | "dept" | "handbook" | "people" | "org" | "policies" | "search";
+export type DashTab = "sops" | "mysops" | "onboarding" | "dept" | "handbook" | "people" | "org" | "policies" | "search";
 
 const TABS: { id: DashTab; label: string; href: string }[] = [
   { id: "sops", label: "My dashboard", href: "/" },
+  { id: "mysops", label: "My SOPs", href: "/sops" },
   { id: "onboarding", label: "Onboarding", href: "/onboarding" },
   { id: "dept", label: "My department", href: "/dept" },
   { id: "handbook", label: "Employee handbook", href: "/handbook" },
