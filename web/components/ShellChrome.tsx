@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Icon, { type IconName } from "@/components/Icon";
 import Logo from "@/components/Logo";
 import { LoadingScreen } from "@/components/SignOutButton";
@@ -17,6 +17,85 @@ const DASHBOARD = ["/", "/sops", "/certificates", "/search"];
 
 function isActive(path: string, item: Item) {
   return (item.match ?? [item.href]).some((m) => (m === "/" ? path === "/" : path === m || path.startsWith(`${m}/`)));
+}
+
+function SidebarBody({ groups, path, progress, pct }: { groups: { title: string; items: Item[] }[]; path: string; progress: MyProgress; pct: number }) {
+  return (
+  <div className="relative flex h-full flex-col gap-6 overflow-y-auto px-3.5 py-5">
+    <SlidingPill path={path} />
+    <Link href="/" className="flex flex-col gap-1.5 rounded-lg px-2 py-1">
+      <Logo className="w-32" />
+      <span className="font-display text-[13px] font-extrabold tracking-[0.12em] text-muted">SOP HUB</span>
+    </Link>
+
+    {groups.map((g) => (
+      <nav key={g.title} aria-label={g.title} className="flex flex-col gap-0.5">
+        <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{g.title}</p>
+        {g.items.map((item) => {
+          const active = isActive(path, item);
+          return (
+            <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
+              className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] ${
+                active ? "font-bold text-white" : "text-nav-text hover:bg-nav-hover hover:text-foreground"
+              }`}>
+              <Icon name={item.icon} />
+              <span className="flex-1">{item.label}</span>
+              {!!item.badge && (
+                <span className={`min-w-6 rounded-full px-1.5 py-px text-center text-xs font-semibold ${
+                  active ? "bg-white/25 text-white" : item.alert ? "bg-danger text-white" : "bg-chip text-foreground"}`}
+                  aria-label={`${item.badge} to finish`}>
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+    ))}
+
+    {progress.total > 0 && (
+      <Link href="/" className="mt-auto flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 hover:border-accent">
+        <span className="ring-fill relative flex size-12 shrink-0 items-center justify-center rounded-full"
+          style={{ "--pct": pct, background: "conic-gradient(var(--brand) calc(var(--pct) * 1%), var(--track) 0)" } as React.CSSProperties}>
+          <span className="flex size-[38px] items-center justify-center rounded-full bg-surface text-xs font-bold">{pct}%</span>
+        </span>
+        <span className="flex flex-col">
+          <span className="text-sm font-semibold">Training progress</span>
+          <span className="text-xs text-muted">{progress.done} of {progress.total} SOPs done</span>
+        </span>
+      </Link>
+    )}
+  </div>
+);
+}
+
+// Where the orange highlight sat on the last page, so it can slide from there
+// to the new page's menu item instead of just appearing.
+let lastPill: { top: number; height: number } | null = null;
+
+// The glowing highlight behind the current menu item. It glides to the new
+// item whenever you move to another page.
+function SlidingPill({ path }: { path: string }) {
+  const [pos, setPos] = useState(lastPill);
+  const me = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const el = me.current?.parentElement?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!el) { setPos(null); return; }
+    if (!el.offsetHeight) return; // this copy of the menu is hidden (phone vs. desktop)
+    const next = { top: el.offsetTop, height: el.offsetHeight };
+    if (lastPill && (lastPill.top !== next.top || lastPill.height !== next.height)) {
+      setPos(lastPill);
+      const raf = requestAnimationFrame(() => requestAnimationFrame(() => setPos(next)));
+      lastPill = next;
+      return () => cancelAnimationFrame(raf);
+    }
+    setPos(next);
+    lastPill = next;
+  }, [path]);
+  return (
+    <span ref={me} aria-hidden hidden={!pos} className="pill-slide pointer-events-none absolute inset-x-3.5 top-0 rounded-xl bg-[image:var(--glow)] shadow-[var(--glow-shadow)]"
+      style={pos ? { transform: `translateY(${pos.top}px)`, height: pos.height } : undefined} />
+  );
 }
 
 export function initials(name: string) {
@@ -68,57 +147,10 @@ export default function ShellChrome({ person, progress }: { person: Person; prog
 
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
 
-  const sidebar = (
-    <div className="flex h-full flex-col gap-6 overflow-y-auto px-3.5 py-5">
-      <Link href="/" className="flex flex-col gap-1.5 rounded-lg px-2 py-1">
-        <Logo className="w-32" />
-        <span className="font-display text-[13px] font-extrabold tracking-[0.12em] text-muted">SOP HUB</span>
-      </Link>
-
-      {groups.map((g) => (
-        <nav key={g.title} aria-label={g.title} className="flex flex-col gap-0.5">
-          <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{g.title}</p>
-          {g.items.map((item) => {
-            const active = isActive(path, item);
-            return (
-              <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] ${
-                  active ? "bg-[image:var(--glow)] font-bold text-white shadow-[var(--glow-shadow)]" : "text-nav-text hover:bg-nav-hover hover:text-foreground"
-                }`}>
-                <Icon name={item.icon} />
-                <span className="flex-1">{item.label}</span>
-                {!!item.badge && (
-                  <span className={`min-w-6 rounded-full px-1.5 py-px text-center text-xs font-semibold ${
-                    active ? "bg-white/25 text-white" : item.alert ? "bg-danger text-white" : "bg-chip text-foreground"}`}
-                    aria-label={`${item.badge} to finish`}>
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-      ))}
-
-      {progress.total > 0 && (
-        <Link href="/" className="mt-auto flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 hover:border-accent">
-          <span className="ring-fill relative flex size-12 shrink-0 items-center justify-center rounded-full"
-            style={{ "--pct": pct, background: "conic-gradient(var(--brand) calc(var(--pct) * 1%), var(--track) 0)" } as React.CSSProperties}>
-            <span className="flex size-[38px] items-center justify-center rounded-full bg-surface text-xs font-bold">{pct}%</span>
-          </span>
-          <span className="flex flex-col">
-            <span className="text-sm font-semibold">Training progress</span>
-            <span className="text-xs text-muted">{progress.done} of {progress.total} SOPs done</span>
-          </span>
-        </Link>
-      )}
-    </div>
-  );
-
   return (
     <>
       {/* Side menu: always showing on wide screens, slides in on phones. */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-sidebar lg:block print:hidden">{sidebar}</aside>
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-sidebar lg:block print:hidden"><SidebarBody groups={groups} path={path} progress={progress} pct={pct} /></aside>
       <div className={`fade fixed inset-0 z-40 bg-black/40 lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={() => setOpen(false)} aria-hidden />
       <aside aria-label="Menu" className={`drawer fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] border-r border-line bg-sidebar shadow-xl lg:hidden print:hidden ${
@@ -127,7 +159,7 @@ export default function ShellChrome({ person, progress }: { person: Person; prog
           className="absolute right-3 top-4 flex size-10 items-center justify-center rounded-xl text-muted hover:bg-nav-hover">
           <Icon name="close" />
         </button>
-        {sidebar}
+        <SidebarBody groups={groups} path={path} progress={progress} pct={pct} />
       </aside>
 
       <header className="sticky top-0 z-20 flex h-[4.25rem] items-center gap-3 border-b border-line bg-background/85 px-4 backdrop-blur-md sm:px-6 lg:px-8 print:hidden">

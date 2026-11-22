@@ -193,6 +193,7 @@ body {
   .page-enter { animation: page-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   .lift { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
   .lift:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgb(20 16 12 / 0.08); }
+  .pill-slide { transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), height 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
   .drawer { transition: transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1); }
   .fade { transition: opacity 0.2s ease; }
   .pop { animation: pop-in 0.16s ease-out both; transform-origin: top right; }
