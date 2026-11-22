@@ -92,9 +92,9 @@ export function Field({
   );
 }
 
-export function SubmitButton({ children, pendingLabel = "One moment…" }: { children: React.ReactNode; pendingLabel?: string }) {
+export function SubmitButton({ children, pendingLabel = "One moment…", slowScreen }: { children: React.ReactNode; pendingLabel?: string; slowScreen?: string }) {
   return (
-    <PendingButton pendingLabel={pendingLabel} className="h-12 rounded-xl bg-btn text-base font-semibold text-white shadow-sm hover:bg-btn-hover">
+    <PendingButton pendingLabel={pendingLabel} slowScreen={slowScreen} className="h-12 rounded-xl bg-btn text-base font-semibold text-white shadow-sm hover:bg-btn-hover">
       {children}
     </PendingButton>
   );
