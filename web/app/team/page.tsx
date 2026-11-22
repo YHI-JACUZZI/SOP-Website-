@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { getMyProfile, PROFILE_FIELDS, type Profile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -76,9 +76,9 @@ export default async function TeamPage({
   const stats = [
     { label: "People", value: team.length, color: undefined },
     { label: "SOPs assigned", value: all.length, color: undefined },
-    { label: "Completed", value: all.filter((c) => c.status === "done").length, color: "#12663A" },
-    { label: "Overdue", value: all.filter((c) => c.status === "overdue").length, color: "#A3290F" },
-    { label: "Refreshers due", value: all.filter((c) => c.status === "refresh").length, color: "#1D4E9E" },
+    { label: "Completed", value: all.filter((c) => c.status === "done").length, color: "var(--ok)" },
+    { label: "Overdue", value: all.filter((c) => c.status === "overdue").length, color: "var(--danger)" },
+    { label: "Refreshers due", value: all.filter((c) => c.status === "refresh").length, color: "var(--info)" },
     { label: "Avg quiz score", value: avg === null ? "—" : `${avg}%`, color: undefined },
   ];
   const overdueOnly = show === "overdue";
@@ -97,8 +97,7 @@ export default async function TeamPage({
       : (() => { const p = team.find((x) => x.id === a.person_id); return p?.full_name || p?.email || "Someone"; })();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SignedInBar profile={me} />
+    <AppShell profile={me}>
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex-1">
@@ -109,7 +108,7 @@ export default async function TeamPage({
             <nav aria-label="Department" className="flex flex-wrap gap-2 text-sm">
               {depts.map((d) => (
                 <Link key={d.id} href={`/team?dept=${d.id}`} aria-current={d.id === dept.id ? "page" : undefined}
-                  className={`rounded-lg px-3 py-1.5 font-semibold ring-1 ${d.id === dept.id ? "bg-bar text-white ring-bar" : "bg-surface ring-line hover:ring-accent"}`}>
+                  className={`rounded-lg px-3 py-1.5 font-semibold ring-1 ${d.id === dept.id ? "bg-ink text-on-ink ring-ink" : "bg-surface ring-line hover:ring-accent"}`}>
                   {d.name}
                 </Link>
               ))}
@@ -117,12 +116,12 @@ export default async function TeamPage({
           )}
         </div>
 
-        {error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{error}</p>}
-        {notice && <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm text-[#12663a]">{notice}</p>}
+        {error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{error}</p>}
+        {notice && <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm text-ok">{notice}</p>}
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        <div className="stagger grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           {stats.map((s) => (
-            <div key={s.label} className="flex flex-col gap-1 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
+            <div key={s.label} className="flex flex-col gap-1 rounded-xl bg-surface px-4 py-3 border border-line">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted">{s.label}</span>
               <span className="font-display text-3xl font-extrabold" style={{ color: s.color }}>{s.value}</span>
             </div>
@@ -131,18 +130,18 @@ export default async function TeamPage({
 
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="flex-1 font-display text-xl font-bold">Who has finished what</h2>
-          <div className="flex overflow-hidden rounded-lg text-sm ring-1 ring-line">
-            <Link href={q({})} className={`px-3 py-2 font-semibold ${!overdueOnly ? "bg-bar text-white" : "bg-surface"}`}>Everyone</Link>
-            <Link href={q({ show: "overdue" })} className={`px-3 py-2 font-semibold ${overdueOnly ? "bg-bar text-white" : "bg-surface"}`}>Overdue only</Link>
+          <div className="flex overflow-hidden rounded-lg text-sm border border-line">
+            <Link href={q({})} className={`px-3 py-2 font-semibold ${!overdueOnly ? "bg-ink text-on-ink" : "bg-surface"}`}>Everyone</Link>
+            <Link href={q({ show: "overdue" })} className={`px-3 py-2 font-semibold ${overdueOnly ? "bg-ink text-on-ink" : "bg-surface"}`}>Overdue only</Link>
           </div>
         </div>
 
         {team.length === 0 ? (
-          <p className="rounded-lg bg-surface p-4 text-sm text-muted ring-1 ring-line">No one in {dept.name} has a login yet.</p>
+          <p className="rounded-lg bg-surface p-4 text-sm text-muted border border-line">No one in {dept.name} has a login yet.</p>
         ) : (
-          <div className="overflow-x-auto rounded-xl bg-surface ring-1 ring-line">
+          <div className="overflow-x-auto rounded-xl bg-surface border border-line">
             <table className="w-full min-w-[640px] border-collapse text-sm">
-              <thead className="bg-bar text-left text-xs uppercase tracking-wide text-white">
+              <thead className="border-b border-line bg-surface-2 text-left text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Person</th>
                   <th className="px-4 py-3 font-semibold">Role</th>
@@ -187,7 +186,7 @@ export default async function TeamPage({
         </p>
 
         <section className="grid gap-6 md:grid-cols-2">
-          <form action={assignSop} className="flex flex-col gap-3 rounded-xl bg-surface p-5 ring-1 ring-line">
+          <form action={assignSop} className="flex flex-col gap-3 rounded-xl bg-surface p-5 border border-line">
             <h2 className="font-display text-xl font-bold">Assign an SOP</h2>
             <input type="hidden" name="dept" value={isAdmin ? String(dept.id) : ""} />
             <label className="flex flex-col gap-1 text-sm">
@@ -221,10 +220,10 @@ export default async function TeamPage({
               </select>
               <span className="text-xs text-muted">After signing, they review the SOP, take its quiz and sign again this often.</span>
             </label>
-            <button type="submit" className="h-11 rounded-lg bg-[#c25508] font-semibold text-white">Assign</button>
+            <button type="submit" className="h-11 rounded-lg bg-btn font-semibold text-white">Assign</button>
           </form>
 
-          <div className="flex flex-col gap-3 rounded-xl bg-surface p-5 ring-1 ring-line">
+          <div className="flex flex-col gap-3 rounded-xl bg-surface p-5 border border-line">
             <h2 className="font-display text-xl font-bold">Current assignments</h2>
             {deptAssignments.length === 0 ? (
               <p className="text-sm text-muted">None yet.</p>
@@ -239,7 +238,7 @@ export default async function TeamPage({
                     <form action={removeAssignment}>
                       <input type="hidden" name="id" value={a.id} />
                       <input type="hidden" name="dept" value={isAdmin ? String(dept.id) : ""} />
-                      <button type="submit" className="text-[#a3290f] underline">Remove</button>
+                      <button type="submit" className="text-danger underline">Remove</button>
                     </form>
                   </li>
                 ))}
@@ -248,6 +247,6 @@ export default async function TeamPage({
           </div>
         </section>
       </main>
-    </div>
+    </AppShell>
   );
 }

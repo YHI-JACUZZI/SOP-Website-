@@ -44,7 +44,7 @@ export default function ChartTools({ chart, charts, departments }: {
   const [open, setOpen] = useState<Panel>(null);
   const tab = (p: Exclude<Panel, null>, text: string) => (
     <button type="button" onClick={() => setOpen(open === p ? null : p)} aria-expanded={open === p}
-      className={`${btn} h-9 ring-1 ${open === p ? "bg-bar text-white ring-bar" : "bg-surface ring-line hover:ring-accent"}`}>
+      className={`${btn} h-9 ring-1 ${open === p ? "bg-ink text-on-ink ring-ink" : "bg-surface ring-line hover:ring-accent"}`}>
       {text}
     </button>
   );
@@ -59,7 +59,7 @@ export default function ChartTools({ chart, charts, departments }: {
       </div>
 
       {open === "new" && (
-        <form action={createChart} className="grid gap-3 rounded-xl bg-surface p-4 ring-1 ring-line sm:grid-cols-2 lg:grid-cols-[1.2fr_1.5fr_1fr_1fr_auto] lg:items-end">
+        <form action={createChart} className="grid gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow)] sm:grid-cols-2 lg:grid-cols-[1.2fr_1.5fr_1fr_1fr_auto] lg:items-end">
           <input type="hidden" name="back" value={chart.id} />
           <div className="flex flex-col gap-1">
             <label htmlFor="nc-name" className={label}>Chart name</label>
@@ -71,7 +71,7 @@ export default function ChartTools({ chart, charts, departments }: {
           </div>
           <Who id="nc-who" departments={departments} />
           <Under id="nc-under" charts={charts} />
-          <PendingButton pendingLabel="Making…" className={`${btn} bg-[#c25508] text-white`}>Make chart</PendingButton>
+          <PendingButton pendingLabel="Making…" className={`${btn} bg-btn text-white`}>Make chart</PendingButton>
           <p className="text-xs text-muted sm:col-span-2 lg:col-span-5">
             It starts with a lane for each role in the department (or each department, if everyone sees it) and Start → First step → End. You build the rest with Edit chart.
           </p>
@@ -79,7 +79,7 @@ export default function ChartTools({ chart, charts, departments }: {
       )}
 
       {open === "copy" && (
-        <form action={duplicateChart} className="grid gap-3 rounded-xl bg-surface p-4 ring-1 ring-line sm:grid-cols-[1fr_1.5fr_auto] sm:items-end">
+        <form action={duplicateChart} className="grid gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow)] sm:grid-cols-[1fr_1.5fr_auto] sm:items-end">
           <input type="hidden" name="from" value={chart.id} />
           <div className="flex flex-col gap-1">
             <label htmlFor="dc-name" className={label}>Name for the copy</label>
@@ -89,7 +89,7 @@ export default function ChartTools({ chart, charts, departments }: {
             <label htmlFor="dc-sum" className={label}>Description</label>
             <input id="dc-sum" name="summary" defaultValue={chart.summary ?? ""} className={field} />
           </div>
-          <PendingButton pendingLabel="Copying…" className={`${btn} bg-[#c25508] text-white`}>Make a copy</PendingButton>
+          <PendingButton pendingLabel="Copying…" className={`${btn} bg-btn text-white`}>Make a copy</PendingButton>
           <p className="text-xs text-muted sm:col-span-3">
             Copies every lane, step, arrow and SOP link into a new chart. &ldquo;{chart.name}&rdquo; stays exactly as it is.
           </p>
@@ -97,7 +97,7 @@ export default function ChartTools({ chart, charts, departments }: {
       )}
 
       {open === "details" && (
-        <div className="flex flex-col gap-3 rounded-xl bg-surface p-4 ring-1 ring-line">
+        <div className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow)]">
           <form action={saveChartDetails} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.5fr_1fr_1fr_auto] lg:items-end">
             <input type="hidden" name="id" value={chart.id} />
             <div className="flex flex-col gap-1">
@@ -116,7 +116,7 @@ export default function ChartTools({ chart, charts, departments }: {
             <form action={deleteChart} className="border-t border-line pt-3"
               onSubmit={(e) => { if (!window.confirm(`Delete "${chart.name}" for everyone? Its steps and history go too.`)) e.preventDefault(); }}>
               <input type="hidden" name="id" value={chart.id} />
-              <PendingButton pendingLabel="Deleting…" className="text-sm font-semibold text-[#a3290f] underline">Delete this chart</PendingButton>
+              <PendingButton pendingLabel="Deleting…" className="text-sm font-semibold text-danger underline">Delete this chart</PendingButton>
             </form>
           )}
         </div>

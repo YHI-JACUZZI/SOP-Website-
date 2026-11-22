@@ -12,8 +12,8 @@ export default function SignOffForm({ sopId, statement, suggested }: { sopId: st
       <input type="hidden" name="id" value={sopId} />
       <Statement text={statement} />
       <SignatureField name={name} setName={setName} />
-      {state.error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{state.error}</p>}
-      <button type="submit" disabled={pending} className="h-11 self-start rounded-lg bg-[#c25508] px-6 font-semibold text-white disabled:opacity-60">
+      {state.error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{state.error}</p>}
+      <button type="submit" disabled={pending} className="h-11 self-start rounded-lg bg-btn px-6 font-semibold text-white disabled:opacity-60">
         {pending ? "Signing…" : "Sign and finish"}
       </button>
     </form>
@@ -22,8 +22,8 @@ export default function SignOffForm({ sopId, statement, suggested }: { sopId: st
 
 export function Statement({ text }: { text: string }) {
   return (
-    <label className="flex items-start gap-3 rounded-lg bg-background p-4 text-sm leading-relaxed ring-1 ring-line">
-      <input type="checkbox" name="agree" required className="mt-1 size-4 shrink-0 accent-[#c25508]" />
+    <label className="flex items-start gap-3 rounded-lg bg-background p-4 text-sm leading-relaxed border border-line">
+      <input type="checkbox" name="agree" required className="mt-1 size-4 shrink-0 accent-btn" />
       <span>{text}</span>
     </label>
   );

@@ -22,12 +22,12 @@ export type Refresher = {
 };
 
 export const STATUS_STYLE: Record<Status, { text: string; bg: string; fg: string }> = {
-  done: { text: "Done", bg: "#E1F4E8", fg: "#12663A" },
-  refresh: { text: "Refresher due", bg: "#E6EEFB", fg: "#1D4E9E" },
-  reread: { text: "New revision", bg: "#FFF3D6", fg: "#6B3F00" },
-  overdue: { text: "Overdue", bg: "#FBE4DE", fg: "#A3290F" },
-  reading: { text: "In progress", bg: "#FFF3D6", fg: "#6B3F00" },
-  todo: { text: "Not started", bg: "#F1EFED", fg: "#5E5A56" },
+  done: { text: "Done", bg: "var(--ok-bg)", fg: "var(--ok)" },
+  refresh: { text: "Refresher due", bg: "var(--info-bg)", fg: "var(--info)" },
+  reread: { text: "New revision", bg: "var(--caution-bg)", fg: "var(--caution)" },
+  overdue: { text: "Overdue", bg: "var(--danger-bg)", fg: "var(--danger)" },
+  reading: { text: "In progress", bg: "var(--caution-bg)", fg: "var(--caution)" },
+  todo: { text: "Not started", bg: "var(--chip)", fg: "var(--muted)" },
 };
 
 const todayIso = () => new Date().toISOString().slice(0, 10);

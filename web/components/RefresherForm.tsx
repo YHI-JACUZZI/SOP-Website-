@@ -25,7 +25,7 @@ export default function RefresherForm({
   if (r && state !== dismissed) {
     return (
       <div className="flex flex-col gap-3">
-        <p className={`rounded-lg p-4 font-semibold ${r.passed ? "bg-[#e1f4e8] text-[#12663a]" : "bg-[#fbe4de] text-[#a3290f]"}`}>
+        <p className={`rounded-lg p-4 font-semibold ${r.passed ? "bg-ok-bg text-ok" : "bg-danger-bg text-danger"}`}>
           {r.total === 0
             ? "Refresher recorded."
             : r.passed
@@ -43,7 +43,7 @@ export default function RefresherForm({
             View your certificate →
           </Link>
         ) : (
-          <button type="button" onClick={() => setDismissed(state)} className="h-11 self-start rounded-lg bg-[#c25508] px-6 font-semibold text-white">
+          <button type="button" onClick={() => setDismissed(state)} className="h-11 self-start rounded-lg bg-btn px-6 font-semibold text-white">
             Try again
           </button>
         )}
@@ -61,8 +61,8 @@ export default function RefresherForm({
               <fieldset className="flex flex-col gap-2">
                 <legend className="mb-1 font-semibold">{i + 1}. {q.question}</legend>
                 {q.choices.map((c, j) => (
-                  <label key={j} className="flex items-center gap-3 rounded-lg bg-surface px-3 py-2 ring-1 ring-line has-[:checked]:ring-2 has-[:checked]:ring-accent">
-                    <input type="radio" name={`q_${q.id}`} value={j} required className="size-4 accent-[#c25508]" />
+                  <label key={j} className="flex items-center gap-3 rounded-lg bg-surface px-3 py-2 border border-line has-[:checked]:ring-2 has-[:checked]:ring-accent">
+                    <input type="radio" name={`q_${q.id}`} value={j} required className="size-4 accent-btn" />
                     {c}
                   </label>
                 ))}
@@ -73,8 +73,8 @@ export default function RefresherForm({
       )}
       <Statement text={statement} />
       <SignatureField name={name} setName={setName} />
-      {state.error && <p role="alert" className="rounded-lg bg-[#fbe4de] p-3 text-sm text-[#a3290f]">{state.error}</p>}
-      <button type="submit" disabled={pending} className="h-11 self-start rounded-lg bg-[#c25508] px-6 font-semibold text-white disabled:opacity-60">
+      {state.error && <p role="alert" className="rounded-lg bg-danger-bg p-3 text-sm text-danger">{state.error}</p>}
+      <button type="submit" disabled={pending} className="h-11 self-start rounded-lg bg-btn px-6 font-semibold text-white disabled:opacity-60">
         {pending ? "Checking…" : questions.length ? "Submit answers and sign" : "Sign refresher"}
       </button>
     </form>

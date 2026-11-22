@@ -31,7 +31,7 @@ export default function PersonRow({ p, others, roles, isMe, children }: {
   }, [state.saved]);
 
   return (
-    <li className={`rounded-xl bg-surface p-4 ${changed ? "ring-2 ring-accent" : p.full_name ? "ring-1 ring-line" : "ring-2 ring-[#f1c46b]"}`}>
+    <li className={`rounded-xl bg-surface p-4 ${changed ? "ring-2 ring-accent" : p.full_name ? "border border-line" : "ring-2 ring-caution"}`}>
       <form action={action} onChange={() => { setChanged(true); setShowSaved(false); }}
         className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr_1.2fr_auto] md:items-end">
         <input type="hidden" name="id" value={p.id} />
@@ -60,16 +60,16 @@ export default function PersonRow({ p, others, roles, isMe, children }: {
         </div>
         <div className="flex flex-col gap-1 md:mb-5">
           {showSaved ? (
-            <span role="status" className="flex h-10 items-center justify-center rounded-lg bg-[#e1f4e8] px-4 font-semibold text-[#12663a]">Saved ✓</span>
+            <span role="status" className="flex h-10 items-center justify-center rounded-lg bg-ok-bg px-4 font-semibold text-ok">Saved ✓</span>
           ) : (
             <PendingButton pendingLabel="Saving…"
-              className={`h-10 rounded-lg px-4 font-semibold ${changed ? "bg-[#c25508] text-white" : "text-accent ring-1 ring-accent"}`}>
+              className={`h-10 rounded-lg px-4 font-semibold ${changed ? "bg-btn text-white" : "text-accent ring-1 ring-accent"}`}>
               Save
             </PendingButton>
           )}
         </div>
       </form>
-      {state.error && <p role="alert" className="mt-2 text-sm text-[#a3290f]">{state.error}</p>}
+      {state.error && <p role="alert" className="mt-2 text-sm text-danger">{state.error}</p>}
       {changed && !state.error && <p className="mt-1 text-xs font-semibold text-accent">Unsaved changes</p>}
       <div className="mt-2 flex flex-wrap items-start justify-between gap-3 border-t border-line pt-2">
         {children}
@@ -79,7 +79,7 @@ export default function PersonRow({ p, others, roles, isMe, children }: {
             <input type="hidden" name="id" value={p.id} />
             <input type="hidden" name="active" value="false" />
             <input type="hidden" name="name" value={nameOf(p)} />
-            <PendingButton pendingLabel="Removing…" className="text-sm font-semibold text-[#a3290f] underline">Remove</PendingButton>
+            <PendingButton pendingLabel="Removing…" className="text-sm font-semibold text-danger underline">Remove</PendingButton>
           </form>
         )}
       </div>

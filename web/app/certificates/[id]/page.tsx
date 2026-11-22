@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CertificateCard from "@/components/CertificateCard";
 import PrintButton from "@/components/PrintButton";
-import SignedInBar from "@/components/SignedInBar";
+import AppShell from "@/components/AppShell";
 import { getMyProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -45,15 +45,14 @@ export default async function CertificatePage({
   const who = cert.person?.full_name || cert.signed_name || cert.person?.email;
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <div className="print:hidden"><SignedInBar profile={profile} /></div>
+    <AppShell profile={profile}>
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5 px-4 py-8 sm:px-6 print:p-0">
         <div className="flex flex-wrap items-center gap-3 print:hidden">
           <Link href="/" className="flex-1 text-sm font-medium text-accent">← My dashboard</Link>
           <PrintButton />
         </div>
         {fresh && (
-          <p role="status" className="rounded-lg bg-[#e1f4e8] p-3 text-sm font-semibold text-[#12663a] print:hidden">
+          <p role="status" className="rounded-lg bg-ok-bg p-3 text-sm font-semibold text-ok print:hidden">
             Signed and saved. This certificate is kept under My certificates on your dashboard, and your manager can see it too.
           </p>
         )}
@@ -71,12 +70,12 @@ export default async function CertificatePage({
         />
 
         {cert.statement && (
-          <details className="rounded-xl bg-surface p-4 text-sm ring-1 ring-line print:hidden">
+          <details className="rounded-xl bg-surface p-4 text-sm border border-line print:hidden">
             <summary className="cursor-pointer font-semibold">What was agreed when signing</summary>
             <p className="mt-2 leading-relaxed text-muted">{cert.statement}</p>
           </details>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }

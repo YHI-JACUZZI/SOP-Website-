@@ -4,7 +4,7 @@ import { buildOrgChart, countUnder, type OrgNode } from "@/lib/orgChart";
 function Card({ p, me, compact = false }: { p: Person; me: boolean; compact?: boolean }) {
   return (
     <div className={`flex items-center gap-2.5 rounded-xl bg-surface p-2.5 text-left ring-1 ${me ? "ring-2 ring-accent" : "ring-line"} ${compact ? "w-full" : "w-48"}`}>
-      <span aria-hidden className={`flex size-9 shrink-0 items-center justify-center rounded-full font-display text-xs font-bold text-white ${p.is_manager ? "bg-accent" : "bg-bar"}`}>
+      <span aria-hidden className={`flex size-9 shrink-0 items-center justify-center rounded-full font-display text-xs font-bold text-white ${p.is_manager ? "bg-accent" : "bg-ink"}`}>
         {initials(p)}
       </span>
       <span className="flex min-w-0 flex-col">
@@ -28,7 +28,7 @@ function Tree({ node, myId }: { node: OrgNode; myId?: string }) {
         <ul>
           {stack ? (
             <li>
-              <div className="inline-flex w-48 flex-col gap-1.5 rounded-xl bg-background p-1.5 ring-1 ring-line">
+              <div className="inline-flex w-48 flex-col gap-1.5 rounded-xl bg-background p-1.5 border border-line">
                 {kids.map((k) => <Card key={k.person.id} p={k.person} me={k.person.id === myId} compact />)}
               </div>
             </li>
@@ -61,7 +61,7 @@ export default function OrgChart({ people, myId }: { people: Person[]; myId?: st
   return (
     <>
       {roots.length === 0 && (
-        <p className="rounded-lg bg-surface p-4 text-sm text-muted ring-1 ring-line">
+        <p className="rounded-lg bg-surface p-4 text-sm text-muted border border-line">
           No reporting lines yet. Once people have roles (and managers are set), the chart fills in.
         </p>
       )}

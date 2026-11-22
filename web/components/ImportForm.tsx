@@ -317,7 +317,7 @@ export default function ImportForm({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
-      <div className="flex flex-col gap-4 rounded-xl bg-surface p-5 ring-1 ring-line">
+      <div className="flex flex-col gap-4 rounded-xl bg-surface p-5 border border-line">
         <div className="flex flex-col gap-1">
           <label htmlFor="file" className={label}>1. Scribe Word export (.docx)</label>
           <input id="file" type="file" accept=".docx" onChange={(e) => onFile(e.target.files?.[0])} />
@@ -404,7 +404,7 @@ export default function ImportForm({
             Preview
           </button>
           <button type="button" disabled={!ready || !!busy} onClick={publish}
-            className="h-11 flex-1 rounded-lg bg-[#c25508] font-semibold text-white disabled:opacity-40">
+            className="h-11 flex-1 rounded-lg bg-btn font-semibold text-white disabled:opacity-40">
             Publish
           </button>
         </div>
@@ -413,16 +413,16 @@ export default function ImportForm({
         )}
         {busy && <p role="status" className="text-sm text-muted">{busy}</p>}
         {message && (
-          <p role="status" className={`rounded-lg p-3 text-sm ${message.ok ? "bg-[#e1f4e8] text-[#12663a]" : "bg-[#fbe4de] text-[#a3290f]"}`}>
+          <p role="status" className={`rounded-lg p-3 text-sm ${message.ok ? "bg-ok-bg text-ok" : "bg-danger-bg text-danger"}`}>
             {message.text}
           </p>
         )}
       </div>
 
-      <div className="min-h-[70vh] overflow-hidden rounded-xl bg-white ring-1 ring-line">
+      <div className="min-h-[70vh] overflow-hidden rounded-xl bg-white border border-line">
         {preview ? (
           <div className="flex h-full min-h-[70vh] flex-col">
-            <p className="border-b border-line bg-[#fff3d6] px-4 py-2 text-sm text-[#6b3f00]">
+            <p className="border-b border-line bg-caution-bg px-4 py-2 text-sm text-caution">
               Click anywhere in the document to edit the text. Your edits are saved when you click Publish.
               {edited && " (edited)"}
             </p>

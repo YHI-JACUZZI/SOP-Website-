@@ -10,7 +10,7 @@ type Department = { id: number; name: string };
 const PALETTE = ["sales", "sm", "admin", "prod", "pc", "fm", "wh", "inst", "pm", "roof"];
 const label = "text-xs font-semibold uppercase tracking-wide text-muted";
 const input = "h-9 w-full rounded-lg border border-line bg-surface px-2 text-sm";
-const small = "h-8 rounded-md px-2 text-sm font-semibold ring-1 ring-line disabled:opacity-40";
+const small = "h-8 rounded-md px-2 text-sm font-semibold border border-line disabled:opacity-40";
 
 export const newKey = () => "s" + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
 
@@ -43,15 +43,15 @@ export default function ChartEditPanel({
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
         <button type="button" onClick={onSave} disabled={!dirty || saving}
-          className="h-10 flex-1 rounded-lg bg-[#c25508] font-semibold text-white disabled:opacity-40">
+          className="h-10 flex-1 rounded-lg bg-btn font-semibold text-white disabled:opacity-40">
           {saving ? "Saving…" : "Save for everyone"}
         </button>
-        <button type="button" onClick={onCancel} disabled={saving} className="h-10 rounded-lg px-4 font-semibold ring-1 ring-line">
+        <button type="button" onClick={onCancel} disabled={saving} className="h-10 rounded-lg px-4 font-semibold border border-line">
           {dirty ? "Discard" : "Done"}
         </button>
       </div>
       {message && (
-        <p role="status" className={`rounded-lg p-3 text-sm ${message.ok ? "bg-[#e1f4e8] text-[#12663a]" : "bg-[#fbe4de] text-[#a3290f]"}`}>
+        <p role="status" className={`rounded-lg p-3 text-sm ${message.ok ? "bg-ok-bg text-ok" : "bg-danger-bg text-danger"}`}>
           {message.text}
         </p>
       )}
@@ -182,10 +182,10 @@ function StepForm({
         <span className={label}>Arrows out of this step</span>
         {outs.length === 0 && <p className="text-sm text-muted">None yet.</p>}
         {outs.map(({ e, i }) => (
-          <div key={i} className="flex flex-col gap-1 rounded-lg p-2 ring-1 ring-line">
+          <div key={i} className="flex flex-col gap-1 rounded-lg p-2 border border-line">
             <div className="flex items-center gap-2 text-sm">
               <span className="flex-1 font-semibold">→ {draft.steps.find((s) => s.key === e.to)?.label ?? e.to}</span>
-              <button type="button" className="text-[#a3290f] underline"
+              <button type="button" className="text-danger underline"
                 onClick={() => setDraft({ ...draft, edges: draft.edges.filter((_, j) => j !== i) })}>Remove</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -223,7 +223,7 @@ function StepForm({
           });
           setSelKey(key);
         }}>+ Add a step after this</button>
-        <button type="button" className={small + " text-[#a3290f]"} onClick={() => {
+        <button type="button" className={small + " text-danger"} onClick={() => {
           if (!window.confirm(`Delete "${step.label}" and its arrows?`)) return;
           setDraft({
             ...draft,
@@ -265,7 +265,7 @@ function LanesForm({
       <p className="text-sm text-muted">Each lane belongs to a role or department, and its steps belong to them too.</p>
       <ul className="flex flex-col gap-2">
         {lanes.map((l, i) => (
-          <li key={l.key} className="flex flex-col gap-1 rounded-lg p-2 ring-1 ring-line">
+          <li key={l.key} className="flex flex-col gap-1 rounded-lg p-2 border border-line">
             <div className="flex items-center gap-1">
               <i className="inline-block h-3 w-3 shrink-0 rounded-sm" style={{ background: `var(--r-${l.color})` }} />
               <input className={input} aria-label="Lane name" value={l.label}
@@ -281,7 +281,7 @@ function LanesForm({
               <button type="button" className={small}
                 onClick={() => setLanes(lanes.map((x, j) => (j === i ? { ...x, rows: (x.rows ?? 1) + 1 } : x)))}>+</button>
               <div className="flex-1" />
-              <button type="button" className="text-[#a3290f] underline disabled:no-underline disabled:opacity-40" disabled={used(l)}
+              <button type="button" className="text-danger underline disabled:no-underline disabled:opacity-40" disabled={used(l)}
                 title={used(l) ? "Move or delete its steps first" : undefined}
                 onClick={() => setLanes(lanes.filter((_, j) => j !== i))}>Remove</button>
             </div>
