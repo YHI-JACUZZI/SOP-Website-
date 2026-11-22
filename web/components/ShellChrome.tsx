@@ -21,7 +21,8 @@ function isActive(path: string, item: Item) {
 
 function SidebarBody({ groups, path, progress, pct }: { groups: { title: string; items: Item[] }[]; path: string; progress: MyProgress; pct: number }) {
   return (
-  <div className="relative flex h-full flex-col gap-6 overflow-y-auto px-3.5 py-5">
+  <div className="relative flex h-full flex-col gap-6 overflow-y-auto px-3.5 py-5"
+    onScroll={(e) => { if (e.currentTarget.offsetHeight) lastScroll = e.currentTarget.scrollTop; }}>
     <SlidingPill path={path} />
     <Link href="/" className="flex flex-col gap-1.5 rounded-lg px-2 py-1">
       <Logo className="w-32" />
@@ -72,6 +73,8 @@ function SidebarBody({ groups, path, progress, pct }: { groups: { title: string;
 // Where the orange highlight sat on the last page, so it can slide from there
 // to the new page's menu item instead of just appearing.
 let lastPill: { top: number; height: number } | null = null;
+// How far the menu was scrolled, so it stays put when the next page opens.
+let lastScroll = 0;
 
 // The glowing highlight behind the current menu item. It glides to the new
 // item whenever you move to another page.
@@ -79,7 +82,15 @@ function SlidingPill({ path }: { path: string }) {
   const [pos, setPos] = useState(lastPill);
   const me = useRef<HTMLSpanElement>(null);
   useLayoutEffect(() => {
-    const el = me.current?.parentElement?.querySelector<HTMLElement>('[aria-current="page"]');
+    const list = me.current?.parentElement;
+    const el = list?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (list && list.offsetHeight) {
+      // Keep the menu scrolled where it was, and make sure the current page shows.
+      list.scrollTop = lastScroll;
+      if (el && (el.offsetTop < list.scrollTop || el.offsetTop + el.offsetHeight > list.scrollTop + list.clientHeight))
+        list.scrollTop = el.offsetTop - list.clientHeight / 2 + el.offsetHeight / 2;
+      lastScroll = list.scrollTop;
+    }
     if (!el) { setPos(null); return; }
     if (!el.offsetHeight) return; // this copy of the menu is hidden (phone vs. desktop)
     const next = { top: el.offsetTop, height: el.offsetHeight };
