@@ -25,7 +25,7 @@ function SidebarBody({ groups, path, progress, pct }: { groups: { title: string;
     onScroll={(e) => { if (e.currentTarget.offsetHeight) lastScroll = e.currentTarget.scrollTop; }}>
     <SlidingPill path={path} />
     <Link href="/" className="flex flex-col gap-1.5 rounded-lg px-2 py-1">
-      <Logo className="w-32" />
+      <Logo className="w-40" />
       <span className="font-display text-[13px] font-extrabold tracking-[0.12em] text-muted">SOP HUB</span>
     </Link>
 
